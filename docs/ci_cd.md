@@ -83,26 +83,28 @@ The project uses GitHub Actions to automate testing, linting, building, and depl
 
 ### Deploy Workflow (`.github/workflows/deploy.yml`)
 
-**Purpose**: Automatically deploy to Railway when changes are pushed to main.
+**Purpose**: Verify Railway deployment health check after automatic deployment.
 
 **Triggers**:
 - Push to `main` branch
 - Manual trigger via `workflow_dispatch`
 
 **Features**:
-- Deploys to Railway using Railway CLI
-- Verifies deployment with health check
+- Railway automatically deploys via git integration when code is pushed to main
+- Verifies deployment with configurable health check and retry logic
 - Only runs on main branch
 
 **Required Secrets**:
-- `RAILWAY_TOKEN`: Railway authentication token
-- `RAILWAY_SERVICE_ID`: Railway service ID
 - `RAILWAY_DOMAIN`: Railway deployment domain (for health check)
+
+**Optional Variables** (can be set in repository variables):
+- `HEALTH_CHECK_TIMEOUT`: Total timeout in seconds (default: 30)
+- `HEALTH_CHECK_RETRY_DELAY`: Delay between retries in seconds (default: 5)
 
 **Steps**:
 1. Checkout code
-2. Deploy to Railway
-3. Verify deployment health check
+2. Wait for Railway auto-deployment (via git integration)
+3. Verify deployment health check with retry logic
 
 **View Results**: [Deploy Workflow](https://github.com/noamoss/yaml_diffs/actions/workflows/deploy.yml)
 
@@ -115,10 +117,12 @@ Dependabot is configured to automatically update dependencies.
 **Configuration**: `.github/dependabot.yml`
 
 **Features**:
-- Weekly checks for Python dependencies
+- Weekly checks for Python dependencies (via `pyproject.toml`)
 - Weekly checks for GitHub Actions
 - Opens up to 10 pull requests at a time
 - Labels PRs with `dependencies` and ecosystem-specific labels
+
+**Note**: This project uses `uv` for dependency management with a `uv.lock` file. Dependabot updates `pyproject.toml` dependencies via the `pip` ecosystem. After merging a Dependabot PR, run `uv lock` locally to update the `uv.lock` file, or configure a workflow to do this automatically.
 
 ## Testing Workflows Locally
 
@@ -188,9 +192,11 @@ Status badges are displayed in the README to show the current status of each wor
 
 ### Deployment Fails
 
-1. **Check secrets**: Ensure `RAILWAY_TOKEN`, `RAILWAY_SERVICE_ID`, and `RAILWAY_DOMAIN` are set
-2. **Verify Railway service**: Ensure the service exists and is accessible
-3. **Check health endpoint**: Verify `/health` endpoint is available
+1. **Check Railway git integration**: Ensure Railway is connected to the repository and auto-deploys on push to main
+2. **Check secrets**: Ensure `RAILWAY_DOMAIN` is set in repository secrets
+3. **Check variables**: Optionally set `HEALTH_CHECK_TIMEOUT` and `HEALTH_CHECK_RETRY_DELAY` in repository variables
+4. **Verify Railway service**: Ensure the service exists and is accessible
+5. **Check health endpoint**: Verify `/health` endpoint is available and responding
 
 ### Coverage Not Uploading
 
