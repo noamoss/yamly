@@ -497,6 +497,30 @@ class TestDocumentCreation:
         error_msg = str(exc_info.value).lower()
         assert "fetched_at" in error_msg or "iso 8601" in error_msg
 
+        # Test invalid URL format
+        with pytest.raises(ValidationError) as exc_info:
+            Source(url="not-a-url", fetched_at="2025-01-20T09:50:00Z")
+        errors = exc_info.value.errors()
+        assert len(errors) > 0
+        error_msg = str(exc_info.value).lower()
+        assert "url" in error_msg or "uri" in error_msg
+
+        # Test URL without scheme
+        with pytest.raises(ValidationError) as exc_info:
+            Source(url="example.com/law", fetched_at="2025-01-20T09:50:00Z")
+        errors = exc_info.value.errors()
+        assert len(errors) > 0
+        error_msg = str(exc_info.value).lower()
+        assert "url" in error_msg or "uri" in error_msg
+
+        # Test URL without netloc
+        with pytest.raises(ValidationError) as exc_info:
+            Source(url="https://", fetched_at="2025-01-20T09:50:00Z")
+        errors = exc_info.value.errors()
+        assert len(errors) > 0
+        error_msg = str(exc_info.value).lower()
+        assert "url" in error_msg or "uri" in error_msg
+
 
 class TestIntegration:
     """Integration tests for YAML loading and round-trip conversion."""

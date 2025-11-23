@@ -54,7 +54,12 @@ class Section(BaseModel):
     @field_validator("id")
     @classmethod
     def validate_id_pattern(cls, v: str) -> str:
-        """Validate that id matches the required pattern."""
+        """Validate that id matches the required pattern.
+
+        The pattern allows alphanumeric characters, hyphens, and underscores.
+        This means auto-generated UUIDs (which contain hyphens, e.g.,
+        "550e8400-e29b-41d4-a716-446655440000") are valid and will pass validation.
+        """
         pattern = r"^[a-zA-Z0-9_-]+$"
         if not re.match(pattern, v):
             raise ValueError(f"Section id must match pattern [a-zA-Z0-9_-], got: {v}")

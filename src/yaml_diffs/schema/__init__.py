@@ -50,10 +50,10 @@ def get_schema_version() -> str:
     schema = load_schema()
     # Check for JSON Schema format (top-level version)
     if "version" in schema:
-        return schema["version"]  # type: ignore[no-any-return]
+        return str(schema["version"])
     # Check for OpenAPI format (info.version)
     if "info" in schema and isinstance(schema["info"], dict) and "version" in schema["info"]:
-        return schema["info"]["version"]  # type: ignore[no-any-return]
+        return str(schema["info"]["version"])
     raise KeyError("Schema version not defined")
 
 

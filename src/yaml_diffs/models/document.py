@@ -5,6 +5,7 @@ from __future__ import annotations
 from datetime import datetime
 from enum import Enum
 from typing import Literal, Optional
+from urllib.parse import urlparse
 
 from pydantic import BaseModel, Field, field_validator
 
@@ -56,18 +57,34 @@ class Source(BaseModel):
         description="ISO 8601 timestamp when document was fetched.",
     )
 
+    @field_validator("url")
+    @classmethod
+    def validate_url(cls, v: str) -> str:
+        """Validate that url is a valid URI."""
+        try:
+            result = urlparse(v)
+            if not all([result.scheme, result.netloc]):
+                raise ValueError(f"url must be a valid URI with scheme and netloc, got: {v}")
+            return v
+        except Exception as err:
+            raise ValueError(f"url must be a valid URI, got: {v}") from err
+
     @field_validator("fetched_at")
     @classmethod
     def validate_fetched_at_format(cls, v: str) -> str:
         """Validate that fetched_at is in ISO 8601 format."""
         try:
-            # Handle 'Z' timezone indicator
-            date_str = v.replace("Z", "+00:00") if v.endswith("Z") else v
+            # Handle 'Z' timezone indicator - only replace trailing 'Z'
+            # Guard against edge case where v is just "Z"
+            if v.endswith("Z") and len(v) > 1:
+                date_str = v[:-1] + "+00:00"
+            else:
+                date_str = v
             datetime.fromisoformat(date_str)
             return v
         except ValueError as err:
             raise ValueError(
-                f"fetched_at must be in ISO 8601 format (YYYY-MM-DDTHH:MM:SS), got: {v}"
+                f"fetched_at must be in ISO 8601 format (YYYY-MM-DD or YYYY-MM-DDTHH:MM:SS), got: {v}"
             ) from err
 
 
@@ -150,8 +167,12 @@ class Document(BaseModel):
             return v
         try:
             # Try parsing as ISO 8601 (supports both date and datetime)
-            # Handle 'Z' timezone indicator
-            date_str = v.replace("Z", "+00:00") if v.endswith("Z") else v
+            # Handle 'Z' timezone indicator - only replace trailing 'Z'
+            # Guard against edge case where v is just "Z"
+            if v.endswith("Z") and len(v) > 1:
+                date_str = v[:-1] + "+00:00"
+            else:
+                date_str = v
             datetime.fromisoformat(date_str)
             return v
         except ValueError as err:
