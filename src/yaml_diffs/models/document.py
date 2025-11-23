@@ -1,8 +1,11 @@
 """Document model for legal documents."""
 
+from __future__ import annotations
+
+from datetime import datetime
 from typing import Optional
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 from yaml_diffs.models.section import Section
 
@@ -61,6 +64,23 @@ class Document(BaseModel):
         default_factory=list,
         description="List of root-level sections in the document.",
     )
+
+    @field_validator("published_date", "updated_date")
+    @classmethod
+    def validate_date_format(cls, v: Optional[str]) -> Optional[str]:
+        """Validate that date strings are in ISO 8601 format."""
+        if v is None:
+            return v
+        try:
+            # Try parsing as ISO 8601 (supports both date and datetime)
+            # Handle 'Z' timezone indicator
+            date_str = v.replace("Z", "+00:00") if v.endswith("Z") else v
+            datetime.fromisoformat(date_str)
+            return v
+        except ValueError as err:
+            raise ValueError(
+                f"Date must be in ISO 8601 format (YYYY-MM-DD or YYYY-MM-DDTHH:MM:SS), got: {v}"
+            ) from err
 
     model_config = {
         "str_strip_whitespace": False,  # Preserve whitespace in metadata

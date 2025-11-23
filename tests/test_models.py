@@ -259,6 +259,38 @@ class TestDocumentCreation:
         error_msg = str(exc_info.value).lower()
         assert "version" in error_msg
 
+    def test_document_rejects_invalid_date_format(self):
+        """Test Document rejects invalid date formats."""
+        # Test invalid date format
+        with pytest.raises(ValidationError) as exc_info:
+            Document(version="1.0", published_date="not-a-date")
+        errors = exc_info.value.errors()
+        assert len(errors) > 0
+        error_msg = str(exc_info.value).lower()
+        assert "published_date" in error_msg or "iso 8601" in error_msg
+
+        # Test invalid updated_date format
+        with pytest.raises(ValidationError) as exc_info:
+            Document(version="1.0", updated_date="2024/01/15")  # Wrong format
+        errors = exc_info.value.errors()
+        assert len(errors) > 0
+        error_msg = str(exc_info.value).lower()
+        assert "updated_date" in error_msg or "iso 8601" in error_msg
+
+    def test_document_accepts_valid_date_formats(self):
+        """Test Document accepts valid ISO 8601 date formats."""
+        # Date only format
+        doc1 = Document(version="1.0", published_date="2024-01-15")
+        assert doc1.published_date == "2024-01-15"
+
+        # Date-time format
+        doc2 = Document(version="1.0", updated_date="2024-01-15T10:30:00")
+        assert doc2.updated_date == "2024-01-15T10:30:00"
+
+        # Date-time with timezone (Z)
+        doc3 = Document(version="1.0", updated_date="2024-01-15T10:30:00Z")
+        assert doc3.updated_date == "2024-01-15T10:30:00Z"
+
 
 class TestIntegration:
     """Integration tests for YAML loading and round-trip conversion."""
