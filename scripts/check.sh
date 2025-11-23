@@ -3,6 +3,7 @@
 # Usage: ./scripts/check.sh
 
 set -e  # Exit on error
+set -o pipefail  # Exit on pipe failure
 
 echo "🔍 Running local CI checks..."
 echo ""
@@ -17,16 +18,20 @@ NC='\033[0m' # No Color
 run_check() {
     local name=$1
     local command=$2
+    local temp_file=$(mktemp)
 
     echo -n "Running $name... "
-    if eval "$command" > /dev/null 2>&1; then
+    if eval "$command" > "$temp_file" 2>&1; then
         echo -e "${GREEN}✓${NC}"
+        rm -f "$temp_file"
         return 0
     else
         echo -e "${RED}✗${NC}"
         echo -e "${RED}Error: $name failed${NC}"
         echo "Command: $command"
-        eval "$command"
+        echo "Output:"
+        cat "$temp_file"
+        rm -f "$temp_file"
         return 1
     fi
 }

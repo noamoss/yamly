@@ -36,6 +36,8 @@ jobs:
         run: |
           pip install dist/yaml_diffs-*.whl
           python -c "import yaml_diffs; print('Package installed successfully')"
+          python -c "from yaml_diffs import __version__; print(f'Package version: {__version__}')"
+          python -c "import yaml_diffs; assert hasattr(yaml_diffs, '__version__'), 'Package missing __version__ attribute'"
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
