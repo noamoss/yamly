@@ -34,4 +34,3 @@ def test_dependencies_importable():
     assert hasattr(pydantic, "BaseModel")
     assert hasattr(yaml, "safe_load")
     assert hasattr(fastapi, "FastAPI")
-

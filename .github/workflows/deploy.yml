@@ -1,0 +1,39 @@
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    name: Deploy to Railway
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Verify deployment health check
+        env:
+          HEALTH_CHECK_URL: https://${{ secrets.RAILWAY_DOMAIN }}/health
+          HEALTH_CHECK_TIMEOUT: ${{ vars.HEALTH_CHECK_TIMEOUT || '30' }}
+          HEALTH_CHECK_RETRY_DELAY: ${{ vars.HEALTH_CHECK_RETRY_DELAY || '5' }}
+        run: |
+          echo "Waiting for deployment to be ready..."
+          max_attempts=$((HEALTH_CHECK_TIMEOUT / HEALTH_CHECK_RETRY_DELAY))
+          attempt=0
+          while [ $attempt -lt $max_attempts ]; do
+            if curl --max-time 10 -f "$HEALTH_CHECK_URL" > /dev/null 2>&1; then
+              echo "✅ Health check passed!"
+              exit 0
+            fi
+            attempt=$((attempt + 1))
+            if [ $attempt -lt $max_attempts ]; then
+              echo "Attempt $attempt/$max_attempts failed, retrying in ${HEALTH_CHECK_RETRY_DELAY}s..."
+              sleep $HEALTH_CHECK_RETRY_DELAY
+            fi
+          done
+          echo "❌ Health check failed after $max_attempts attempts"
+          exit 1
