@@ -53,7 +53,11 @@ if TYPE_CHECKING:
 def load_and_validate(file_path: str | Path | TextIO) -> Document:
     """Load and validate a document in one call.
 
-    This is a convenience function that is equivalent to `validate_document()`.
+    This is a convenience function that simply calls `validate_document()`.
+    It provides a more intuitive name for the common workflow of loading and
+    validating a document in a single step.
+
+    Note: This function is functionally identical to `validate_document()`.
     It loads a YAML file and validates it against both the OpenSpec schema
     and Pydantic models.
 
