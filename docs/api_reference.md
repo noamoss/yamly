@@ -70,7 +70,7 @@ Load and validate a YAML file against both OpenSpec schema and Pydantic models.
 from yaml_diffs import validate_document
 
 doc = validate_document("examples/minimal_document.yaml")
-assert doc.id == "law-1234"
+assert doc.id == "test-123"
 ```
 
 ### `diff_documents(old, new)`
@@ -236,7 +236,7 @@ print(f"Number of sections: {len(doc.sections)}")
 ### 2. Validate a Document
 
 ```python
-from yaml_diffs import validate_document
+from yaml_diffs import validate_document, ValidationError
 
 try:
     doc = validate_document("document.yaml")
