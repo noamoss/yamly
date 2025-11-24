@@ -272,7 +272,7 @@ def diff_documents(old: Document, new: Document) -> DocumentDiff:
         new_section, new_marker_path, new_id_path = new_map[key]
 
         # Check for changes (using independent if statements to allow both
-        # CONTENT_CHANGED and RENAMED to be recorded when both change)
+        # CONTENT_CHANGED and TITLE_CHANGED to be recorded when both change)
         content_changed = old_section.content != new_section.content
         title_changed = old_section.title != new_section.title
 
