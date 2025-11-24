@@ -346,11 +346,17 @@ pytest -m "not slow"
 
 - **Marker-Based**: Diffing is based on section markers (not IDs). Markers are the primary identifiers used for matching sections across document versions.
 - **Marker Requirement**: All sections must have a marker (required field). Markers must be unique within the same nesting level.
-- **Change Types**: Addition, deletion, content change, movement, renaming (title change)
+- **Change Types**:
+  - `SECTION_ADDED`: New section added in new version
+  - `SECTION_REMOVED`: Section removed from old version
+  - `CONTENT_CHANGED`: Content changed (same marker+path)
+  - `SECTION_MOVED`: Path changed (and possibly marker changed) but title+content same
+  - `TITLE_CHANGED`: Title changed (same marker+path+content)
+  - `UNCHANGED`: No changes detected
 - **Path Tracking**: Hybrid approach - uses marker paths for matching, ID paths for tracking
-- **Movement Detection**: Sections with same marker but different parent path are detected as moved
-- **Content Similarity**: Uses content similarity scoring (80% threshold) to detect moved sections with content changes
-- **Multiple Changes**: A single section can have multiple change types (e.g., MOVED + CONTENT_CHANGED as separate entries)
+- **Movement Detection**: Sections are detected as moved when path changed (and possibly marker changed) but title+content are the same. Matching is done by content similarity (≥0.95 threshold), not marker. Empty content sections (parent sections) are not matched to avoid false positives.
+- **Content Similarity**: Uses content similarity scoring (≥0.95 threshold) to detect moved sections. Only sections with non-empty content are matched.
+- **Multiple Changes**: A single section can have multiple change types (e.g., SECTION_MOVED + CONTENT_CHANGED as separate entries)
 - **Nested Handling**: Handle deeply nested structures correctly (5+ levels)
 
 ### API Design

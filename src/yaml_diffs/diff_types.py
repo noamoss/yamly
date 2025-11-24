@@ -12,19 +12,19 @@ class ChangeType(str, Enum):
     """Type of change detected in document diffing.
 
     Attributes:
-        ADDED: New marker in new version
-        DELETED: Marker removed from old version
-        CONTENT_CHANGED: Same marker+path, content changed
-        MOVED: Same marker, different parent path
-        RENAMED: Same marker+path+content, title changed
+        SECTION_ADDED: New section added in new version
+        SECTION_REMOVED: Section removed from old version
+        CONTENT_CHANGED: Content changed (same marker+path)
+        SECTION_MOVED: Path changed (and possibly marker changed) but title+content same
+        TITLE_CHANGED: Title changed (same marker+path+content)
         UNCHANGED: No changes detected
     """
 
-    ADDED = "added"
-    DELETED = "deleted"
+    SECTION_ADDED = "section_added"
+    SECTION_REMOVED = "section_removed"
     CONTENT_CHANGED = "content_changed"
-    MOVED = "moved"
-    RENAMED = "renamed"
+    SECTION_MOVED = "section_moved"
+    TITLE_CHANGED = "title_changed"
     UNCHANGED = "unchanged"
 
 

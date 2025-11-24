@@ -82,7 +82,7 @@ class TestBug1CartesianProduct:
 
         # Should have exactly 2 MOVED changes (one-to-one matching)
         # NOT 4 (cartesian product: 2 old × 2 new = 4)
-        moved_changes = [c for c in diff.changes if c.change_type == ChangeType.MOVED]
+        moved_changes = [c for c in diff.changes if c.change_type == ChangeType.SECTION_MOVED]
         assert len(moved_changes) == 2, f"Expected 2 MOVED changes, got {len(moved_changes)}"
         assert diff.moved_count == 2, f"Expected moved_count=2, got {diff.moved_count}"
 
@@ -140,18 +140,16 @@ class TestBug2MovedRenamed:
 
         diff = diff_documents(old_doc, new_doc)
 
-        # Should have both MOVED and RENAMED
-        moved_changes = [c for c in diff.changes if c.change_type == ChangeType.MOVED]
-        renamed_changes = [c for c in diff.changes if c.change_type == ChangeType.RENAMED]
+        # With new semantics: title changed, so not detected as MOVED
+        # (MOVED requires title+content to be same)
+        # Should be detected as SECTION_REMOVED + SECTION_ADDED
+        moved_changes = [c for c in diff.changes if c.change_type == ChangeType.SECTION_MOVED]
+        removed_changes = [c for c in diff.changes if c.change_type == ChangeType.SECTION_REMOVED]
+        added_changes = [c for c in diff.changes if c.change_type == ChangeType.SECTION_ADDED]
 
-        assert len(moved_changes) == 1, f"Expected 1 MOVED change, got {len(moved_changes)}"
-        assert len(renamed_changes) == 1, f"Expected 1 RENAMED change, got {len(renamed_changes)}"
-        assert diff.moved_count == 1
-        assert diff.modified_count == 1  # RENAMED counts as modified
-
-        # Verify the RENAMED change has correct title info
-        assert renamed_changes[0].old_title == "Old Title"
-        assert renamed_changes[0].new_title == "New Title"
+        assert len(moved_changes) == 0, "Title changed, so not detected as MOVED"
+        assert len(removed_changes) == 2  # Parent chapter + child section
+        assert len(added_changes) == 2  # New parent chapter + new child section
 
 
 class TestBug3MovedContentChanged:
@@ -210,30 +208,24 @@ class TestBug3MovedContentChanged:
 
         diff = diff_documents(old_doc, new_doc)
 
-        # Should have MOVED, RENAMED (title changed), and CONTENT_CHANGED (content changed)
-        moved_changes = [c for c in diff.changes if c.change_type == ChangeType.MOVED]
-        renamed_changes = [c for c in diff.changes if c.change_type == ChangeType.RENAMED]
-        content_changes = [c for c in diff.changes if c.change_type == ChangeType.CONTENT_CHANGED]
+        # With new semantics: content and title changed, so not detected as MOVED
+        # (MOVED requires title+content to be same)
+        # Should be detected as SECTION_REMOVED + SECTION_ADDED
+        moved_changes = [c for c in diff.changes if c.change_type == ChangeType.SECTION_MOVED]
+        removed_changes = [c for c in diff.changes if c.change_type == ChangeType.SECTION_REMOVED]
+        added_changes = [c for c in diff.changes if c.change_type == ChangeType.SECTION_ADDED]
 
-        assert len(moved_changes) == 1, f"Expected 1 MOVED change, got {len(moved_changes)}"
-        assert len(content_changes) == 1, (
-            f"Expected 1 CONTENT_CHANGED change, got {len(content_changes)}"
-        )
-        # Note: RENAMED is only added when content is unchanged, so we shouldn't have it here
-        assert len(renamed_changes) == 0, (
-            f"Expected 0 RENAMED changes (content changed), got {len(renamed_changes)}"
-        )
-
-        assert diff.moved_count == 1
-        assert diff.modified_count == 1  # CONTENT_CHANGED counts as modified
-
-        # Verify the CONTENT_CHANGED change has correct content
-        assert content_changes[0].old_content == "Original content for section one."
-        assert content_changes[0].new_content == "Completely different content after move."
+        assert len(moved_changes) == 0, "Content and title changed, so not detected as MOVED"
+        assert len(removed_changes) == 2  # Parent chapter + child section
+        assert len(added_changes) == 2  # New parent chapter + new child section
 
     def test_moved_section_with_substantially_rewritten_content(self, minimal_document: Document):
-        """Test that moved section with substantially rewritten content (low similarity) still records CONTENT_CHANGED."""
-        # This addresses the case where similarity < 0.8 but content still changed
+        """Test that section with low content similarity is not detected as MOVED.
+
+        With new semantics, SECTION_MOVED requires high content similarity (≥0.95) and same title.
+        If content is substantially rewritten (low similarity), it should be detected as
+        SECTION_REMOVED + SECTION_ADDED instead.
+        """
         old_doc = Document(
             id=minimal_document.id,
             title=minimal_document.title,
@@ -282,16 +274,73 @@ class TestBug3MovedContentChanged:
 
         diff = diff_documents(old_doc, new_doc)
 
-        # Should have MOVED and CONTENT_CHANGED (even though similarity is low)
-        moved_changes = [c for c in diff.changes if c.change_type == ChangeType.MOVED]
-        content_changes = [c for c in diff.changes if c.change_type == ChangeType.CONTENT_CHANGED]
+        # With new semantics: low similarity, so not detected as MOVED
+        # Should be detected as SECTION_REMOVED + SECTION_ADDED
+        moved_changes = [c for c in diff.changes if c.change_type == ChangeType.SECTION_MOVED]
+        removed_changes = [c for c in diff.changes if c.change_type == ChangeType.SECTION_REMOVED]
+        added_changes = [c for c in diff.changes if c.change_type == ChangeType.SECTION_ADDED]
 
-        assert len(moved_changes) == 1, f"Expected 1 MOVED change, got {len(moved_changes)}"
-        assert len(content_changes) == 1, (
-            f"Expected 1 CONTENT_CHANGED change, got {len(content_changes)}"
+        assert len(moved_changes) == 0, "Low similarity should not be detected as MOVED"
+        assert len(removed_changes) == 2  # Parent chapter + child section
+        assert len(added_changes) == 2  # New parent chapter + new child section
+
+
+class TestSectionMovedWithMarkerChange:
+    """Test SECTION_MOVED detection with marker changes."""
+
+    def test_section_moved_with_marker_change(self, minimal_document: Document):
+        """Test that SECTION_MOVED is detected when marker changed but content+title same."""
+        old_doc = Document(
+            id=minimal_document.id,
+            title=minimal_document.title,
+            type=minimal_document.type,
+            version=minimal_document.version,
+            source=minimal_document.source,
+            sections=[
+                Section(
+                    id="chap-1",
+                    marker="פרק א'",
+                    content="",
+                    sections=[
+                        Section(
+                            id="sec-1",
+                            marker="1",
+                            content="Same content here",
+                            title="Same Title",
+                        ),
+                    ],
+                ),
+            ],
         )
-        assert diff.moved_count == 1
-        assert diff.modified_count == 1  # CONTENT_CHANGED counts as modified
 
-        # Verify modified_count is > 0 (the bug was that it stayed 0)
-        assert diff.modified_count > 0, "modified_count should be > 0 when content changed"
+        new_doc = Document(
+            id=old_doc.id,
+            title=old_doc.title,
+            type=old_doc.type,
+            version=old_doc.version,
+            source=old_doc.source,
+            sections=[
+                Section(
+                    id="chap-2",
+                    marker="פרק ב'",
+                    content="",
+                    sections=[
+                        Section(
+                            id="sec-1",
+                            marker="2",  # Marker changed
+                            content="Same content here",  # Content same
+                            title="Same Title",  # Title same
+                        ),
+                    ],
+                ),
+            ],
+        )
+
+        diff = diff_documents(old_doc, new_doc)
+
+        # Should detect SECTION_MOVED (path changed, marker changed, but content+title same)
+        moved_changes = [c for c in diff.changes if c.change_type == ChangeType.SECTION_MOVED]
+        assert len(moved_changes) == 1, f"Expected 1 SECTION_MOVED, got {len(moved_changes)}"
+        assert diff.moved_count == 1
+        assert moved_changes[0].old_marker_path == ("פרק א'", "1")
+        assert moved_changes[0].new_marker_path == ("פרק ב'", "2")
