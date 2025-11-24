@@ -25,9 +25,17 @@ from yaml_diffs.exceptions import (
 def _show_progress(message: str, file_path: str | Path) -> None:
     """Show progress message if output is a TTY.
 
+    Displays a progress message to stderr when processing large files (>1MB).
+    The message only appears when stderr is connected to a terminal (TTY),
+    preventing progress indicators from appearing in piped output or log files.
+
     Args:
-        message: Progress message to display.
-        file_path: Path to the file being processed.
+        message: Progress message to display (e.g., "Loading", "Validating").
+        file_path: Path to the file being processed. Used to determine file size.
+
+    Note:
+        Progress messages are written to stderr to avoid interfering with
+        actual command output written to stdout.
     """
     if sys.stderr.isatty():  # Check stderr since we write to stderr
         file_size = os.path.getsize(file_path) if os.path.exists(file_path) else 0
@@ -93,18 +101,10 @@ def validate_command(file: Path) -> None:
     "--filter-change-types",
     "filter_change_types",
     multiple=True,
-    type=click.Choice(
-        [
-            "SECTION_ADDED",
-            "SECTION_REMOVED",
-            "CONTENT_CHANGED",
-            "TITLE_CHANGED",
-            "SECTION_MOVED",
-            "UNCHANGED",
-        ],
-        case_sensitive=False,
-    ),
-    help="Filter results by change type (can be used multiple times)",
+    type=str,  # Accept any string, validate in code to provide better error messages
+    help="Filter results by change type (can be used multiple times). "
+    "Valid types: SECTION_ADDED, SECTION_REMOVED, CONTENT_CHANGED, "
+    "TITLE_CHANGED, SECTION_MOVED, UNCHANGED",
 )
 @click.option(
     "--filter-section-path",
@@ -153,11 +153,22 @@ def diff_command(
         change_type_filters: list[ChangeType] | None = None
         if filter_change_types:
             change_type_filters = []
+            invalid_types = []
             for ct_str in filter_change_types:
                 try:
                     change_type_filters.append(ChangeType[ct_str.upper()])
                 except KeyError:
+                    invalid_types.append(ct_str)
                     click.echo(f"Warning: Unknown change type '{ct_str}', ignoring", err=True)
+
+            # If all filter types were invalid, raise an error instead of showing empty results
+            if not change_type_filters and invalid_types:
+                handle_cli_error(
+                    ValueError(
+                        f"All provided change type filters were invalid: {', '.join(invalid_types)}. "
+                        f"Valid types are: {', '.join([ct.name for ct in ChangeType])}"
+                    )
+                )
 
         _show_progress("Loading old document", old_file)
         _show_progress("Loading new document", new_file)

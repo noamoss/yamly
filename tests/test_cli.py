@@ -270,6 +270,48 @@ class TestDiffCommand:
         )
         assert result.exit_code == 0
 
+    def test_diff_command_filter_change_types_all_invalid(
+        self, runner: CliRunner, document_v1_file: Path, document_v2_file: Path
+    ) -> None:
+        """Test diff command with all invalid filter-change-types raises error."""
+        result = runner.invoke(
+            cli,
+            [
+                "diff",
+                str(document_v1_file),
+                str(document_v2_file),
+                "--filter-change-types",
+                "INVALID_TYPE_1",
+                "--filter-change-types",
+                "INVALID_TYPE_2",
+            ],
+        )
+        assert result.exit_code != 0
+        assert "All provided change type filters were invalid" in result.output
+        assert "INVALID_TYPE_1" in result.output
+        assert "INVALID_TYPE_2" in result.output
+        assert "Valid types are:" in result.output
+
+    def test_diff_command_filter_change_types_partial_invalid(
+        self, runner: CliRunner, document_v1_file: Path, document_v2_file: Path
+    ) -> None:
+        """Test diff command with some invalid filter-change-types shows warnings but continues."""
+        result = runner.invoke(
+            cli,
+            [
+                "diff",
+                str(document_v1_file),
+                str(document_v2_file),
+                "--filter-change-types",
+                "SECTION_ADDED",
+                "--filter-change-types",
+                "INVALID_TYPE",
+            ],
+        )
+        # Should succeed with valid type, but warn about invalid one
+        assert result.exit_code == 0
+        assert "Warning: Unknown change type 'INVALID_TYPE', ignoring" in result.output
+
     def test_diff_command_filter_section_path(
         self, runner: CliRunner, document_v1_file: Path, document_v2_file: Path
     ) -> None:
