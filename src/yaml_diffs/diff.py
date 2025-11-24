@@ -2,10 +2,17 @@
 
 from __future__ import annotations
 
-from typing import Optional
+from collections import deque
+from typing import TYPE_CHECKING, Optional
 
 from yaml_diffs.diff_types import ChangeType, DiffResult, DocumentDiff
 from yaml_diffs.models import Document, Section
+
+if TYPE_CHECKING:
+    # Type aliases for marker map structure
+    MarkerMapKey = tuple[str, tuple[str, ...]]
+    MarkerMapValue = tuple[Section, tuple[str, ...], list[str]]
+    MarkerMap = dict[MarkerMapKey, MarkerMapValue]
 
 
 def _validate_unique_markers(
@@ -47,7 +54,7 @@ def _build_marker_map(
     sections: list[Section],
     parent_marker_path: tuple[str, ...] = (),
     parent_id_path: Optional[list[str]] = None,
-) -> dict:
+) -> MarkerMap:
     """Build marker+path -> section mapping.
 
     Recursively traverses sections and builds a mapping from
@@ -71,7 +78,7 @@ def _build_marker_map(
     if parent_id_path is None:
         parent_id_path = []
 
-    mapping: dict = {}
+    mapping: MarkerMap = {}
 
     for section in sections:
         # Create key: (marker, parent_marker_path)
@@ -135,9 +142,9 @@ def _calculate_content_similarity(content1: str, content2: str) -> float:
 
 
 def _find_moved_sections(
-    unmatched_old: dict,
-    unmatched_new: dict,
-) -> list:
+    unmatched_old: MarkerMap,
+    unmatched_new: MarkerMap,
+) -> list[tuple[MarkerMapKey, MarkerMapKey]]:
     """Find sections that moved (same marker, different path).
 
     Matches sections by marker only (ignoring path) to detect movements.
@@ -157,28 +164,30 @@ def _find_moved_sections(
         >>> matches = _find_moved_sections({old_key: ...}, {new_key: ...})
         >>> assert (old_key, new_key) in matches
     """
-    matches: list = []
+    matches: list[tuple[MarkerMapKey, MarkerMapKey]] = []
 
     # Build marker -> keys mapping for new document
-    marker_to_new_keys: dict = {}
+    # Use deque for O(1) popleft() operations instead of O(n) pop(0)
+    marker_to_new_keys: dict[str, deque[MarkerMapKey]] = {}
     for new_key in unmatched_new.keys():
         marker = new_key[0]
         if marker not in marker_to_new_keys:
-            marker_to_new_keys[marker] = []
+            marker_to_new_keys[marker] = deque()
         marker_to_new_keys[marker].append(new_key)
 
     # Find matches by marker (one-to-one matching)
-    # BUG FIX: Use .pop(0) to ensure one-to-one matching and prevent cartesian product
+    # BUG FIX: Use popleft() to ensure one-to-one matching and prevent cartesian product
     # when multiple old sections share the same marker with multiple new sections.
     # Without this fix, if 2 old sections with marker "1" match 2 new sections with
     # marker "1", all 4 pairings would be created instead of 2 one-to-one matches.
+    # Using deque.popleft() is O(1) instead of list.pop(0) which is O(n).
     for old_key in list(unmatched_old.keys()):
         old_marker = old_key[0]
         if old_marker in marker_to_new_keys and marker_to_new_keys[old_marker]:
             # Found a match by marker (different path = moved)
             # Take the first available new_key with this marker (one-to-one)
-            # Using .pop(0) removes it from the list, preventing duplicate matches
-            new_key = marker_to_new_keys[old_marker].pop(0)
+            # Using popleft() removes it from the deque, preventing duplicate matches
+            new_key = marker_to_new_keys[old_marker].popleft()
             matches.append((old_key, new_key))
 
             # Remove from unmatched_new to avoid duplicate matches
@@ -235,8 +244,11 @@ def diff_documents(old: Document, new: Document) -> DocumentDiff:
         old_section, old_marker_path, old_id_path = old_map[key]
         new_section, new_marker_path, new_id_path = new_map[key]
 
-        # Check for content change
-        if old_section.content != new_section.content:
+        # Check for changes (using elif for mutually exclusive conditions)
+        content_changed = old_section.content != new_section.content
+        title_changed = old_section.title != new_section.title
+
+        if content_changed:
             changes.append(
                 DiffResult(
                     section_id=old_section.id,
@@ -250,29 +262,22 @@ def diff_documents(old: Document, new: Document) -> DocumentDiff:
                     new_content=new_section.content,
                 )
             )
-
-        # Check for title change (rename)
-        if old_section.title != new_section.title:
+        elif title_changed:
             # Only mark as renamed if content is the same
-            if old_section.content == new_section.content:
-                changes.append(
-                    DiffResult(
-                        section_id=old_section.id,
-                        change_type=ChangeType.RENAMED,
-                        marker=old_section.marker,
-                        old_marker_path=old_marker_path,
-                        new_marker_path=new_marker_path,
-                        old_id_path=old_id_path,
-                        new_id_path=new_id_path,
-                        old_title=old_section.title,
-                        new_title=new_section.title,
-                    )
+            changes.append(
+                DiffResult(
+                    section_id=old_section.id,
+                    change_type=ChangeType.RENAMED,
+                    marker=old_section.marker,
+                    old_marker_path=old_marker_path,
+                    new_marker_path=new_marker_path,
+                    old_id_path=old_id_path,
+                    new_id_path=new_id_path,
+                    old_title=old_section.title,
+                    new_title=new_section.title,
                 )
-            # If content also changed, title change is part of content change
-            # (already handled above)
-
-        # No changes detected
-        if old_section.content == new_section.content and old_section.title == new_section.title:
+            )
+        else:
             changes.append(
                 DiffResult(
                     section_id=old_section.id,
@@ -296,9 +301,9 @@ def diff_documents(old: Document, new: Document) -> DocumentDiff:
         old_section, old_marker_path, old_id_path = old_map[old_key]
         new_section, new_marker_path, new_id_path = new_map[new_key]
 
-        # Check if content also changed
-        content_similarity = _calculate_content_similarity(old_section.content, new_section.content)
+        # Check if content and title changed
         content_changed = old_section.content != new_section.content
+        title_changed = old_section.title != new_section.title
 
         # Add MOVED change
         changes.append(
@@ -317,8 +322,7 @@ def diff_documents(old: Document, new: Document) -> DocumentDiff:
         # Moved sections with title changes should record both MOVED and RENAMED
         # to be consistent with non-moved sections. This ensures title change
         # information is not lost when a section moves.
-        title_changed = old_section.title != new_section.title
-        if title_changed and old_section.content == new_section.content:
+        if title_changed and not content_changed:
             changes.append(
                 DiffResult(
                     section_id=old_section.id,
@@ -333,9 +337,11 @@ def diff_documents(old: Document, new: Document) -> DocumentDiff:
                 )
             )
 
-        # If content changed and similarity is high (>80%) with same title,
-        # also add CONTENT_CHANGED
-        if content_changed and content_similarity >= 0.8 and old_section.title == new_section.title:
+        # BUG FIX: Always detect content changes for moved sections, even when
+        # title changes or content is substantially rewritten (similarity < 0.8).
+        # Previously, CONTENT_CHANGED was only added when similarity >= 0.8 and
+        # title unchanged, causing content edits to be lost in other cases.
+        if content_changed:
             changes.append(
                 DiffResult(
                     section_id=old_section.id,

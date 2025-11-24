@@ -152,3 +152,146 @@ class TestBug2MovedRenamed:
         # Verify the RENAMED change has correct title info
         assert renamed_changes[0].old_title == "Old Title"
         assert renamed_changes[0].new_title == "New Title"
+
+
+class TestBug3MovedContentChanged:
+    """Test Bug 3: Moved sections with content changes should always record CONTENT_CHANGED."""
+
+    def test_moved_section_with_content_and_title_change(self, minimal_document: Document):
+        """Test that moved section with both content and title change records MOVED, RENAMED, and CONTENT_CHANGED."""
+        # This test addresses the specific issue from comment #2554771461:
+        # "Moving marker '1' to a new parent with different text and a new title
+        # currently produces no content-change entry despite the text change."
+        old_doc = Document(
+            id=minimal_document.id,
+            title=minimal_document.title,
+            type=minimal_document.type,
+            version=minimal_document.version,
+            source=minimal_document.source,
+            sections=[
+                Section(
+                    id="chap-1",
+                    marker="פרק א'",
+                    content="",
+                    sections=[
+                        Section(
+                            id="sec-1",
+                            marker="1",
+                            content="Original content for section one.",
+                            title="Original Title",
+                        ),
+                    ],
+                ),
+            ],
+        )
+
+        new_doc = Document(
+            id=old_doc.id,
+            title=old_doc.title,
+            type=old_doc.type,
+            version=old_doc.version,
+            source=old_doc.source,
+            sections=[
+                Section(
+                    id="chap-2",
+                    marker="פרק ב'",
+                    content="",
+                    sections=[
+                        Section(
+                            id="sec-1",
+                            marker="1",
+                            content="Completely different content after move.",  # Different text
+                            title="New Title",  # Title also changed
+                        ),
+                    ],
+                ),
+            ],
+        )
+
+        diff = diff_documents(old_doc, new_doc)
+
+        # Should have MOVED, RENAMED (title changed), and CONTENT_CHANGED (content changed)
+        moved_changes = [c for c in diff.changes if c.change_type == ChangeType.MOVED]
+        renamed_changes = [c for c in diff.changes if c.change_type == ChangeType.RENAMED]
+        content_changes = [c for c in diff.changes if c.change_type == ChangeType.CONTENT_CHANGED]
+
+        assert len(moved_changes) == 1, f"Expected 1 MOVED change, got {len(moved_changes)}"
+        assert len(content_changes) == 1, (
+            f"Expected 1 CONTENT_CHANGED change, got {len(content_changes)}"
+        )
+        # Note: RENAMED is only added when content is unchanged, so we shouldn't have it here
+        assert len(renamed_changes) == 0, (
+            f"Expected 0 RENAMED changes (content changed), got {len(renamed_changes)}"
+        )
+
+        assert diff.moved_count == 1
+        assert diff.modified_count == 1  # CONTENT_CHANGED counts as modified
+
+        # Verify the CONTENT_CHANGED change has correct content
+        assert content_changes[0].old_content == "Original content for section one."
+        assert content_changes[0].new_content == "Completely different content after move."
+
+    def test_moved_section_with_substantially_rewritten_content(self, minimal_document: Document):
+        """Test that moved section with substantially rewritten content (low similarity) still records CONTENT_CHANGED."""
+        # This addresses the case where similarity < 0.8 but content still changed
+        old_doc = Document(
+            id=minimal_document.id,
+            title=minimal_document.title,
+            type=minimal_document.type,
+            version=minimal_document.version,
+            source=minimal_document.source,
+            sections=[
+                Section(
+                    id="chap-1",
+                    marker="פרק א'",
+                    content="",
+                    sections=[
+                        Section(
+                            id="sec-1",
+                            marker="1",
+                            content="The quick brown fox jumps over the lazy dog.",
+                            title="Section Title",
+                        ),
+                    ],
+                ),
+            ],
+        )
+
+        new_doc = Document(
+            id=old_doc.id,
+            title=old_doc.title,
+            type=old_doc.type,
+            version=old_doc.version,
+            source=old_doc.source,
+            sections=[
+                Section(
+                    id="chap-2",
+                    marker="פרק ב'",
+                    content="",
+                    sections=[
+                        Section(
+                            id="sec-1",
+                            marker="1",
+                            content="A completely different sentence with no shared words.",  # Low similarity
+                            title="Section Title",  # Same title
+                        ),
+                    ],
+                ),
+            ],
+        )
+
+        diff = diff_documents(old_doc, new_doc)
+
+        # Should have MOVED and CONTENT_CHANGED (even though similarity is low)
+        moved_changes = [c for c in diff.changes if c.change_type == ChangeType.MOVED]
+        content_changes = [c for c in diff.changes if c.change_type == ChangeType.CONTENT_CHANGED]
+
+        assert len(moved_changes) == 1, f"Expected 1 MOVED change, got {len(moved_changes)}"
+        assert len(content_changes) == 1, (
+            f"Expected 1 CONTENT_CHANGED change, got {len(content_changes)}"
+        )
+        assert diff.moved_count == 1
+        assert diff.modified_count == 1  # CONTENT_CHANGED counts as modified
+
+        # Verify modified_count is > 0 (the bug was that it stayed 0)
+        assert diff.modified_count > 0, "modified_count should be > 0 when content changed"
