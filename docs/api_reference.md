@@ -61,7 +61,6 @@ Load and validate a YAML file against both OpenSpec schema and Pydantic models.
 
 **Raises:**
 - `YAMLLoadError`: If the file cannot be read or parsed
-- `ImportError`: If jsonschema is not available
 - `OpenSpecValidationError`: If OpenSpec validation fails
 - `PydanticValidationError`: If Pydantic validation fails
 

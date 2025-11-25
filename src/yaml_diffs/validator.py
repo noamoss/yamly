@@ -8,18 +8,8 @@ from pathlib import Path
 from typing import Any, TextIO
 from urllib.parse import urlparse
 
-try:
-    from jsonschema import FormatChecker
-    from jsonschema.validators import Draft202012Validator
-
-    JSONSCHEMA_AVAILABLE = True
-except ImportError:
-    JSONSCHEMA_AVAILABLE = False
-    # These are only used when JSONSCHEMA_AVAILABLE is True
-    # Type ignore needed because we assign None to imported types
-    FormatChecker = None  # type: ignore[assignment, misc]
-    Draft202012Validator = None  # type: ignore[assignment, misc]
-
+from jsonschema import FormatChecker
+from jsonschema.validators import Draft202012Validator
 from pydantic import ValidationError as PydanticValidationErrorBase
 
 from yaml_diffs.exceptions import (
@@ -97,16 +87,7 @@ def _get_format_checker() -> FormatChecker:
 
     Returns:
         FormatChecker instance with URI and date-time validators.
-
-    Raises:
-        ImportError: If jsonschema is not available.
     """
-    if not JSONSCHEMA_AVAILABLE:
-        raise ImportError(
-            "jsonschema is required for OpenSpec validation. "
-            "Install it with: pip install jsonschema"
-        )
-
     format_checker = FormatChecker()
     # Type ignore needed for FormatChecker.checks() type variable limitation
     format_checker.checks("uri")(_validate_uri)  # type: ignore[type-var, misc]
@@ -131,7 +112,6 @@ def validate_against_openspec(
             schema using load_schema().
 
     Raises:
-        ImportError: If jsonschema is not available.
         OpenSpecValidationError: If validation fails. The exception includes:
             - Aggregated error messages
             - Field paths for each error
@@ -141,12 +121,6 @@ def validate_against_openspec(
         >>> data = {"document": {"id": "test", ...}}
         >>> validate_against_openspec(data)  # Raises if invalid
     """
-    if not JSONSCHEMA_AVAILABLE:
-        raise ImportError(
-            "jsonschema is required for OpenSpec validation. "
-            "Install it with: pip install jsonschema"
-        )
-
     if schema is None:
         schema = load_schema()
 
@@ -248,7 +222,6 @@ def validate_document(file_path: str | Path | TextIO) -> Document:
 
     Raises:
         YAMLLoadError: If the file cannot be read or parsed.
-        ImportError: If jsonschema is not available.
         OpenSpecValidationError: If OpenSpec validation fails.
         PydanticValidationError: If Pydantic validation fails.
 

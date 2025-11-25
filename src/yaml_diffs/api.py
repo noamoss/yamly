@@ -69,7 +69,6 @@ def load_and_validate(file_path: str | Path | TextIO) -> Document:
 
     Raises:
         YAMLLoadError: If the file cannot be read or parsed.
-        ImportError: If jsonschema is not available.
         OpenSpecValidationError: If OpenSpec validation fails.
         PydanticValidationError: If Pydantic validation fails.
 

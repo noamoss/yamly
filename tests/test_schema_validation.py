@@ -7,18 +7,10 @@ from urllib.parse import urlparse
 
 import pytest
 import yaml
+from jsonschema import FormatChecker
+from jsonschema.validators import Draft202012Validator
 
 from yaml_diffs.schema import get_schema_version, load_schema
-
-# Try to import jsonschema, skip tests if not available
-try:
-    from jsonschema import FormatChecker
-    from jsonschema.validators import Draft202012Validator
-
-    JSONSCHEMA_AVAILABLE = True
-except ImportError:
-    JSONSCHEMA_AVAILABLE = False
-    pytestmark = pytest.mark.skip("jsonschema library not available")
 
 
 def validate_uri(instance: str) -> bool:

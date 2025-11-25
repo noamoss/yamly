@@ -5,13 +5,6 @@ from pathlib import Path
 
 import pytest
 
-# Try to import jsonschema, skip tests if not available
-try:
-    from jsonschema import FormatChecker  # noqa: F401
-    from jsonschema.validators import Draft202012Validator  # noqa: F401
-except ImportError:
-    pytestmark = pytest.mark.skip("jsonschema library not available")
-
 from yaml_diffs.api import (
     ChangeType,
     Document,
