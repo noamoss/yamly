@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pytest
 
-from yaml_diffs.exceptions import PathValidationError, YAMLLoadError
+from yaml_diffs.exceptions import PathValidationError
 from yaml_diffs.loader import load_yaml_file
 from yaml_diffs.security import is_path_safe, validate_path_safe
 
@@ -304,15 +304,11 @@ class TestLoadYamlFileWithValidation:
         yaml_file.write_text("document:\n  id: test\n", encoding="utf-8")
 
         # Try to access file using traversal
-        with pytest.raises(Exception) as exc_info:
-            # This should fail because of directory traversal
+        # Should raise PathValidationError directly (not converted to YAMLLoadError)
+        with pytest.raises(PathValidationError) as exc_info:
             load_yaml_file("../test.yaml", validate_path=True)
 
-        # Should raise YAMLLoadError (wrapping PathValidationError)
-        assert (
-            "validation" in str(exc_info.value).lower()
-            or "traversal" in str(exc_info.value).lower()
-        )
+        assert exc_info.value.reason == "directory_traversal"
 
     def test_load_with_validation_base_dir(self, tmp_path: Path) -> None:
         """Test loading file with base_dir restriction."""
@@ -332,8 +328,11 @@ class TestLoadYamlFileWithValidation:
         outside_file = tmp_path / "outside.yaml"
         outside_file.write_text("document:\n  id: test\n", encoding="utf-8")
 
-        with pytest.raises((YAMLLoadError, PathValidationError)):
+        # Should raise PathValidationError directly (not converted to YAMLLoadError)
+        with pytest.raises(PathValidationError) as exc_info:
             load_yaml_file(str(outside_file), validate_path=True, base_dir=base_dir)
+
+        assert exc_info.value.reason == "outside_base_dir"
 
     def test_load_without_validation_backward_compatibility(self, tmp_path: Path) -> None:
         """Test that validation is optional (backward compatibility)."""

@@ -9,7 +9,6 @@ import yaml  # type: ignore[import-untyped]
 from pydantic import ValidationError as PydanticValidationErrorBase
 
 from yaml_diffs.exceptions import (
-    PathValidationError,
     PydanticValidationError,
     YAMLLoadError,
     format_pydantic_errors,
@@ -68,15 +67,9 @@ def load_yaml_file(
 
     # Validate path if requested (for API security)
     if validate_path:
-        try:
-            file_path_obj = validate_path_safe(file_path_obj, base_dir)
-        except PathValidationError as e:
-            # Convert PathValidationError to YAMLLoadError for consistency
-            raise YAMLLoadError(
-                f"Path validation failed: {e.message}",
-                original_error=e,
-                file_path=str(e.file_path) if e.file_path else str(file_path_obj),
-            ) from e
+        # Don't convert PathValidationError - let it bubble up to the secure handler
+        # Converting to YAMLLoadError would expose file paths in API responses
+        file_path_obj = validate_path_safe(file_path_obj, base_dir)
 
     try:
         with open(file_path_obj, encoding="utf-8") as f:

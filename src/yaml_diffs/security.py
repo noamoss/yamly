@@ -42,7 +42,6 @@ def validate_path_safe(
         PathValidationError: If the path is unsafe. Reasons include:
             - "directory_traversal": Path contains `..` sequences
             - "outside_base_dir": Path resolves outside base_dir
-            - "absolute_path": Absolute path provided when base_dir is set
 
     Examples:
         >>> from pathlib import Path
