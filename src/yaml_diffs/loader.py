@@ -51,8 +51,9 @@ def load_yaml_file(
             - PermissionError: Insufficient permissions to read file
             - yaml.YAMLError: Invalid YAML syntax
             - UnicodeDecodeError: Encoding issues
-            - PathValidationError: If path validation fails (when
-                `validate_path=True`)
+        PathValidationError: If path validation fails (when `validate_path=True`).
+            This is a separate exception type raised directly when path validation
+            is enabled and the path is determined to be unsafe.
 
     Examples:
         >>> data = load_yaml_file("examples/minimal_document.yaml")
