@@ -27,6 +27,7 @@ classifiers = [
 
 dependencies = [
     "click>=8.0.0",
+    "jsonschema>=4.0.0",
     "pydantic>=2.0.0",
     "pyyaml>=6.0",
     "fastapi>=0.100.0",
@@ -42,7 +43,6 @@ dev = [
     "mypy>=1.5.0",
     "pre-commit>=3.4.0",
     "build>=1.0.0",
-    "jsonschema>=4.0.0",
     "types-jsonschema>=4.0.0",
     "httpx>=0.24.0",
 ]
