@@ -9,6 +9,7 @@ import json
 import logging
 from typing import Any
 
+import httpx
 import mcp.types as types
 
 from yaml_diffs.mcp_server.client import APIClient
@@ -98,9 +99,42 @@ async def handle_validate_document(
     yaml_content = str(arguments["yaml"])
 
     try:
-        result = client.validate_document(yaml_content)
+        result = await client.validate_document(yaml_content)
         response_text = json.dumps(result, indent=2, ensure_ascii=False)
         return [types.TextContent(type="text", text=response_text)]
+    except httpx.HTTPStatusError as e:
+        error_message = f"API error validating document: HTTP {e.response.status_code}"
+        logger.error(error_message, exc_info=True)
+        return [
+            types.TextContent(
+                type="text",
+                text=json.dumps(
+                    {
+                        "error": "HTTPStatusError",
+                        "message": error_message,
+                        "status_code": e.response.status_code,
+                        "valid": False,
+                    },
+                    indent=2,
+                ),
+            )
+        ]
+    except httpx.RequestError as e:
+        error_message = f"Network error validating document: {str(e)}"
+        logger.error(error_message, exc_info=True)
+        return [
+            types.TextContent(
+                type="text",
+                text=json.dumps(
+                    {
+                        "error": "RequestError",
+                        "message": error_message,
+                        "valid": False,
+                    },
+                    indent=2,
+                ),
+            )
+        ]
     except Exception as e:
         error_message = f"Error validating document: {str(e)}"
         logger.error(error_message, exc_info=True)
@@ -143,9 +177,40 @@ async def handle_diff_documents(
     new_yaml = str(arguments["new_yaml"])
 
     try:
-        result = client.diff_documents(old_yaml, new_yaml)
+        result = await client.diff_documents(old_yaml, new_yaml)
         response_text = json.dumps(result, indent=2, ensure_ascii=False)
         return [types.TextContent(type="text", text=response_text)]
+    except httpx.HTTPStatusError as e:
+        error_message = f"API error diffing documents: HTTP {e.response.status_code}"
+        logger.error(error_message, exc_info=True)
+        return [
+            types.TextContent(
+                type="text",
+                text=json.dumps(
+                    {
+                        "error": "HTTPStatusError",
+                        "message": error_message,
+                        "status_code": e.response.status_code,
+                    },
+                    indent=2,
+                ),
+            )
+        ]
+    except httpx.RequestError as e:
+        error_message = f"Network error diffing documents: {str(e)}"
+        logger.error(error_message, exc_info=True)
+        return [
+            types.TextContent(
+                type="text",
+                text=json.dumps(
+                    {
+                        "error": "RequestError",
+                        "message": error_message,
+                    },
+                    indent=2,
+                ),
+            )
+        ]
     except Exception as e:
         error_message = f"Error diffing documents: {str(e)}"
         logger.error(error_message, exc_info=True)
@@ -176,9 +241,42 @@ async def handle_health_check(
         List of TextContent objects with health status.
     """
     try:
-        result = client.health_check()
+        result = await client.health_check()
         response_text = json.dumps(result, indent=2, ensure_ascii=False)
         return [types.TextContent(type="text", text=response_text)]
+    except httpx.HTTPStatusError as e:
+        error_message = f"API error checking health: HTTP {e.response.status_code}"
+        logger.error(error_message, exc_info=True)
+        return [
+            types.TextContent(
+                type="text",
+                text=json.dumps(
+                    {
+                        "error": "HTTPStatusError",
+                        "message": error_message,
+                        "status_code": e.response.status_code,
+                        "status": "unhealthy",
+                    },
+                    indent=2,
+                ),
+            )
+        ]
+    except httpx.RequestError as e:
+        error_message = f"Network error checking health: {str(e)}"
+        logger.error(error_message, exc_info=True)
+        return [
+            types.TextContent(
+                type="text",
+                text=json.dumps(
+                    {
+                        "error": "RequestError",
+                        "message": error_message,
+                        "status": "unhealthy",
+                    },
+                    indent=2,
+                ),
+            )
+        ]
     except Exception as e:
         error_message = f"Error checking health: {str(e)}"
         logger.error(error_message, exc_info=True)

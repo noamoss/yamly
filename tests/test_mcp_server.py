@@ -6,7 +6,7 @@ Tests configuration, client, and server initialization.
 from __future__ import annotations
 
 import os
-from unittest.mock import MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import httpx
 import pytest
@@ -89,6 +89,34 @@ class TestMCPServerConfig:
         config = MCPServerConfig(api_base_url="http://example.com/")
         assert config.api_base_url == "http://example.com"
 
+    def test_config_invalid_url_no_scheme(self) -> None:
+        """Test that invalid URL without scheme raises ValueError."""
+        with pytest.raises(ValueError, match="Invalid API base URL"):
+            MCPServerConfig(api_base_url="not-a-url")
+
+    def test_config_invalid_url_no_netloc(self) -> None:
+        """Test that invalid URL without netloc raises ValueError."""
+        with pytest.raises(ValueError, match="Invalid API base URL"):
+            MCPServerConfig(api_base_url="http://")
+
+    def test_config_invalid_url_empty_string(self) -> None:
+        """Test that empty string URL falls back to default (not an error)."""
+        # Empty string is treated as falsy and falls back to default
+        config = MCPServerConfig(api_base_url="")
+        assert config.api_base_url == "http://localhost:8000"
+
+    def test_config_valid_urls(self) -> None:
+        """Test that valid URLs are accepted."""
+        valid_urls = [
+            "http://localhost:8000",
+            "https://api.example.com",
+            "http://192.168.1.1:9000",
+            "https://example.com:443/path",
+        ]
+        for url in valid_urls:
+            config = MCPServerConfig(api_base_url=url)
+            assert config.api_base_url == url.rstrip("/")
+
     def test_config_repr(self) -> None:
         """Test string representation of configuration."""
         config = MCPServerConfig(api_key="secret-key")
@@ -102,56 +130,62 @@ class TestMCPServerConfig:
 class TestAPIClient:
     """Tests for APIClient."""
 
-    def test_client_initialization(self) -> None:
+    @pytest.mark.asyncio
+    async def test_client_initialization(self) -> None:
         """Test API client initialization."""
         config = MCPServerConfig()
         client = APIClient(config)
         assert client.config == config
         assert client._client.base_url == config.api_base_url
-        client.close()
+        await client.close()
 
-    def test_client_headers_without_auth(self) -> None:
+    @pytest.mark.asyncio
+    async def test_client_headers_without_auth(self) -> None:
         """Test HTTP headers without authentication."""
         config = MCPServerConfig()
         client = APIClient(config)
         headers = client._get_headers()
         assert headers["Content-Type"] == "application/json"
         assert "Authorization" not in headers
-        client.close()
+        await client.close()
 
-    def test_client_headers_with_auth(self) -> None:
+    @pytest.mark.asyncio
+    async def test_client_headers_with_auth(self) -> None:
         """Test HTTP headers with authentication."""
         config = MCPServerConfig(api_key="test-key")
         client = APIClient(config)
         headers = client._get_headers()
         assert headers["Content-Type"] == "application/json"
         assert headers["Authorization"] == "Bearer test-key"
-        client.close()
+        await client.close()
 
-    @patch("yaml_diffs.mcp_server.client.httpx.Client")
-    def test_validate_document_success(self, mock_client_class: MagicMock) -> None:
+    @patch("yaml_diffs.mcp_server.client.httpx.AsyncClient")
+    @pytest.mark.asyncio
+    async def test_validate_document_success(self, mock_client_class: MagicMock) -> None:
         """Test successful document validation."""
         mock_response = MagicMock()
         mock_response.json.return_value = {"valid": True, "document": {"id": "test"}}
         mock_response.raise_for_status.return_value = None
 
         mock_client = MagicMock()
-        mock_client.post.return_value = mock_response
+        mock_client.post = AsyncMock(return_value=mock_response)
+        mock_client.aclose = AsyncMock()
         mock_client_class.return_value = mock_client
 
         config = MCPServerConfig()
         client = APIClient(config)
-        result = client.validate_document("document: id: test")
+        result = await client.validate_document("document: id: test")
 
         assert result == {"valid": True, "document": {"id": "test"}}
         mock_client.post.assert_called_once_with(
             "/api/v1/validate",
             json={"yaml": "document: id: test"},
         )
-        client.close()
+        await client.close()
 
-    @patch("yaml_diffs.mcp_server.client.httpx.Client")
-    def test_validate_document_error(self, mock_client_class: MagicMock) -> None:
+    @patch("yaml_diffs.mcp_server.client.httpx.AsyncClient")
+    @pytest.mark.asyncio
+    async def test_validate_document_error(self, mock_client_class: MagicMock) -> None:
         """Test document validation with API error."""
         mock_response = MagicMock()
         mock_response.status_code = 400
@@ -160,62 +194,102 @@ class TestAPIClient:
         )
 
         mock_client = MagicMock()
-        mock_client.post.return_value = mock_response
+        mock_client.post = AsyncMock(return_value=mock_response)
+        mock_client.aclose = AsyncMock()
         mock_client_class.return_value = mock_client
 
         config = MCPServerConfig()
         client = APIClient(config)
 
         with pytest.raises(httpx.HTTPStatusError):
-            client.validate_document("invalid yaml")
+            await client.validate_document("invalid yaml")
 
-        client.close()
+        await client.close()
 
-    @patch("yaml_diffs.mcp_server.client.httpx.Client")
-    def test_diff_documents_success(self, mock_client_class: MagicMock) -> None:
+    @patch("yaml_diffs.mcp_server.client.httpx.AsyncClient")
+    @pytest.mark.asyncio
+    async def test_diff_documents_success(self, mock_client_class: MagicMock) -> None:
         """Test successful document diffing."""
         mock_response = MagicMock()
         mock_response.json.return_value = {"diff": {"changes": []}}
         mock_response.raise_for_status.return_value = None
 
         mock_client = MagicMock()
-        mock_client.post.return_value = mock_response
+        mock_client.post = AsyncMock(return_value=mock_response)
+        mock_client.aclose = AsyncMock()
         mock_client_class.return_value = mock_client
 
         config = MCPServerConfig()
         client = APIClient(config)
-        result = client.diff_documents("old: yaml", "new: yaml")
+        result = await client.diff_documents("old: yaml", "new: yaml")
 
         assert result == {"diff": {"changes": []}}
         mock_client.post.assert_called_once_with(
             "/api/v1/diff",
             json={"old_yaml": "old: yaml", "new_yaml": "new: yaml"},
         )
-        client.close()
+        await client.close()
 
-    @patch("yaml_diffs.mcp_server.client.httpx.Client")
-    def test_health_check_success(self, mock_client_class: MagicMock) -> None:
+    @patch("yaml_diffs.mcp_server.client.httpx.AsyncClient")
+    @pytest.mark.asyncio
+    async def test_health_check_success(self, mock_client_class: MagicMock) -> None:
         """Test successful health check."""
         mock_response = MagicMock()
         mock_response.json.return_value = {"status": "healthy", "version": "0.1.0"}
         mock_response.raise_for_status.return_value = None
 
         mock_client = MagicMock()
-        mock_client.get.return_value = mock_response
+        mock_client.get = AsyncMock(return_value=mock_response)
+        mock_client.aclose = AsyncMock()
         mock_client_class.return_value = mock_client
 
         config = MCPServerConfig()
         client = APIClient(config)
-        result = client.health_check()
+        result = await client.health_check()
 
         assert result == {"status": "healthy", "version": "0.1.0"}
         mock_client.get.assert_called_once_with("/health")
-        client.close()
+        await client.close()
 
-    def test_client_context_manager(self) -> None:
-        """Test API client as context manager."""
+    @pytest.mark.asyncio
+    async def test_client_context_manager(self) -> None:
+        """Test API client as async context manager."""
         config = MCPServerConfig()
-        with APIClient(config) as client:
+        async with APIClient(config) as client:
             assert client.config == config
         # Client should be closed after context exit
         assert client._client.is_closed
+
+    @patch("yaml_diffs.mcp_server.client.httpx.AsyncClient")
+    @pytest.mark.asyncio
+    async def test_client_timeout_zero_converted_to_none(
+        self, mock_client_class: MagicMock
+    ) -> None:
+        """Test that timeout=0 is converted to None for httpx.AsyncClient."""
+        mock_client = MagicMock()
+        mock_client.aclose = AsyncMock()
+        mock_client_class.return_value = mock_client
+
+        config = MCPServerConfig(timeout=0)
+        client = APIClient(config)
+        # Verify httpx.AsyncClient was called with timeout=None
+        mock_client_class.assert_called_once()
+        call_kwargs = mock_client_class.call_args[1]
+        assert call_kwargs["timeout"] is None
+        await client.close()
+
+    @patch("yaml_diffs.mcp_server.client.httpx.AsyncClient")
+    @pytest.mark.asyncio
+    async def test_client_timeout_positive_preserved(self, mock_client_class: MagicMock) -> None:
+        """Test that positive timeout values are preserved."""
+        mock_client = MagicMock()
+        mock_client.aclose = AsyncMock()
+        mock_client_class.return_value = mock_client
+
+        config = MCPServerConfig(timeout=60)
+        client = APIClient(config)
+        # Verify httpx.AsyncClient was called with timeout=60
+        mock_client_class.assert_called_once()
+        call_kwargs = mock_client_class.call_args[1]
+        assert call_kwargs["timeout"] == 60
+        await client.close()

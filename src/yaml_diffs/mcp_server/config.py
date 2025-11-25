@@ -7,7 +7,7 @@ from __future__ import annotations
 
 import logging
 import os
-from typing import Optional
+from urllib.parse import urlparse
 
 logger = logging.getLogger(__name__)
 
@@ -26,9 +26,9 @@ class MCPServerConfig:
 
     def __init__(
         self,
-        api_base_url: Optional[str] = None,
-        api_key: Optional[str] = None,
-        timeout: Optional[int] = None,
+        api_base_url: str | None = None,
+        api_key: str | None = None,
+        timeout: int | None = None,
     ) -> None:
         """Initialize configuration from parameters or environment variables.
 
@@ -41,7 +41,16 @@ class MCPServerConfig:
         """
         base_url = api_base_url or os.getenv("YAML_DIFFS_API_URL", "http://localhost:8000")
         assert base_url is not None  # Type narrowing for mypy
-        self.api_base_url = base_url.rstrip("/")
+        base_url = base_url.rstrip("/")
+
+        # Validate URL format
+        parsed = urlparse(base_url)
+        if not parsed.scheme or not parsed.netloc:
+            raise ValueError(
+                f"Invalid API base URL: {base_url}. URL must include scheme (http/https) and netloc (hostname)"
+            )
+
+        self.api_base_url = base_url
 
         self.api_key = api_key or os.getenv("YAML_DIFFS_API_KEY")
 

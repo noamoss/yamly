@@ -268,15 +268,18 @@ def mcp_server_command(api_url: str | None, api_key: str | None, timeout: int | 
         # Run with API key authentication
         yaml-diffs mcp-server --api-key your-api-key-here
     """
-    # Set environment variables if provided via CLI
-    if api_url is not None:
-        os.environ["YAML_DIFFS_API_URL"] = api_url
-    if api_key is not None:
-        os.environ["YAML_DIFFS_API_KEY"] = api_key
-    if timeout is not None:
-        os.environ["YAML_DIFFS_API_TIMEOUT"] = str(timeout)
+    try:
+        # Create configuration from CLI arguments
+        from yaml_diffs.mcp_server.config import MCPServerConfig
+        from yaml_diffs.mcp_server.server import main
 
-    # Import and run the server
-    from yaml_diffs.mcp_server.server import main
+        config = MCPServerConfig(
+            api_base_url=api_url,
+            api_key=api_key,
+            timeout=timeout,
+        )
 
-    main()
+        # Run the server with the configuration
+        main(config)
+    except Exception as e:
+        handle_cli_error(e)

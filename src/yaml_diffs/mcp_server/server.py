@@ -9,7 +9,7 @@ import asyncio
 import logging
 from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
-from typing import Any
+from typing import Any, cast
 
 import mcp.server.stdio
 import mcp.types as types
@@ -24,14 +24,24 @@ from yaml_diffs.mcp_server.tools import call_tool, get_tool_definitions
 logger = logging.getLogger(__name__)
 
 # Global API client (initialized in lifespan)
+# Note: This global variable is necessary for the MCP server pattern where tool handlers
+# need access to the client. The MCP SDK's handler decorators don't support dependency
+# injection, so we use a global variable. This is thread-safe for stdio transport
+# (single-threaded), but if the server ever supports concurrent requests, this would
+# need to be reconsidered.
 api_client: APIClient | None = None
 
 
 @asynccontextmanager
-async def server_lifespan() -> AsyncGenerator[dict[str, Any], None]:
+async def server_lifespan(
+    config: MCPServerConfig | None = None,
+) -> AsyncGenerator[dict[str, Any], None]:
     """Server lifespan context manager.
 
     Initializes resources on startup and cleans up on shutdown.
+
+    Args:
+        config: Optional MCP server configuration. If None, loads from environment variables.
 
     Yields:
         Dictionary with lifespan context (currently empty, but available for future use).
@@ -39,7 +49,8 @@ async def server_lifespan() -> AsyncGenerator[dict[str, Any], None]:
     global api_client
 
     # Startup: Initialize API client
-    config = MCPServerConfig()
+    if config is None:
+        config = MCPServerConfig()
     logger.info(f"Initializing MCP server with config: {config}")
     api_client = APIClient(config)
     logger.info("MCP server initialized successfully")
@@ -49,50 +60,70 @@ async def server_lifespan() -> AsyncGenerator[dict[str, Any], None]:
     finally:
         # Shutdown: Clean up resources
         if api_client is not None:
-            api_client.close()
+            await api_client.close()
             api_client = None
         logger.info("MCP server shutdown complete")
 
 
-# Create server instance with lifespan
-server = Server("yaml-diffs-mcp-server", lifespan=server_lifespan)
-
-
-@server.list_tools()
-async def handle_list_tools() -> list[types.Tool]:
-    """List available MCP tools.
-
-    Returns:
-        List of Tool objects defining available tools.
-    """
-    return get_tool_definitions()
-
-
-@server.call_tool()
-async def handle_call_tool(name: str, arguments: dict[str, Any]) -> list[types.TextContent]:
-    """Handle tool call requests.
+def _create_server(config: MCPServerConfig | None = None) -> Server:
+    """Create and configure the MCP server instance.
 
     Args:
-        name: Tool name.
-        arguments: Tool arguments.
+        config: Optional MCP server configuration. If None, loads from environment variables.
 
     Returns:
-        List of TextContent objects with tool result.
-
-    Raises:
-        ValueError: If tool name is unknown or API client is not initialized.
+        Configured Server instance.
     """
-    if api_client is None:
-        raise ValueError("API client not initialized")
 
-    return await call_tool(api_client, name, arguments)
+    # Create server instance with lifespan that uses the provided config
+    # Note: The MCP SDK expects lifespan callables to accept a Server parameter,
+    # even if we don't use it (we capture config from the closure)
+    # The @asynccontextmanager decorator returns an AbstractAsyncContextManager,
+    # but mypy can't infer this, so we use cast to satisfy type checking
+    def lifespan_wrapper(_server: Server) -> Any:
+        return cast(Any, server_lifespan(config))
+
+    server = Server("yaml-diffs-mcp-server", lifespan=lifespan_wrapper)
+
+    @server.list_tools()
+    async def handle_list_tools() -> list[types.Tool]:
+        """List available MCP tools.
+
+        Returns:
+            List of Tool objects defining available tools.
+        """
+        return get_tool_definitions()
+
+    @server.call_tool()
+    async def handle_call_tool(name: str, arguments: dict[str, Any]) -> list[types.TextContent]:
+        """Handle tool call requests.
+
+        Args:
+            name: Tool name.
+            arguments: Tool arguments.
+
+        Returns:
+            List of TextContent objects with tool result.
+
+        Raises:
+            ValueError: If tool name is unknown or API client is not initialized.
+        """
+        if api_client is None:
+            raise ValueError("API client not initialized")
+
+        return await call_tool(api_client, name, arguments)
+
+    return server
 
 
-async def run_server() -> None:
+async def run_server(config: MCPServerConfig | None = None) -> None:
     """Run the MCP server with stdio transport.
 
     This is the main entry point for the MCP server. It sets up the server
     with stdio transport (standard MCP protocol) and runs the server loop.
+
+    Args:
+        config: Optional MCP server configuration. If None, loads from environment variables.
     """
     # Configure logging
     logging.basicConfig(
@@ -102,6 +133,9 @@ async def run_server() -> None:
     )
 
     logger.info(f"Starting yaml-diffs MCP server v{__version__}")
+
+    # Create server instance
+    server = _create_server(config)
 
     # Run server with stdio transport
     async with mcp.server.stdio.stdio_server() as (read_stream, write_stream):
@@ -119,10 +153,14 @@ async def run_server() -> None:
         )
 
 
-def main() -> None:
-    """Main entry point for running the MCP server."""
+def main(config: MCPServerConfig | None = None) -> None:
+    """Main entry point for running the MCP server.
+
+    Args:
+        config: Optional MCP server configuration. If None, loads from environment variables.
+    """
     try:
-        asyncio.run(run_server())
+        asyncio.run(run_server(config))
     except KeyboardInterrupt:
         logger.info("Server interrupted by user")
     except Exception as e:

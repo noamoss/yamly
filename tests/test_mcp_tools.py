@@ -6,7 +6,7 @@ Tests tool definitions and handler functions.
 from __future__ import annotations
 
 import json
-from unittest.mock import MagicMock
+from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
@@ -83,10 +83,12 @@ class TestToolHandlers:
     @pytest.mark.asyncio
     async def test_handle_validate_document_success(self, mock_client: APIClient) -> None:
         """Test successful document validation handler."""
-        mock_client.validate_document.return_value = {
-            "valid": True,
-            "document": {"id": "test", "type": "law"},
-        }
+        mock_client.validate_document = AsyncMock(
+            return_value={
+                "valid": True,
+                "document": {"id": "test", "type": "law"},
+            }
+        )
 
         result = await handle_validate_document(mock_client, {"yaml": "document: id: test"})
 
@@ -106,7 +108,7 @@ class TestToolHandlers:
     @pytest.mark.asyncio
     async def test_handle_validate_document_error(self, mock_client: APIClient) -> None:
         """Test validate_document handler with API error."""
-        mock_client.validate_document.side_effect = Exception("API error")
+        mock_client.validate_document = AsyncMock(side_effect=Exception("API error"))
 
         result = await handle_validate_document(mock_client, {"yaml": "invalid"})
 
@@ -120,9 +122,9 @@ class TestToolHandlers:
     @pytest.mark.asyncio
     async def test_handle_diff_documents_success(self, mock_client: APIClient) -> None:
         """Test successful document diffing handler."""
-        mock_client.diff_documents.return_value = {
-            "diff": {"changes": [], "added_count": 0, "deleted_count": 0}
-        }
+        mock_client.diff_documents = AsyncMock(
+            return_value={"diff": {"changes": [], "added_count": 0, "deleted_count": 0}}
+        )
 
         result = await handle_diff_documents(
             mock_client, {"old_yaml": "old: yaml", "new_yaml": "new: yaml"}
@@ -149,7 +151,7 @@ class TestToolHandlers:
     @pytest.mark.asyncio
     async def test_handle_diff_documents_error(self, mock_client: APIClient) -> None:
         """Test diff_documents handler with API error."""
-        mock_client.diff_documents.side_effect = Exception("API error")
+        mock_client.diff_documents = AsyncMock(side_effect=Exception("API error"))
 
         result = await handle_diff_documents(
             mock_client, {"old_yaml": "old: yaml", "new_yaml": "new: yaml"}
@@ -164,7 +166,7 @@ class TestToolHandlers:
     @pytest.mark.asyncio
     async def test_handle_health_check_success(self, mock_client: APIClient) -> None:
         """Test successful health check handler."""
-        mock_client.health_check.return_value = {"status": "healthy", "version": "0.1.0"}
+        mock_client.health_check = AsyncMock(return_value={"status": "healthy", "version": "0.1.0"})
 
         result = await handle_health_check(mock_client, {})
 
@@ -178,7 +180,7 @@ class TestToolHandlers:
     @pytest.mark.asyncio
     async def test_handle_health_check_error(self, mock_client: APIClient) -> None:
         """Test health_check handler with API error."""
-        mock_client.health_check.side_effect = Exception("API error")
+        mock_client.health_check = AsyncMock(side_effect=Exception("API error"))
 
         result = await handle_health_check(mock_client, {})
 
@@ -192,7 +194,7 @@ class TestToolHandlers:
     @pytest.mark.asyncio
     async def test_call_tool_validate(self, mock_client: APIClient) -> None:
         """Test call_tool with validate_document."""
-        mock_client.validate_document.return_value = {"valid": True}
+        mock_client.validate_document = AsyncMock(return_value={"valid": True})
 
         result = await call_tool(mock_client, "validate_document", {"yaml": "test"})
 
@@ -202,7 +204,7 @@ class TestToolHandlers:
     @pytest.mark.asyncio
     async def test_call_tool_diff(self, mock_client: APIClient) -> None:
         """Test call_tool with diff_documents."""
-        mock_client.diff_documents.return_value = {"diff": {}}
+        mock_client.diff_documents = AsyncMock(return_value={"diff": {}})
 
         result = await call_tool(
             mock_client, "diff_documents", {"old_yaml": "old", "new_yaml": "new"}
@@ -214,7 +216,7 @@ class TestToolHandlers:
     @pytest.mark.asyncio
     async def test_call_tool_health(self, mock_client: APIClient) -> None:
         """Test call_tool with health_check."""
-        mock_client.health_check.return_value = {"status": "healthy"}
+        mock_client.health_check = AsyncMock(return_value={"status": "healthy"})
 
         result = await call_tool(mock_client, "health_check", {})
 
