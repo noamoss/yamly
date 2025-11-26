@@ -174,7 +174,7 @@ document:
 ### Workflow 1: Create a New Document
 
 ```python
-from yaml_diffs import validate_document
+from yaml_diffs import validate_document, ValidationError
 from pathlib import Path
 
 # Create document from template

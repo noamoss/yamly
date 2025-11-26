@@ -121,7 +121,7 @@ yaml-diffs mcp-server --api-url http://api.example.com:8000
 ### 1. Load and Validate a Document
 
 ```python
-from yaml_diffs import validate_document
+from yaml_diffs import validate_document, ValidationError
 
 try:
     doc = validate_document("document.yaml")
