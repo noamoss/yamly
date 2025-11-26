@@ -76,12 +76,6 @@ def sample_id() -> str:
     return str(uuid.uuid4())
 
 
-@pytest.fixture
-def sample_uuid() -> str:
-    """Generate a sample UUID string for testing (backward compatibility)."""
-    return str(uuid.uuid4())
-
-
 # ============================================================================
 # Content Fixtures
 # ============================================================================

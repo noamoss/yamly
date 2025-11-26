@@ -119,8 +119,8 @@ class TestLargeDocumentLoading:
         assert elapsed_time < 5.0, f"Loading took {elapsed_time:.2f}s, expected < 5.0s"
 
     def test_load_very_large_document_10000_sections(self, tmp_path: Path):
-        """Test loading a very large document with 10000+ sections."""
-        # Generate very large document (100 top-level * 10 per level * 10 depth = 10,000+)
+        """Test loading a very large document with 1000+ sections."""
+        # Generate very large document (50 top-level * 5 per level * 3 depth = ~1,550 sections)
         doc = generate_large_document(num_top_level_sections=50, max_depth=3, sections_per_level=5)
 
         # Write to temporary file
