@@ -32,4 +32,3 @@ def health_check() -> HealthResponse:
         status="healthy",
         version=settings.app_version,
     )
-
