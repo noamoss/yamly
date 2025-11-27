@@ -25,12 +25,6 @@ classifiers = [
     "Topic :: Text Processing :: Markup",
 ]
 
-[project.urls]
-Homepage = "https://github.com/noamoss/yaml_diffs"
-Documentation = "https://github.com/noamoss/yaml_diffs/tree/main/docs"
-Repository = "https://github.com/noamoss/yaml_diffs"
-Issues = "https://github.com/noamoss/yaml_diffs/issues"
-
 dependencies = [
     "click>=8.0.0",
     "httpx>=0.24.0",
@@ -41,6 +35,12 @@ dependencies = [
     "fastapi>=0.100.0",
     "uvicorn[standard]>=0.23.0",
 ]
+
+[project.urls]
+Homepage = "https://github.com/noamoss/yaml_diffs"
+Documentation = "https://github.com/noamoss/yaml_diffs/tree/main/docs"
+Repository = "https://github.com/noamoss/yaml_diffs"
+Issues = "https://github.com/noamoss/yaml_diffs/issues"
 
 [project.optional-dependencies]
 dev = [
