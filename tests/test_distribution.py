@@ -106,7 +106,7 @@ def test_package_metadata_wheel(built_package: tuple[Path, Path]) -> None:
         # Check required metadata fields
         assert "Name: yaml-diffs" in metadata_content
         assert "Version: 0.1.0" in metadata_content
-        assert "Author: Noam Oss" in metadata_content
+        assert "Author-email: Noam Oss <noam@thepitz.studio>" in metadata_content
         assert "License: MIT" in metadata_content
         assert "Requires-Python: >=3.10" in metadata_content
 
@@ -129,7 +129,7 @@ def test_package_metadata_sdist(built_package: tuple[Path, Path]) -> None:
         # Check required metadata fields
         assert "Name: yaml-diffs" in pkg_info_content
         assert "Version: 0.1.0" in pkg_info_content
-        assert "Author: Noam Oss" in pkg_info_content
+        assert "Author-email: Noam Oss <noam@thepitz.studio>" in pkg_info_content
         assert "License: MIT" in pkg_info_content
         assert "Requires-Python: >=3.10" in pkg_info_content
 
