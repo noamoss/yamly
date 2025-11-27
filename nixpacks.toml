@@ -1,0 +1,10 @@
+# Nixpacks configuration for Railway deployment
+[providers]
+python = "310"
+
+[phases.install]
+cmds = [
+  "pip install --upgrade pip",
+  "pip install -r requirements.txt",
+  "pip install -e ."
+]
