@@ -174,7 +174,8 @@ class TestRailwayStartCommand:
     def test_start_command_uses_uvicorn(self) -> None:
         """Test that start command uses uvicorn (as specified in railway.json)."""
         # This is a documentation/configuration test
-        # The actual command is: uvicorn src.yaml_diffs.api_server.main:app --host 0.0.0.0 --port $PORT
+        # The actual command is: uvicorn yaml_diffs.api_server.main:app --host 0.0.0.0 --port $PORT
+        # Railway installs the package, so it uses the installed package name (yaml_diffs, not src.yaml_diffs)
         # We verify the app can be imported and used with uvicorn
         assert app is not None
         assert hasattr(app, "openapi")

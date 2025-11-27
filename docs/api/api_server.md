@@ -301,8 +301,10 @@ The project includes Railway configuration files:
 The start command is configured in `railway.json`:
 
 ```bash
-uvicorn src.yaml_diffs.api_server.main:app --host 0.0.0.0 --port $PORT
+uvicorn yaml_diffs.api_server.main:app --host 0.0.0.0 --port $PORT
 ```
+
+**Note:** Railway installs the package, so the start command uses the installed package name `yaml_diffs` (not `src.yaml_diffs`). For local development from the project root, use `src.yaml_diffs.api_server.main:app`.
 
 Railway automatically sets the `PORT` environment variable, which the application reads at startup.
 
