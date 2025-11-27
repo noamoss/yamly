@@ -147,10 +147,12 @@ The health check is configured in `railway.json`:
 {
   "deploy": {
     "healthcheckPath": "/health",
-    "healthcheckTimeout": 100
+    "healthcheckTimeout": 30
   }
 }
 ```
+
+**Note:** The health check timeout is set to 30 seconds, which is sufficient for most applications. Railway will consider the service unhealthy if the health endpoint doesn't respond within this time. If your service requires a longer startup time, you can increase this value, but 30 seconds is recommended for most FastAPI applications.
 
 ### Health Endpoint
 

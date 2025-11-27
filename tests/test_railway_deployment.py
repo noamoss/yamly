@@ -19,7 +19,7 @@ class TestRailwayEnvironmentVariables:
 
     def test_port_from_railway_env_var(self) -> None:
         """Test that PORT environment variable is read correctly (Railway requirement)."""
-        with patch.dict(os.environ, {"PORT": "3000"}, clear=False):
+        with patch.dict(os.environ, {"PORT": "3000"}, clear=True):
             # Create new settings instance to pick up env var
             test_settings = Settings()
             assert test_settings.port == 3000
@@ -72,8 +72,19 @@ class TestRailwayEnvironmentVariables:
     def test_cors_wildcard_warning_in_production(self) -> None:
         """Test that CORS wildcard triggers warning in production."""
         with patch.dict(
-            os.environ, {"CORS_ORIGINS": "*", "ENVIRONMENT": "production"}, clear=False
+            os.environ, {"CORS_ORIGINS": "*", "RAILWAY_ENVIRONMENT": "production"}, clear=True
         ):
+            import logging
+
+            with patch.object(logging, "warning") as mock_warning:
+                Settings()
+                # Should log warning about insecure CORS in production
+                mock_warning.assert_called_once()
+                assert "insecure" in str(mock_warning.call_args).lower()
+
+    def test_cors_wildcard_warning_with_environment_var(self) -> None:
+        """Test that CORS wildcard triggers warning with ENVIRONMENT variable (backward compatibility)."""
+        with patch.dict(os.environ, {"CORS_ORIGINS": "*", "ENVIRONMENT": "production"}, clear=True):
             import logging
 
             with patch.object(logging, "warning") as mock_warning:
@@ -128,8 +139,8 @@ class TestRailwayServerConfiguration:
 
     def test_app_binds_to_correct_host(self) -> None:
         """Test that FastAPI app is configured correctly."""
-        # The app should be configured to bind to 0.0.0.0 via settings
-        assert settings.host == "0.0.0.0" or settings.host is not None
+        # The app should be configured to bind to 0.0.0.0 for Railway
+        assert settings.host == "0.0.0.0", f"Expected host to be 0.0.0.0, got {settings.host}"
 
     def test_app_uses_port_from_settings(self) -> None:
         """Test that app uses port from settings."""
@@ -139,9 +150,15 @@ class TestRailwayServerConfiguration:
 
     def test_cors_middleware_configured(self) -> None:
         """Test that CORS middleware is configured in the app."""
-        # Check that CORS middleware is in the app
-        middleware_types = [type(middleware).__name__ for middleware in app.user_middleware]
-        assert "CORSMiddleware" in str(middleware_types) or len(app.user_middleware) > 0
+        # Check that CORS middleware is actually in the app
+        from fastapi.middleware.cors import CORSMiddleware
+
+        middleware_found = False
+        for middleware in app.user_middleware:
+            if middleware.cls == CORSMiddleware:
+                middleware_found = True
+                break
+        assert middleware_found, "CORSMiddleware should be configured in the app"
 
     def test_health_router_included(self) -> None:
         """Test that health check router is included in the app."""
