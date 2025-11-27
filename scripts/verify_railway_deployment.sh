@@ -13,6 +13,7 @@ if [ -z "$BASE_URL" ]; then
     echo "Examples:"
     echo "  $0 http://yaml_diffs.railway.internal  # Internal Railway URL (from Railway environment)"
     echo "  $0 https://your-app.up.railway.app      # Public Railway URL"
+    echo "  $0 your-app.up.railway.app              # Protocol will be auto-detected (HTTPS for Railway)"
     echo ""
     echo "To get your Railway public URL:"
     echo "  1. Go to Railway dashboard → Your service → Settings → Domains"
@@ -21,12 +22,28 @@ if [ -z "$BASE_URL" ]; then
     exit 1
 fi
 
+# Auto-detect protocol if not provided
+if [[ ! "$BASE_URL" =~ ^https?:// ]]; then
+    # If it's a Railway domain, default to HTTPS
+    if [[ "$BASE_URL" =~ \.railway\.(app|internal)$ ]] || [[ "$BASE_URL" =~ railway\.internal$ ]]; then
+        if [[ "$BASE_URL" =~ railway\.internal$ ]]; then
+            BASE_URL="http://$BASE_URL"
+        else
+            BASE_URL="https://$BASE_URL"
+        fi
+    else
+        # For other domains, default to HTTPS
+        BASE_URL="https://$BASE_URL"
+    fi
+    echo "Auto-detected protocol: $BASE_URL"
+fi
+
 echo "Verifying Railway deployment at: $BASE_URL"
 echo ""
 
 # Test 1: Health Check
 echo "1. Testing Health Check Endpoint (/health)..."
-HEALTH_RESPONSE=$(curl -s -w "\nHTTP_STATUS:%{http_code}" "$BASE_URL/health")
+HEALTH_RESPONSE=$(curl -s -L -w "\nHTTP_STATUS:%{http_code}" "$BASE_URL/health")
 HTTP_STATUS=$(echo "$HEALTH_RESPONSE" | grep "HTTP_STATUS" | cut -d: -f2)
 HEALTH_BODY=$(echo "$HEALTH_RESPONSE" | sed '/HTTP_STATUS/d')
 
@@ -42,7 +59,7 @@ echo ""
 
 # Test 2: Root Endpoint
 echo "2. Testing Root Endpoint (/)..."
-ROOT_RESPONSE=$(curl -s -w "\nHTTP_STATUS:%{http_code}" "$BASE_URL/")
+ROOT_RESPONSE=$(curl -s -L -w "\nHTTP_STATUS:%{http_code}" "$BASE_URL/")
 HTTP_STATUS=$(echo "$ROOT_RESPONSE" | grep "HTTP_STATUS" | cut -d: -f2)
 ROOT_BODY=$(echo "$ROOT_RESPONSE" | sed '/HTTP_STATUS/d')
 
@@ -58,7 +75,7 @@ echo ""
 
 # Test 3: OpenAPI Documentation
 echo "3. Testing OpenAPI Documentation (/openapi.json)..."
-OPENAPI_RESPONSE=$(curl -s -w "\nHTTP_STATUS:%{http_code}" "$BASE_URL/openapi.json")
+OPENAPI_RESPONSE=$(curl -s -L -w "\nHTTP_STATUS:%{http_code}" "$BASE_URL/openapi.json")
 HTTP_STATUS=$(echo "$OPENAPI_RESPONSE" | grep "HTTP_STATUS" | cut -d: -f2)
 
 if [ "$HTTP_STATUS" = "200" ]; then
@@ -83,7 +100,7 @@ MINIMAL_YAML='document:
     fetched_at: "2025-01-20T09:50:00Z"
   sections: []'
 
-VALIDATE_RESPONSE=$(curl -s -w "\nHTTP_STATUS:%{http_code}" \
+VALIDATE_RESPONSE=$(curl -s -L -w "\nHTTP_STATUS:%{http_code}" \
     -X POST "$BASE_URL/api/v1/validate" \
     -H "Content-Type: application/json" \
     -d "{\"yaml\": $(echo "$MINIMAL_YAML" | jq -Rs .)}")
@@ -108,7 +125,7 @@ echo ""
 
 # Test 5: Swagger UI
 echo "5. Testing Swagger UI (/docs)..."
-DOCS_RESPONSE=$(curl -s -w "\nHTTP_STATUS:%{http_code}" "$BASE_URL/docs")
+DOCS_RESPONSE=$(curl -s -L -w "\nHTTP_STATUS:%{http_code}" "$BASE_URL/docs")
 HTTP_STATUS=$(echo "$DOCS_RESPONSE" | grep "HTTP_STATUS" | cut -d: -f2)
 
 if [ "$HTTP_STATUS" = "200" ]; then
