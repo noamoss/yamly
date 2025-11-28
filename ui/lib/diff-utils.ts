@@ -289,6 +289,46 @@ export async function computeLineDiff(
       }
     }
 
+    // Final pass: directly compare original source lines
+    // For lines at the same position with identical content, ensure they're marked unchanged
+    // This catches cases where diff-match-patch incorrectly marks identical lines as changed
+    const oldLinesArray = oldText.split("\n");
+    const newLinesArray = newText.split("\n");
+    const minLen = Math.min(oldLinesArray.length, newLinesArray.length);
+
+    // Build lookup maps by line number (1-indexed)
+    const oldLinesByNum = new Map<number, LineDiff>();
+    const newLinesByNum = new Map<number, LineDiff>();
+
+    for (const line of oldLines) {
+      oldLinesByNum.set(line.lineNumber, line);
+    }
+    for (const line of newLines) {
+      newLinesByNum.set(line.lineNumber, line);
+    }
+
+    // Compare lines at same position in source documents
+    for (let i = 0; i < minLen; i++) {
+      const oldContent = oldLinesArray[i];
+      const newContent = newLinesArray[i];
+      const lineNum = i + 1; // 1-indexed
+
+      // If lines are identical at same position, ensure they're marked as unchanged
+      if (oldContent === newContent) {
+        const oldLine = oldLinesByNum.get(lineNum);
+        const newLine = newLinesByNum.get(lineNum);
+
+        if (oldLine) {
+          oldLine.type = "unchanged";
+          oldLine.newLineNumber = lineNum;
+        }
+        if (newLine) {
+          newLine.type = "unchanged";
+          newLine.oldLineNumber = lineNum;
+        }
+      }
+    }
+
     return { oldLines, newLines };
   } catch (error) {
     // Fallback on error

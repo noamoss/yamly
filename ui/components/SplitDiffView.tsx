@@ -219,24 +219,39 @@ export default function SplitDiffView({ oldYaml, newYaml, diff }: SplitDiffViewP
     return RangeSet.of(markers);
   }, [getDiscussion, lineToChangesMap]);
 
-  // Create decorations for old editor
+  // Compute which lines should be highlighted based on API semantic changes
+  const { oldHighlightLines, newHighlightLines } = useMemo(() => {
+    const oldLines = new Set<number>();
+    const newLines = new Set<number>();
+
+    for (const change of diff.changes) {
+      // Skip unchanged items
+      if (change.change_type === ChangeType.UNCHANGED) continue;
+
+      if (change.old_line_number) {
+        oldLines.add(change.old_line_number);
+      }
+      if (change.new_line_number) {
+        newLines.add(change.new_line_number);
+      }
+    }
+
+    return { oldHighlightLines: oldLines, newHighlightLines: newLines };
+  }, [diff.changes]);
+
+  // Create decorations for old editor (using API semantic changes)
   const createOldDecorations = useCallback((state: EditorState) => {
     const decorations: Range<Decoration>[] = [];
 
-    const maxLines = Math.min(oldLineDiffs.length, state.doc.lines);
-    const currentLineToChangesMap = lineToChangesMapRef.current;
+    for (const lineNum of oldHighlightLines) {
+      if (lineNum >= 1 && lineNum <= state.doc.lines) {
+        const line = state.doc.line(lineNum);
+        if (!line) continue;
 
-    for (let i = 0; i < maxLines; i++) {
-      const lineDiff = oldLineDiffs[i];
-      const line = state.doc.line(i + 1);
-      if (!line) continue;
-
-      // Add background decoration
-      if (lineDiff.type === "removed" || lineDiff.type === "modified") {
         const deco = Decoration.line({
-          class: lineDiff.type === "removed" ? "cm-line-removed" : "cm-line-modified",
+          class: "cm-line-modified",
           attributes: {
-            "data-line-number": (i + 1).toString(),
+            "data-line-number": lineNum.toString(),
             "data-side": "old",
           },
         });
@@ -244,26 +259,22 @@ export default function SplitDiffView({ oldYaml, newYaml, diff }: SplitDiffViewP
       }
     }
 
-    return Decoration.set(decorations);
-  }, [oldLineDiffs]);
+    return Decoration.set(decorations, true);
+  }, [oldHighlightLines]);
 
-  // Create decorations for new editor
+  // Create decorations for new editor (using API semantic changes)
   const createNewDecorations = useCallback((state: EditorState) => {
     const decorations: Range<Decoration>[] = [];
 
-    const maxLines = Math.min(newLineDiffs.length, state.doc.lines);
+    for (const lineNum of newHighlightLines) {
+      if (lineNum >= 1 && lineNum <= state.doc.lines) {
+        const line = state.doc.line(lineNum);
+        if (!line) continue;
 
-    for (let i = 0; i < maxLines; i++) {
-      const lineDiff = newLineDiffs[i];
-      const line = state.doc.line(i + 1);
-      if (!line) continue;
-
-      // Add background decoration
-      if (lineDiff.type === "added" || lineDiff.type === "modified") {
         const deco = Decoration.line({
-          class: lineDiff.type === "added" ? "cm-line-added" : "cm-line-modified",
+          class: "cm-line-modified",
           attributes: {
-            "data-line-number": (i + 1).toString(),
+            "data-line-number": lineNum.toString(),
             "data-side": "new",
           },
         });
@@ -271,8 +282,8 @@ export default function SplitDiffView({ oldYaml, newYaml, diff }: SplitDiffViewP
       }
     }
 
-    return Decoration.set(decorations);
-  }, [newLineDiffs]);
+    return Decoration.set(decorations, true);
+  }, [newHighlightLines]);
 
   // Setup old editor
   useEffect(() => {
