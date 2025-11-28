@@ -583,6 +583,7 @@ def enrich_diff_with_yaml_extraction(
     from yaml_diffs.yaml_extract import (
         extract_section_yaml,
         find_metadata_line_number,
+        find_section_content_line_number,
         find_section_line_number,
     )
 
@@ -620,6 +621,16 @@ def enrich_diff_with_yaml_extraction(
             )
             if is_metadata:
                 change.old_line_number = find_metadata_line_number(old_yaml, change.old_marker_path)
+            elif change.change_type == ChangeType.CONTENT_CHANGED:
+                # For content changes, find the specific content: field line
+                change.old_line_number = find_section_content_line_number(
+                    old_yaml, change.old_marker_path, "content"
+                )
+            elif change.change_type == ChangeType.TITLE_CHANGED:
+                # For title changes, find the specific title: field line
+                change.old_line_number = find_section_content_line_number(
+                    old_yaml, change.old_marker_path, "title"
+                )
             else:
                 change.old_line_number = find_section_line_number(old_yaml, change.old_marker_path)
 
@@ -630,6 +641,16 @@ def enrich_diff_with_yaml_extraction(
             )
             if is_metadata:
                 change.new_line_number = find_metadata_line_number(new_yaml, change.new_marker_path)
+            elif change.change_type == ChangeType.CONTENT_CHANGED:
+                # For content changes, find the specific content: field line
+                change.new_line_number = find_section_content_line_number(
+                    new_yaml, change.new_marker_path, "content"
+                )
+            elif change.change_type == ChangeType.TITLE_CHANGED:
+                # For title changes, find the specific title: field line
+                change.new_line_number = find_section_content_line_number(
+                    new_yaml, change.new_marker_path, "title"
+                )
             else:
                 change.new_line_number = find_section_line_number(new_yaml, change.new_marker_path)
 

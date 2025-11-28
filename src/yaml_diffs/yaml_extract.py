@@ -330,6 +330,67 @@ def extract_section_yaml(
     return None
 
 
+def find_section_content_line_number(
+    yaml_text: str,
+    marker_path: tuple[str, ...],
+    field_name: str = "content",
+) -> int | None:
+    """Find the line number of a specific field within a section.
+
+    Args:
+        yaml_text: The full YAML document as a string
+        marker_path: Tuple of markers representing the path to the section
+        field_name: The field to find (default: "content")
+
+    Returns:
+        The line number (1-indexed) where the field is, or None if not found
+    """
+    # First, find the section start line
+    section_start = find_section_line_number(yaml_text, marker_path)
+    if section_start is None:
+        return None
+
+    try:
+        lines = yaml_text.split("\n")
+        # Get the indent of the section start line (the "- id:" line)
+        section_line = lines[section_start - 1]
+        section_indent = len(section_line) - len(section_line.lstrip())
+
+        # The field should be indented more than the "-" but at the same level as other fields
+        # For "- id: sec-1", the "content:" line will have indent = section_indent + 2
+        field_indent = section_indent + 2
+
+        # Scan from section start to find the field
+        for i in range(section_start - 1, len(lines)):
+            line = lines[i]
+            trimmed = line.strip()
+
+            # Skip empty lines and comments
+            if not trimmed or trimmed.startswith("#"):
+                continue
+
+            current_indent = len(line) - len(line.lstrip())
+
+            # If we've moved past this section (less indented than section start), stop
+            if current_indent <= section_indent and i > section_start - 1:
+                # Check if this is a new section at the same level
+                if trimmed.startswith("-"):
+                    break
+                # Or if it's a different field at document level
+                if current_indent < section_indent:
+                    break
+
+            # Look for the field at the expected indent
+            if current_indent == field_indent and trimmed.startswith(f"{field_name}:"):
+                return i + 1  # 1-indexed
+
+        # Fall back to section start if field not found
+        return section_start
+
+    except Exception:
+        return section_start
+
+
 def find_metadata_line_number(
     yaml_text: str,
     marker_path: tuple[str, ...],
