@@ -6,7 +6,6 @@ import { EditorState, Extension, Range, RangeSet } from "@codemirror/state";
 import { syntaxHighlighting, defaultHighlightStyle } from "@codemirror/language";
 import { yaml } from "@codemirror/lang-yaml";
 import { DocumentDiff, DiffResult, ChangeType } from "@/lib/types";
-import { computeLineDiff, LineDiff } from "@/lib/diff-utils";
 import { useDiscussionsStore } from "@/stores/discussions";
 import InlineDiscussion from "./InlineDiscussion";
 
@@ -65,8 +64,6 @@ export default function SplitDiffView({ oldYaml, newYaml, diff }: SplitDiffViewP
   const newEditorRef = useRef<HTMLDivElement>(null);
   const oldViewRef = useRef<EditorView | null>(null);
   const newViewRef = useRef<EditorView | null>(null);
-  const [oldLineDiffs, setOldLineDiffs] = useState<LineDiff[]>([]);
-  const [newLineDiffs, setNewLineDiffs] = useState<LineDiff[]>([]);
   const [expandedDiscussions, setExpandedDiscussions] = useState<Set<string>>(new Set());
   const scrollSyncRef = useRef<boolean>(true);
   const discussionRefs = useRef<Map<string, HTMLDivElement>>(new Map());
@@ -74,20 +71,6 @@ export default function SplitDiffView({ oldYaml, newYaml, diff }: SplitDiffViewP
 
   // Get discussions store to check for discussions
   const getDiscussion = useDiscussionsStore((state) => state.getDiscussion);
-
-  // Compute line diffs
-  useEffect(() => {
-    let cancelled = false;
-    computeLineDiff(oldYaml, newYaml).then(({ oldLines, newLines }) => {
-      if (!cancelled) {
-        setOldLineDiffs(oldLines);
-        setNewLineDiffs(newLines);
-      }
-    });
-    return () => {
-      cancelled = true;
-    };
-  }, [oldYaml, newYaml]);
 
   // Map changes to line ranges using line numbers from API
   const mapChangesToLines = useCallback((changes: DiffResult[]) => {
@@ -172,7 +155,7 @@ export default function SplitDiffView({ oldYaml, newYaml, diff }: SplitDiffViewP
     }
 
     return RangeSet.of(markers);
-  }, [getDiscussion, lineToChangesMap]);
+  }, [getDiscussion]); // lineToChangesMapRef.current is used, not the memoized value
 
   // Create gutter markers for discussion icons (new editor)
   const createNewGutterMarkers = useCallback((view: EditorView) => {
@@ -212,7 +195,7 @@ export default function SplitDiffView({ oldYaml, newYaml, diff }: SplitDiffViewP
     }
 
     return RangeSet.of(markers);
-  }, [getDiscussion, lineToChangesMap]);
+  }, [getDiscussion]); // lineToChangesMapRef.current is used, not the memoized value
 
   // Compute which lines should be highlighted based on API semantic changes
   const { oldHighlightLines, newHighlightLines } = useMemo(() => {
@@ -398,14 +381,6 @@ export default function SplitDiffView({ oldYaml, newYaml, diff }: SplitDiffViewP
     };
   }, [oldYaml, createOldDecorations]);
 
-  // Update decorations when line diffs change
-  useEffect(() => {
-    if (oldViewRef.current && oldLineDiffs.length > 0) {
-      // Force decoration update by dispatching a no-op transaction
-      oldViewRef.current.dispatch({});
-    }
-  }, [oldLineDiffs.length]);
-
   // Subscribe to discussions store changes to update icons
   const discussions = useDiscussionsStore((state) => state.discussions);
   useEffect(() => {
@@ -544,14 +519,6 @@ export default function SplitDiffView({ oldYaml, newYaml, diff }: SplitDiffViewP
       newViewRef.current = null;
     };
   }, [newYaml, createNewDecorations]);
-
-  // Update decorations when line diffs change
-  useEffect(() => {
-    if (newViewRef.current && newLineDiffs.length > 0) {
-      // Force decoration update by dispatching a no-op transaction
-      newViewRef.current.dispatch({});
-    }
-  }, [newLineDiffs.length]);
 
   // Get changes with their line positions for inline display - filter unchanged without discussions
   const changesWithPositions = diff.changes
