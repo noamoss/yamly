@@ -1,39 +1,46 @@
 """Document diff endpoint.
 
 Provides POST /api/v1/diff endpoint for comparing two YAML documents.
+Supports both legal document mode (marker-based) and generic YAML mode.
 """
-
-from io import StringIO
 
 from fastapi import APIRouter, status
 
-from yaml_diffs.api_server.schemas import DiffRequest, DiffResponse
-from yaml_diffs.diff import diff_documents, enrich_diff_with_yaml_extraction
-from yaml_diffs.loader import load_document
+from yaml_diffs.api_server.schemas import (
+    DiffRequest,
+    UnifiedDiffResponse,
+)
+from yaml_diffs.diff import enrich_diff_with_yaml_extraction
+from yaml_diffs.diff_router import DiffMode, diff_yaml_with_mode
+from yaml_diffs.diff_types import DocumentDiff
+from yaml_diffs.generic_diff import enrich_generic_diff_with_line_numbers
+from yaml_diffs.generic_diff_types import DiffOptions, GenericDiff, IdentityRule
 
 router = APIRouter()
 
 
 @router.post(
     "/api/v1/diff",
-    response_model=DiffResponse,
+    response_model=UnifiedDiffResponse,
     status_code=status.HTTP_200_OK,
     tags=["diff"],
     summary="Diff two YAML documents",
-    description="Compares two YAML documents and returns detected changes.",
+    description="Compares two YAML documents and returns detected changes. "
+    "Supports both legal document mode (marker-based) and generic YAML mode.",
 )
-def diff_documents_endpoint(request: DiffRequest) -> DiffResponse:
+def diff_documents_endpoint(request: DiffRequest) -> UnifiedDiffResponse:
     """Diff two YAML documents.
 
     Accepts two YAML documents (old and new versions) and compares them
-    to detect changes. Returns a DocumentDiff object containing all
-    detected changes including additions, deletions, modifications, and movements.
+    to detect changes. Supports both legal document mode (marker-based diff)
+    and generic YAML mode (path-based diff with identity rules).
 
     Args:
-        request: DiffRequest containing old and new YAML content as strings.
+        request: DiffRequest containing old and new YAML content, mode, and optional identity rules.
 
     Returns:
-        DiffResponse with DocumentDiff containing all detected changes.
+        UnifiedDiffResponse with either DocumentDiff (legal_document mode) or
+        GenericDiff (general mode) containing all detected changes.
 
     Raises:
         HTTPException: If document loading or diffing fails (handled by exception handlers in main.py).
@@ -42,30 +49,54 @@ def diff_documents_endpoint(request: DiffRequest) -> DiffResponse:
         >>> POST /api/v1/diff
         {
             "old_yaml": "document:\\n  id: 'test'\\n  ...",
-            "new_yaml": "document:\\n  id: 'test'\\n  ..."
+            "new_yaml": "document:\\n  id: 'test'\\n  ...",
+            "mode": "auto"
         }
         {
-            "diff": {
-                "changes": [...],
-                "added_count": 1,
-                "deleted_count": 0,
-                "modified_count": 1,
-                "moved_count": 0
-            }
+            "mode": "legal_document",
+            "document_diff": {...},
+            "generic_diff": null
         }
     """
-    # Convert YAML strings to file-like objects for load_document
-    old_yaml_io = StringIO(request.old_yaml)
-    new_yaml_io = StringIO(request.new_yaml)
+    # Convert identity rules from request to DiffOptions
+    identity_rules = [
+        IdentityRule(
+            array=rule.array,
+            identity_field=rule.identity_field,
+            when_field=rule.when_field,
+            when_value=rule.when_value,
+        )
+        for rule in request.identity_rules
+    ]
+    options = DiffOptions(identity_rules=identity_rules)
 
-    # Load both documents
-    old_doc = load_document(old_yaml_io)
-    new_doc = load_document(new_yaml_io)
+    # Diff using the router (handles mode detection and routing)
+    result = diff_yaml_with_mode(
+        request.old_yaml,
+        request.new_yaml,
+        mode=request.mode,
+        options=options,
+    )
 
-    # Diff the documents
-    diff = diff_documents(old_doc, new_doc)
-
-    # Enrich with YAML extraction and line numbers
-    enrich_diff_with_yaml_extraction(diff, request.old_yaml, request.new_yaml)
-
-    return DiffResponse(diff=diff)
+    # Determine which mode was actually used
+    if isinstance(result, DocumentDiff):
+        # Legal document mode
+        # Enrich with YAML extraction and line numbers
+        enrich_diff_with_yaml_extraction(result, request.old_yaml, request.new_yaml)
+        return UnifiedDiffResponse(
+            mode=DiffMode.LEGAL_DOCUMENT,
+            document_diff=result,
+            generic_diff=None,
+        )
+    elif isinstance(result, GenericDiff):
+        # Generic mode
+        # Enrich with line numbers
+        enrich_generic_diff_with_line_numbers(result, request.old_yaml, request.new_yaml)
+        return UnifiedDiffResponse(
+            mode=DiffMode.GENERAL,
+            document_diff=None,
+            generic_diff=result,
+        )
+    else:
+        # Should not happen, but handle gracefully
+        raise ValueError(f"Unexpected diff result type: {type(result)}")

@@ -1,0 +1,40 @@
+# Application Configuration - Version 1
+app:
+  name: MyApplication
+  version: "1.0.0"
+  debug: false
+
+database:
+  host: localhost
+  port: 5432
+  name: myapp_db
+  credentials:
+    username: admin
+    password: secret123
+
+cache:
+  enabled: true
+  provider: redis
+  ttl: 3600
+  connection:
+    host: localhost
+    port: 6379
+
+logging:
+  level: INFO
+  format: json
+  outputs:
+    - console
+    - file
+
+features:
+  - name: dark_mode
+    enabled: true
+    rollout_percentage: 100
+  - name: new_dashboard
+    enabled: false
+    rollout_percentage: 0
+  - name: api_v2
+    enabled: true
+    rollout_percentage: 50
+

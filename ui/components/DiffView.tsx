@@ -1,16 +1,21 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { DocumentDiff } from "@/lib/types";
+import { DocumentDiff, GenericDiff } from "@/lib/types";
 import DiffSummary from "./DiffSummary";
 import ChangeCard from "./ChangeCard";
+import GenericChangeCard from "./GenericChangeCard";
 import SplitDiffView from "./SplitDiffView";
 import Tooltip from "./Tooltip";
 
 interface DiffViewProps {
-  diff: DocumentDiff;
+  diff: DocumentDiff | GenericDiff;
   oldYaml: string;
   newYaml: string;
+}
+
+function isDocumentDiff(diff: DocumentDiff | GenericDiff): diff is DocumentDiff {
+  return "added_count" in diff && "deleted_count" in diff && "modified_count" in diff && "moved_count" in diff;
 }
 
 type ViewType = "split" | "cards";
@@ -82,8 +87,10 @@ export default function DiffView({ diff, oldYaml, newYaml }: DiffViewProps) {
 
       {/* View content */}
       {viewType === "split" ? (
+        // Split view works for both diff types - shows raw YAML side-by-side
         <SplitDiffView oldYaml={oldYaml} newYaml={newYaml} diff={diff} />
-      ) : (
+      ) : isDocumentDiff(diff) ? (
+        // Document diff cards view
         <div className="px-6 py-4 space-y-4">
           {diff.changes
             .slice() // Create a copy to avoid mutating original
@@ -106,6 +113,25 @@ export default function DiffView({ diff, oldYaml, newYaml }: DiffViewProps) {
                 />
               );
             })}
+        </div>
+      ) : (
+        // Generic diff cards view
+        <div className="px-6 py-4 space-y-4">
+          {diff.changes
+            .slice() // Create a copy to avoid mutating original
+            .sort((a, b) => {
+              // Sort by new line number, fall back to old line number
+              const aLine = a.new_line_number ?? a.old_line_number ?? Infinity;
+              const bLine = b.new_line_number ?? b.old_line_number ?? Infinity;
+              return aLine - bLine;
+            })
+            .map((change, index) => (
+              <GenericChangeCard
+                key={change.id || `change-${change.path}-${change.change_type}-${index}`}
+                change={change}
+                index={index}
+              />
+            ))}
         </div>
       )}
     </div>

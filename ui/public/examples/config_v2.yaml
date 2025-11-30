@@ -1,0 +1,51 @@
+# Application Configuration - Version 2 (Updated)
+app:
+  name: MyApplication
+  version: "2.0.0"  # Updated version
+  debug: false
+  environment: production  # New field
+
+database:
+  hostname: db.production.com  # Renamed from 'host' and changed value
+  port: 5432
+  name: myapp_production  # Changed database name
+  credentials:
+    username: app_user  # Changed username
+    password: secure_password_456  # Changed password
+  pool_size: 10  # New field
+
+cache:
+  enabled: true
+  provider: memcached  # Changed from redis
+  ttl: 7200  # Increased TTL
+  connection:
+    host: cache.production.com  # Changed host
+    port: 11211  # Changed port for memcached
+
+logging:
+  level: WARNING  # Changed from INFO
+  format: json
+  outputs:
+    - console
+    # Removed 'file' output
+  retention_days: 30  # New field
+
+monitoring:  # New section
+  enabled: true
+  provider: datadog
+  metrics_interval: 60
+
+features:
+  - name: dark_mode
+    enabled: true
+    rollout_percentage: 100
+  - name: new_dashboard
+    enabled: true  # Now enabled
+    rollout_percentage: 75  # Partially rolled out
+  - name: api_v2
+    enabled: true
+    rollout_percentage: 100  # Fully rolled out
+  - name: ai_assistant  # New feature
+    enabled: false
+    rollout_percentage: 0
+

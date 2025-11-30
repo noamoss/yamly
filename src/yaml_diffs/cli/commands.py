@@ -14,12 +14,15 @@ import click
 from yaml_diffs import ChangeType
 from yaml_diffs.api import diff_and_format, validate_document
 from yaml_diffs.cli.utils import handle_cli_error
+from yaml_diffs.diff_router import DiffMode, diff_yaml_with_mode
+from yaml_diffs.diff_types import DocumentDiff
 from yaml_diffs.exceptions import (
     OpenSpecValidationError,
     PydanticValidationError,
     ValidationError,
     YAMLLoadError,
 )
+from yaml_diffs.generic_diff_types import DiffOptions, GenericDiff, IdentityRule
 
 
 def _show_progress(message: str, file_path: str | Path) -> None:
@@ -98,6 +101,20 @@ def validate_command(file: Path) -> None:
     help="Save output to file instead of stdout",
 )
 @click.option(
+    "--mode",
+    type=click.Choice(["auto", "general", "legal_document"], case_sensitive=False),
+    default="auto",
+    help="Diff mode: auto (detect), general (generic YAML), or legal_document (marker-based)",
+)
+@click.option(
+    "--identity-rule",
+    "identity_rules",
+    multiple=True,
+    type=str,
+    help="Identity rule for array matching. Format: 'array:field' or 'array:field:when_field=when_value'. "
+    "Example: 'containers:name' or 'inventory:catalog_id:type=book'. Can be used multiple times.",
+)
+@click.option(
     "--filter-change-types",
     "filter_change_types",
     multiple=True,
@@ -118,19 +135,30 @@ def diff_command(
     new_file: Path,
     output_format: str,
     output_file: Path | None,
+    mode: str,
+    identity_rules: tuple[str, ...],
     filter_change_types: tuple[str, ...],
     filter_section_path: str | None,
 ) -> None:
     """Diff two YAML document versions and show the differences.
 
     This command compares two YAML documents and shows the differences
-    between them. The output can be formatted as JSON, text, or YAML.
+    between them. Supports both legal document mode (marker-based) and
+    generic YAML mode (path-based with identity rules).
 
     Examples:
 
         \b
-        # Basic diff with JSON output
+        # Basic diff with JSON output (auto-detect mode)
         yaml-diffs diff old.yaml new.yaml
+
+        \b
+        # Generic YAML mode with identity rules
+        yaml-diffs diff old.yaml new.yaml --mode general --identity-rule "containers:name"
+
+        \b
+        # Conditional identity rule for polymorphic arrays
+        yaml-diffs diff old.yaml new.yaml --identity-rule "inventory:catalog_id:type=book"
 
         \b
         # Diff with text format
@@ -149,6 +177,79 @@ def diff_command(
         yaml-diffs diff old.yaml new.yaml --filter-section-path "1.2.3"
     """
     try:
+        # Parse identity rules
+        parsed_rules: list[IdentityRule] = []
+        for rule_str in identity_rules:
+            # Format: "array:field" or "array:field:when_field=when_value"
+            parts = rule_str.split(":")
+            if len(parts) < 2:
+                handle_cli_error(
+                    ValueError(
+                        f"Invalid identity rule format: '{rule_str}'. "
+                        "Expected: 'array:field' or 'array:field:when_field=when_value'"
+                    )
+                )
+            array_name = parts[0].strip()
+            identity_field = parts[1].strip()
+
+            if not array_name or not identity_field:
+                handle_cli_error(
+                    ValueError(
+                        f"Invalid identity rule format: '{rule_str}'. "
+                        "Array name and identity field cannot be empty."
+                    )
+                )
+
+            when_field = None
+            when_value = None
+
+            if len(parts) >= 3:
+                # Parse condition: "when_field=when_value"
+                condition = ":".join(parts[2:])  # Rejoin in case value contains ':'
+                if "=" in condition:
+                    when_field, when_value = condition.split("=", 1)
+                    when_field = when_field.strip() if when_field else None
+                    when_value = when_value.strip() if when_value else None
+
+                    # Validate that when_field is not empty if condition is specified
+                    if not when_field:
+                        handle_cli_error(
+                            ValueError(
+                                f"Invalid identity rule format: '{rule_str}'. "
+                                "when_field cannot be empty when condition is specified."
+                            )
+                        )
+                else:
+                    handle_cli_error(
+                        ValueError(
+                            f"Invalid condition format in rule '{rule_str}'. "
+                            "Expected: 'array:field:when_field=when_value'"
+                        )
+                    )
+
+            parsed_rules.append(
+                IdentityRule(
+                    array=array_name,
+                    identity_field=identity_field,
+                    when_field=when_field,
+                    when_value=when_value,
+                )
+            )
+
+        # Convert mode string to enum with error handling
+        MODE_MAP = {
+            "auto": DiffMode.AUTO,
+            "general": DiffMode.GENERAL,
+            "legal_document": DiffMode.LEGAL_DOCUMENT,
+        }
+        mode_enum = MODE_MAP.get(mode.lower())
+        if mode_enum is None:
+            handle_cli_error(
+                ValueError(f"Invalid mode '{mode}'. Must be one of: auto, general, legal_document")
+            )
+            # handle_cli_error calls sys.exit(1) and never returns
+            return  # type: ignore[unreachable]
+
         # Convert filter_change_types to ChangeType enum if provided
         change_type_filters: list[ChangeType] | None = None
         if filter_change_types:
@@ -173,14 +274,46 @@ def diff_command(
         _show_progress("Loading old document", old_file)
         _show_progress("Loading new document", new_file)
 
-        # Perform the diff
-        formatted_output = diff_and_format(
-            old_file,
-            new_file,
-            output_format=output_format.lower(),
-            filter_change_types=change_type_filters,
-            filter_section_path=filter_section_path,
-        )
+        # Read YAML files
+        old_yaml = old_file.read_text(encoding="utf-8")
+        new_yaml = new_file.read_text(encoding="utf-8")
+
+        # Create diff options
+        options = DiffOptions(identity_rules=parsed_rules)
+
+        # Perform the diff using router
+        diff_result = diff_yaml_with_mode(old_yaml, new_yaml, mode=mode_enum, options=options)
+
+        # Format output
+        import json
+
+        if isinstance(diff_result, DocumentDiff):
+            # Legal document mode - use existing formatter
+            formatted_output = diff_and_format(
+                old_file,
+                new_file,
+                output_format=output_format.lower(),
+                filter_change_types=change_type_filters,
+                filter_section_path=filter_section_path,
+            )
+        elif isinstance(diff_result, GenericDiff):
+            # Generic mode - simple JSON output for now
+            # TODO: Add generic formatters (text, yaml) similar to document formatters
+            if output_format.lower() == "json":
+                formatted_output = json.dumps(
+                    diff_result.model_dump(), indent=2, ensure_ascii=False
+                )
+            else:
+                # For now, only JSON is supported for generic diff
+                click.echo(
+                    f"Warning: Format '{output_format}' not yet supported for generic diff, using JSON",
+                    err=True,
+                )
+                formatted_output = json.dumps(
+                    diff_result.model_dump(), indent=2, ensure_ascii=False
+                )
+        else:
+            handle_cli_error(ValueError(f"Unexpected diff result type: {type(diff_result)}"))
 
         # Write output
         if output_file:

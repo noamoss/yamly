@@ -4,9 +4,10 @@ This file provides essential context and instructions for AI coding agents worki
 
 ## Project Overview
 
-**yaml-diffs** is a Python service for representing Hebrew legal and regulatory documents in a flexible, nested YAML format. The service provides:
+**yaml-diffs** is a powerful YAML diffing service that supports both **generic YAML files** and **Hebrew legal documents**. The service provides:
 
-- **Schema Layer**: OpenSpec definition (language-agnostic contract) for document structure
+- **Dual Mode Support**: Generic YAML diffing (any YAML file) and Legal Document diffing (schema-validated)
+- **Schema Layer**: OpenSpec definition (language-agnostic contract) for legal document structure
 - **Model Layer**: Pydantic models for Python runtime validation
 - **Core Logic**: Document diffing, validation, and transformation utilities
 - **Interface Layer**: Python library API, CLI tool, REST API (FastAPI), and Web UI (Next.js)
@@ -16,11 +17,16 @@ The project supports unlimited nesting, flexible structural markers, Hebrew cont
 
 ### Key Architecture Points
 
+- **Dual Mode Operation**: 
+  - **Generic Mode**: Diff any YAML file with path-based change tracking and smart array matching
+  - **Legal Document Mode**: Schema-validated diffing for Hebrew legal documents with marker-based section matching
+- **Smart Array Matching**: Auto-detects identity fields (`id`, `name`, `key`) or use custom identity rules
+- **Complete Change Detection**: VALUE_CHANGED, KEY_ADDED, KEY_REMOVED, KEY_RENAMED, KEY_MOVED, ITEM_ADDED, ITEM_REMOVED, ITEM_MOVED, TYPE_CHANGED
 - **Recursive Structure**: Documents use recursive sections with unlimited nesting depth
 - **Optional IDs**: Section IDs are optional and will be auto-generated if not provided. IDs are used for tracking but not for matching sections (markers are used instead).
 - **Hebrew Support**: Full UTF-8 support for Hebrew legal text throughout
-- **Multiple Interfaces**: Library (Python), CLI (`yaml-diffs`), and REST API (`/api/v1/*`)
-- **Schema Validation**: Dual validation via OpenSpec (contract) and Pydantic (runtime)
+- **Multiple Interfaces**: Library (Python), CLI (`yaml-diffs`), REST API (`/api/v1/*`), and Web UI (Next.js)
+- **Schema Validation**: Dual validation via OpenSpec (contract) and Pydantic (runtime) for legal documents
 
 ## Development Environment Setup
 
@@ -76,8 +82,11 @@ yaml-diffs/
 │       ├── api.py              # Main library API
 │       ├── loader.py           # YAML loading utilities
 │       ├── validator.py        # Validation logic
-│       ├── diff.py              # Document diffing engine
-│       ├── diff_types.py        # Diff result types
+│       ├── diff.py              # Legal document diffing engine
+│       ├── diff_types.py        # Legal document diff result types
+│       ├── generic_diff.py      # Generic YAML diffing engine
+│       ├── generic_diff_types.py # Generic diff result types
+│       ├── diff_router.py       # Mode detection and routing
 │       ├── exceptions.py        # Custom exceptions
 │       ├── models/              # Pydantic models
 │       │   ├── document.py
@@ -193,11 +202,23 @@ uv pip install dist/yaml_diffs-*.whl
 ### CLI Usage
 
 ```bash
-# Validate a document
+# Validate a legal document
 yaml-diffs validate examples/minimal_document.yaml
 
-# Diff two documents
+# Auto-detect mode and diff two documents
 yaml-diffs diff examples/document_v1.yaml examples/document_v2.yaml
+
+# Force generic YAML mode (any YAML file)
+yaml-diffs diff config_v1.yaml config_v2.yaml --mode general
+
+# Generic diff with identity rules (match containers by name)
+yaml-diffs diff old.yaml new.yaml --mode general --identity-rule "containers:name"
+
+# Conditional identity rule (books by catalog_id when type=book)
+yaml-diffs diff old.yaml new.yaml --identity-rule "inventory:catalog_id:type=book"
+
+# Force legal document mode
+yaml-diffs diff old.yaml new.yaml --mode legal_document
 
 # Diff with JSON output
 yaml-diffs diff --format json old.yaml new.yaml
@@ -398,7 +419,41 @@ pytest -m "not slow"
 
 ## Key Implementation Details
 
-### Document Schema
+### Mode Detection and Routing
+
+The service supports two diffing modes:
+
+- **Generic Mode** (`general`): For any YAML file (configs, K8s manifests, etc.)
+- **Legal Document Mode** (`legal_document`): For schema-validated Hebrew legal documents
+
+Mode detection is handled by `diff_router.py`:
+- Auto-detection checks for `document` → `sections` → `marker` structure
+- Explicit mode can be specified via API parameter or CLI flag
+
+### Generic YAML Diffing
+
+For arbitrary YAML without predefined schemas:
+
+- **Path-Based Tracking**: Changes tracked by dot-notation paths (e.g., `spec.replicas`, `database.host`)
+- **Change Types**:
+  - `VALUE_CHANGED`: Same key, different value
+  - `KEY_ADDED` / `KEY_REMOVED`: Key added or removed from mapping
+  - `KEY_RENAMED`: Key name changed but value similar (detected within same parent)
+  - `KEY_MOVED`: Key+value moved to different path
+  - `ITEM_ADDED` / `ITEM_REMOVED`: Array item added or removed
+  - `ITEM_CHANGED`: Same array item (by identity), content changed
+  - `ITEM_MOVED`: Array item moved to different array/path
+  - `TYPE_CHANGED`: Value type changed (e.g., string → number)
+- **Identity Rules**: Configure how array items are matched:
+  - Auto-detection of common fields: `id`, `name`, `key`, `_id`, `uuid`
+  - Custom rules: `--identity-rule "containers:name"`
+  - Conditional rules: `--identity-rule "inventory:catalog_id:type=book"`
+- **3-Phase Algorithm**:
+  1. **Local Diff**: Recursive comparison at same paths
+  2. **Rename Detection**: Match removed+added keys with similar values
+  3. **Move Detection**: Match remaining items globally by identity/content
+
+### Legal Document Schema
 
 - **Optional IDs**: Section IDs are optional and will be auto-generated as UUIDs if not provided. IDs are used for tracking but not for matching sections across versions.
 - **Markers Required**: All sections must have a marker (required field). Markers are the primary identifiers for diffing.
@@ -406,7 +461,7 @@ pytest -m "not slow"
 - **Optional Fields**: `title` and `id` are optional; `marker` and `content` are required (content defaults to empty string)
 - **Content Field**: Contains only text for this section level (not children)
 
-### Diffing Logic
+### Legal Document Diffing Logic
 
 - **Marker-Based**: Diffing is based on section markers (not IDs). Markers are the primary identifiers used for matching sections across document versions.
 - **Marker Requirement**: All sections must have a marker (required field). Markers must be unique within the same nesting level.

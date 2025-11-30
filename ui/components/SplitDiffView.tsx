@@ -5,14 +5,22 @@ import { EditorView, lineNumbers, Decoration, gutter, GutterMarker } from "@code
 import { EditorState, Extension, Range, RangeSet } from "@codemirror/state";
 import { syntaxHighlighting, defaultHighlightStyle } from "@codemirror/language";
 import { yaml } from "@codemirror/lang-yaml";
-import { DocumentDiff, DiffResult, ChangeType } from "@/lib/types";
+import { DocumentDiff, DiffResult, ChangeType, GenericDiff, GenericDiffResult, GenericChangeType } from "@/lib/types";
 import { useDiscussionsStore } from "@/stores/discussions";
 import InlineDiscussion from "./InlineDiscussion";
 
 interface SplitDiffViewProps {
   oldYaml: string;
   newYaml: string;
-  diff: DocumentDiff;
+  diff: DocumentDiff | GenericDiff;
+}
+
+function isDocumentDiff(diff: DocumentDiff | GenericDiff): diff is DocumentDiff {
+  return "added_count" in diff && "deleted_count" in diff && "modified_count" in diff && "moved_count" in diff;
+}
+
+function isDocumentDiffResult(change: DiffResult | GenericDiffResult): change is DiffResult {
+  return "section_id" in change && "marker" in change;
 }
 
 // Gutter marker to display discussion icon
@@ -73,7 +81,7 @@ export default function SplitDiffView({ oldYaml, newYaml, diff }: SplitDiffViewP
   const getDiscussion = useDiscussionsStore((state) => state.getDiscussion);
 
   // Map changes to line ranges using line numbers from API
-  const mapChangesToLines = useCallback((changes: DiffResult[]) => {
+  const mapChangesToLines = useCallback((changes: (DiffResult | GenericDiffResult)[]) => {
     const changeMap = new Map<string, { oldLine?: number; newLine?: number }>();
 
     for (const change of changes) {
@@ -204,7 +212,10 @@ export default function SplitDiffView({ oldYaml, newYaml, diff }: SplitDiffViewP
 
     for (const change of diff.changes) {
       // Skip unchanged items
-      if (change.change_type === ChangeType.UNCHANGED) continue;
+      const isUnchanged =
+        ('change_type' in change && change.change_type === ChangeType.UNCHANGED) ||
+        ('change_type' in change && change.change_type === GenericChangeType.UNCHANGED);
+      if (isUnchanged) continue;
 
       if (change.old_line_number) {
         oldLines.add(change.old_line_number);
@@ -532,7 +543,10 @@ export default function SplitDiffView({ oldYaml, newYaml, diff }: SplitDiffViewP
     })
     .filter(({ change }) => {
       // Show if not unchanged, or if unchanged but has discussion
-      if (change.change_type !== ChangeType.UNCHANGED) {
+      const isUnchanged =
+        ('change_type' in change && change.change_type === ChangeType.UNCHANGED) ||
+        ('change_type' in change && change.change_type === GenericChangeType.UNCHANGED);
+      if (!isUnchanged) {
         return true;
       }
       const discussion = getDiscussion(change.id);
@@ -703,7 +717,12 @@ export default function SplitDiffView({ oldYaml, newYaml, diff }: SplitDiffViewP
                               Change (no line mapping)
                             </span>
                           )}
-                          {discussion && discussion.comments.length > 0 && (
+                          {!isDocumentDiffResult(change) && 'change_type' in change && (
+                            <span className="text-xs px-1.5 py-0.5 bg-blue-100 text-blue-700 rounded">
+                              {change.change_type.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')}
+                            </span>
+                          )}
+                          {isDocumentDiffResult(change) && discussion && discussion.comments.length > 0 && (
                             <span className="text-xs text-blue-600">
                               {discussion.comments.length} comment{discussion.comments.length !== 1 ? "s" : ""}
                             </span>
@@ -725,13 +744,76 @@ export default function SplitDiffView({ oldYaml, newYaml, diff }: SplitDiffViewP
                           />
                         </svg>
                       </div>
-                      {isExpanded && (
+                      {isExpanded && isDocumentDiffResult(change) && (
                         <div className="p-3">
                           <InlineDiscussion
                             change={change}
                             lineNumber={lineNumber || 0}
                             side={side}
                           />
+                        </div>
+                      )}
+                      {isExpanded && !isDocumentDiffResult(change) && (
+                        <div className="p-3 space-y-3">
+                          <div className="text-sm text-gray-700">
+                            <div className="font-semibold mb-2">
+                              {('change_type' in change ? change.change_type : 'unknown').split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')}
+                            </div>
+                            <div className="space-y-1.5 text-xs">
+                              {('path' in change && change.path) && (
+                                <div className="text-gray-600">
+                                  <span className="font-semibold">Path:</span>{' '}
+                                  <span className="font-mono bg-gray-100 px-1 rounded">{change.path}</span>
+                                </div>
+                              )}
+                              {('old_path' in change && change.old_path && change.old_path !== change.path) && (
+                                <div className="text-gray-600">
+                                  <span className="font-semibold">Old Path:</span>{' '}
+                                  <span className="font-mono bg-gray-100 px-1 rounded">{change.old_path}</span>
+                                </div>
+                              )}
+                              {('new_path' in change && change.new_path && change.new_path !== change.path) && (
+                                <div className="text-gray-600">
+                                  <span className="font-semibold">New Path:</span>{' '}
+                                  <span className="font-mono bg-gray-100 px-1 rounded">{change.new_path}</span>
+                                </div>
+                              )}
+                              {('old_key' in change && change.old_key) && (
+                                <div className="text-gray-600">
+                                  <span className="font-semibold">Old Key:</span>{' '}
+                                  <span className="font-mono bg-gray-100 px-1 rounded">{change.old_key}</span>
+                                </div>
+                              )}
+                              {('new_key' in change && change.new_key) && (
+                                <div className="text-gray-600">
+                                  <span className="font-semibold">New Key:</span>{' '}
+                                  <span className="font-mono bg-gray-100 px-1 rounded">{change.new_key}</span>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                          {/* Show old/new values if available */}
+                          {('old_value' in change && change.old_value !== undefined) && (
+                            <div className="border-t border-gray-200 pt-2">
+                              <div className="text-xs font-semibold text-gray-600 mb-1">Old Value:</div>
+                              <div className="text-xs font-mono bg-red-50 border border-red-200 rounded p-2 text-gray-800 break-all">
+                                {typeof change.old_value === 'object'
+                                  ? JSON.stringify(change.old_value, null, 2)
+                                  : String(change.old_value)}
+                              </div>
+                            </div>
+                          )}
+                          {('new_value' in change && change.new_value !== undefined) && (
+                            <div className="border-t border-gray-200 pt-2">
+                              <div className="text-xs font-semibold text-gray-600 mb-1">New Value:</div>
+                              <div className="text-xs font-mono bg-green-50 border border-green-200 rounded p-2 text-gray-800 break-all">
+                                {typeof change.new_value === 'object'
+                                  ? JSON.stringify(change.new_value, null, 2)
+                                  : String(change.new_value)}
+                              </div>
+                            </div>
+                          )}
+                          {/* Discussions not yet supported for generic diffs */}
                         </div>
                       )}
                     </div>

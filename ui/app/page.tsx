@@ -17,7 +17,7 @@ import Tooltip from "@/components/Tooltip";
 import DocumentationLinks from "@/components/DocumentationLinks";
 import DocumentationModal from "@/components/DocumentationModal";
 import { diffDocuments, ApiError, testApiConnection } from "@/lib/api";
-import { DocumentDiff } from "@/lib/types";
+import { DocumentDiff, DiffMode, GenericDiff, IdentityRule, UnifiedDiffResponse } from "@/lib/types";
 
 type ViewMode = "editor" | "diff";
 
@@ -25,7 +25,10 @@ export default function Home() {
   const [oldYaml, setOldYaml] = useState("");
   const [newYaml, setNewYaml] = useState("");
   const [viewMode, setViewMode] = useState<ViewMode>("editor");
-  const [diff, setDiff] = useState<DocumentDiff | null>(null);
+  const [diff, setDiff] = useState<DocumentDiff | GenericDiff | null>(null);
+  const [diffMode, setDiffMode] = useState<DiffMode>("general");
+  const [identityRules, setIdentityRules] = useState<IdentityRule[]>([]);
+  const [isModeLocked, setIsModeLocked] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [apiTestResult, setApiTestResult] = useState<string | null>(null);
   const [showOnboarding, setShowOnboarding] = useState(false);
@@ -41,10 +44,28 @@ export default function Home() {
   }, []);
 
   const diffMutation = useMutation({
-    mutationFn: ({ oldYaml, newYaml }: { oldYaml: string; newYaml: string }) =>
-      diffDocuments(oldYaml, newYaml),
-    onSuccess: (data) => {
-      setDiff(data.diff);
+    mutationFn: ({
+      oldYaml,
+      newYaml,
+      mode,
+      identityRules,
+    }: {
+      oldYaml: string;
+      newYaml: string;
+      mode: DiffMode;
+      identityRules: IdentityRule[];
+    }) => diffDocuments(oldYaml, newYaml, mode, identityRules),
+    onSuccess: (data: UnifiedDiffResponse) => {
+      // Update mode based on what was actually used
+      setDiffMode(data.mode);
+      // Set the appropriate diff
+      if (data.document_diff) {
+        setDiff(data.document_diff);
+      } else if (data.generic_diff) {
+        setDiff(data.generic_diff);
+      } else {
+        setDiff(null);
+      }
       setViewMode("diff");
       setError(null);
     },
@@ -70,24 +91,34 @@ export default function Home() {
       return;
     }
 
-    // Basic validation - check if YAML contains 'document:' key
-    // Allow whitespace/comments before document: key
-    const oldYamlTrimmed = oldYaml.trim();
-    const newYamlTrimmed = newYaml.trim();
-    // Pattern matches 'document:' at start of line, optionally preceded by comments
-    const DOCUMENT_KEY_PATTERN = /^#.*\n?document:|^document:/m;
+    // Only validate document: key for legal_document mode
+    if (diffMode === "legal_document") {
+      const oldYamlTrimmed = oldYaml.trim();
+      const newYamlTrimmed = newYaml.trim();
+      const DOCUMENT_KEY_PATTERN = /^#.*\n?document:|^document:/m;
 
-    if (!DOCUMENT_KEY_PATTERN.test(oldYamlTrimmed)) {
-      setError("YAML must have 'document:' as the top-level key. Example:\n\ndocument:\n  id: \"test\"\n  title: \"Test\"\n  ...");
-      return;
-    }
-    if (!DOCUMENT_KEY_PATTERN.test(newYamlTrimmed)) {
-      setError("YAML must have 'document:' as the top-level key. Example:\n\ndocument:\n  id: \"test\"\n  title: \"Test\"\n  ...");
-      return;
+      if (!DOCUMENT_KEY_PATTERN.test(oldYamlTrimmed)) {
+        setError("YAML must have 'document:' as the top-level key. Example:\n\ndocument:\n  id: \"test\"\n  title: \"Test\"\n  ...");
+        return;
+      }
+      if (!DOCUMENT_KEY_PATTERN.test(newYamlTrimmed)) {
+        setError("YAML must have 'document:' as the top-level key. Example:\n\ndocument:\n  id: \"test\"\n  title: \"Test\"\n  ...");
+        return;
+      }
     }
 
     setError(null);
-    diffMutation.mutate({ oldYaml, newYaml });
+    diffMutation.mutate({
+      oldYaml,
+      newYaml,
+      mode: diffMode,
+      identityRules: identityRules.map((r) => ({
+        array: r.array,
+        identity_field: r.identity_field,
+        when_field: r.when_field || null,
+        when_value: r.when_value || null,
+      })),
+    });
   };
 
   const handleOldYamlLoad = (content: string) => {
@@ -100,12 +131,19 @@ export default function Home() {
     setError(null);
   };
 
-  const handleLoadExample = (oldYaml: string, newYaml: string) => {
+  const handleLoadExample = (oldYaml: string, newYaml: string, mode: "general" | "legal_document") => {
     setOldYaml(oldYaml);
     setNewYaml(newYaml);
+    setDiffMode(mode);
     setError(null);
     // Optionally scroll to editor area
     window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  const handleClearExample = () => {
+    setOldYaml("");
+    setNewYaml("");
+    setIsModeLocked(false);
   };
 
   return (
@@ -246,7 +284,16 @@ export default function Home() {
       </div>
 
       {/* Demo Section */}
-      <DemoSection onLoadExample={handleLoadExample} />
+      <DemoSection
+        onLoadExample={handleLoadExample}
+        onClearExample={handleClearExample}
+        mode={diffMode}
+        onModeChange={setDiffMode}
+        isModeLocked={isModeLocked}
+        onModeLockChange={setIsModeLocked}
+        identityRules={identityRules}
+        onIdentityRulesChange={setIdentityRules}
+      />
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
@@ -348,8 +395,9 @@ export default function Home() {
                     <p className="text-sm text-blue-800">
                       <strong>Get started:</strong> Upload or paste two YAML
                       documents, or try an example from the demo section above.
-                      Make sure your documents have <code className="bg-blue-100 px-1 rounded">document:</code> as the
-                      top-level key.
+                      {diffMode === "legal_document" && (
+                        <> Make sure your documents have <code className="bg-blue-100 px-1 rounded">document:</code> as the top-level key.</>
+                      )}
                     </p>
                   </div>
                 </div>

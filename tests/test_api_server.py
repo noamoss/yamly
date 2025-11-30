@@ -163,8 +163,8 @@ def test_diff_endpoint_valid_documents(document_v1_content: str, document_v2_con
     )
     assert response.status_code == 200
     data = response.json()
-    assert "diff" in data
-    diff = data["diff"]
+    assert "document_diff" in data or "generic_diff" in data
+    diff = data.get("document_diff") or data.get("generic_diff")
     assert "changes" in diff
     assert "added_count" in diff
     assert "deleted_count" in diff
@@ -188,7 +188,8 @@ def test_diff_endpoint_includes_extraction_fields(
     )
     assert response.status_code == 200
     data = response.json()
-    diff = data["diff"]
+    assert "document_diff" in data, "Expected document_diff in response"
+    diff = data["document_diff"]
     assert len(diff["changes"]) > 0, "Expected at least one change"
 
     # Check that at least one change has the extraction fields populated
@@ -227,7 +228,8 @@ def test_diff_endpoint_identical_documents(minimal_yaml_content: str) -> None:
     )
     assert response.status_code == 200
     data = response.json()
-    diff = data["diff"]
+    assert "document_diff" in data, "Expected document_diff in response"
+    diff = data["document_diff"]
     # Should have no changes or only UNCHANGED entries
     assert diff["added_count"] == 0
     assert diff["deleted_count"] == 0
@@ -363,7 +365,9 @@ def test_api_endpoints_end_to_end(document_v1_content: str, document_v2_content:
         },
     )
     assert response3.status_code == 200
-    diff = response3.json()["diff"]
+    data = response3.json()
+    assert "document_diff" in data, "Expected document_diff in response"
+    diff = data["document_diff"]
     assert len(diff["changes"]) > 0
 
 
@@ -457,7 +461,9 @@ def test_diff_endpoint_nested_structures(
         },
     )
     assert response.status_code == 200
-    diff = response.json()["diff"]
+    data = response.json()
+    assert "document_diff" in data, "Expected document_diff in response"
+    diff = data["document_diff"]
     # Should handle nested structures correctly
     assert isinstance(diff["changes"], list)
 
