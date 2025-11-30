@@ -5,6 +5,7 @@ import { DocumentDiff } from "@/lib/types";
 import DiffSummary from "./DiffSummary";
 import ChangeCard from "./ChangeCard";
 import SplitDiffView from "./SplitDiffView";
+import Tooltip from "./Tooltip";
 
 interface DiffViewProps {
   diff: DocumentDiff;
@@ -49,26 +50,32 @@ export default function DiffView({ diff, oldYaml, newYaml }: DiffViewProps) {
       <div className="border-b border-gray-200 bg-white">
         <div className="px-4 sm:px-6">
           <nav className="flex space-x-8">
-            <button
-              onClick={() => handleViewChange("split")}
-              className={`py-3 px-1 border-b-2 font-medium text-sm transition-colors ${
-                viewType === "split"
-                  ? "border-blue-500 text-blue-600"
-                  : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-              }`}
-            >
-              Split View
-            </button>
-            <button
-              onClick={() => handleViewChange("cards")}
-              className={`py-3 px-1 border-b-2 font-medium text-sm transition-colors ${
-                viewType === "cards"
-                  ? "border-blue-500 text-blue-600"
-                  : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-              }`}
-            >
-              Cards View
-            </button>
+            <Tooltip content="Side-by-side comparison of old and new versions">
+              <button
+                onClick={() => handleViewChange("split")}
+                className={`py-3 px-1 border-b-2 font-medium text-sm transition-colors ${
+                  viewType === "split"
+                    ? "border-blue-500 text-blue-600"
+                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                }`}
+                aria-label="Switch to split view"
+              >
+                Split View
+              </button>
+            </Tooltip>
+            <Tooltip content="Individual change cards with detailed information">
+              <button
+                onClick={() => handleViewChange("cards")}
+                className={`py-3 px-1 border-b-2 font-medium text-sm transition-colors ${
+                  viewType === "cards"
+                    ? "border-blue-500 text-blue-600"
+                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                }`}
+                aria-label="Switch to cards view"
+              >
+                Cards View
+              </button>
+            </Tooltip>
           </nav>
         </div>
       </div>

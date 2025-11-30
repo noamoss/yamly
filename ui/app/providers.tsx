@@ -1,6 +1,7 @@
 "use client";
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import * as TooltipPrimitive from "@radix-ui/react-tooltip";
 import { useState } from "react";
 
 export default function Providers({ children }: { children: React.ReactNode }) {
@@ -17,6 +18,10 @@ export default function Providers({ children }: { children: React.ReactNode }) {
   );
 
   return (
-    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+    <QueryClientProvider client={queryClient}>
+      <TooltipPrimitive.Provider delayDuration={300}>
+        {children}
+      </TooltipPrimitive.Provider>
+    </QueryClientProvider>
   );
 }

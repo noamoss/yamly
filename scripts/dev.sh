@@ -2,6 +2,9 @@
 # Start both backend and frontend dev servers
 # Usage: ./scripts/dev.sh
 
+# Set CORS_ORIGINS for local development
+export CORS_ORIGINS="http://localhost:3000"
+
 set -e  # Exit on error
 
 # Colors for output

@@ -1,0 +1,77 @@
+# Space Taco Truck Mission Configuration - Version 1
+# Fictional example demonstrating various diff types
+
+document:
+  id: "space-taco-mission-001"
+  title: "Galactic Taco Delivery Mission"
+  type: "mission_config"
+  version:
+    number: "1.0"
+    description: "Initial mission configuration"
+  mission:
+    name: "Taco Truck Alpha"
+    destination: "Mars Colony Beta"
+    estimated_arrival: "2025-06-15T14:30:00Z"
+    crew:
+      - name: "Captain Taco"
+        role: "Pilot"
+        experience_years: 10
+      - name: "Salsa Bot"
+        role: "Chef"
+        experience_years: 5
+    cargo:
+      - item: "Tortillas"
+        quantity: 1000
+        unit: "pieces"
+      - item: "Space Salsa"
+        quantity: 50
+        unit: "liters"
+      - item: "Zero-G Guacamole"
+        quantity: 30
+        unit: "kilograms"
+    route:
+      waypoints:
+        - name: "Earth Orbit Station"
+          coordinates: [0, 0, 400]
+        - name: "Lunar Base"
+          coordinates: [384400, 0, 0]
+        - name: "Mars Colony Beta"
+          coordinates: [225000000, 0, 0]
+    safety_protocols:
+      - "Emergency taco deployment system"
+      - "Atmospheric pressure monitoring"
+      - "Crew health checks every 6 hours"
+    sections:
+      - marker: "mission-objectives"
+        title: "Primary Objectives"
+        content: |
+          Deliver fresh tacos to Mars Colony Beta.
+          Maintain food quality during transit.
+          Complete mission within 72 hours.
+        sections:
+          - marker: "objective-1"
+            title: "Food Quality"
+            content: |
+              Ensure all ingredients remain fresh and safe for consumption.
+            sections: []
+          - marker: "objective-2"
+            title: "Timely Delivery"
+            content: |
+              Arrive at destination within scheduled time window.
+            sections: []
+
+      - marker: "equipment"
+        title: "Required Equipment"
+        content: |
+          Standard space taco truck with all necessary modifications.
+        sections:
+          - marker: "equipment-1"
+            title: "Cooking Systems"
+            content: |
+              Zero-gravity taco assembly station.
+            sections: []
+          - marker: "equipment-2"
+            title: "Storage"
+            content: |
+              Temperature-controlled ingredient storage.
+            sections: []

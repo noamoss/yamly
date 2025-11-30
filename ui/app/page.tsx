@@ -1,12 +1,21 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import { useMutation } from "@tanstack/react-query";
 import YamlEditor from "@/components/YamlEditor";
 import FileUpload from "@/components/FileUpload";
 import DiffView from "@/components/DiffView";
 import ExportButton from "@/components/ExportButton";
+import DemoSection from "@/components/DemoSection";
+import OnboardingModal, {
+  hasSeenOnboarding,
+  markOnboardingAsSeen,
+} from "@/components/OnboardingModal";
+import HelpModal from "@/components/HelpModal";
+import Tooltip from "@/components/Tooltip";
+import DocumentationLinks from "@/components/DocumentationLinks";
+import DocumentationModal from "@/components/DocumentationModal";
 import { diffDocuments, ApiError, testApiConnection } from "@/lib/api";
 import { DocumentDiff } from "@/lib/types";
 
@@ -19,6 +28,17 @@ export default function Home() {
   const [diff, setDiff] = useState<DocumentDiff | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [apiTestResult, setApiTestResult] = useState<string | null>(null);
+  const [showOnboarding, setShowOnboarding] = useState(false);
+  const [showHelp, setShowHelp] = useState(false);
+  const [showDocModal, setShowDocModal] = useState(false);
+  const [docPath, setDocPath] = useState<string | null>(null);
+
+  // Check for onboarding on mount
+  useEffect(() => {
+    if (!hasSeenOnboarding()) {
+      setShowOnboarding(true);
+    }
+  }, []);
 
   const diffMutation = useMutation({
     mutationFn: ({ oldYaml, newYaml }: { oldYaml: string; newYaml: string }) =>
@@ -54,13 +74,14 @@ export default function Home() {
     // Allow whitespace/comments before document: key
     const oldYamlTrimmed = oldYaml.trim();
     const newYamlTrimmed = newYaml.trim();
-    const documentKeyPattern = /^#.*\n?document:|^document:/m;
+    // Pattern matches 'document:' at start of line, optionally preceded by comments
+    const DOCUMENT_KEY_PATTERN = /^#.*\n?document:|^document:/m;
 
-    if (!documentKeyPattern.test(oldYamlTrimmed)) {
+    if (!DOCUMENT_KEY_PATTERN.test(oldYamlTrimmed)) {
       setError("YAML must have 'document:' as the top-level key. Example:\n\ndocument:\n  id: \"test\"\n  title: \"Test\"\n  ...");
       return;
     }
-    if (!documentKeyPattern.test(newYamlTrimmed)) {
+    if (!DOCUMENT_KEY_PATTERN.test(newYamlTrimmed)) {
       setError("YAML must have 'document:' as the top-level key. Example:\n\ndocument:\n  id: \"test\"\n  title: \"Test\"\n  ...");
       return;
     }
@@ -77,6 +98,14 @@ export default function Home() {
   const handleNewYamlLoad = (content: string) => {
     setNewYaml(content);
     setError(null);
+  };
+
+  const handleLoadExample = (oldYaml: string, newYaml: string) => {
+    setOldYaml(oldYaml);
+    setNewYaml(newYaml);
+    setError(null);
+    // Optionally scroll to editor area
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   return (
@@ -108,52 +137,77 @@ export default function Home() {
               </h1>
             </div>
             <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
-              <button
-                onClick={handleTestApi}
-                className="px-3 sm:px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors text-sm sm:text-base"
-                title="Test API connection"
-              >
-                Test API
-              </button>
-              <ExportButton diff={diff} disabled={!diff} />
-              <button
-                onClick={handleRunDiff}
-                disabled={diffMutation.isPending || !oldYaml.trim() || !newYaml.trim()}
-                className={`px-3 sm:px-4 py-2 rounded-lg hover:opacity-90 disabled:bg-gray-300 disabled:cursor-not-allowed transition-all text-sm sm:text-base flex-1 sm:flex-initial ${
-                  diffMutation.isPending || !oldYaml.trim() || !newYaml.trim()
-                    ? 'bg-gray-300'
-                    : 'bg-[var(--brand-primary)]'
-                } text-white`}
-              >
-                {diffMutation.isPending ? (
-                  <span className="flex items-center gap-2 justify-center">
-                    <svg
-                      className="animate-spin h-4 w-4"
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                    >
-                      <circle
-                        className="opacity-25"
-                        cx="12"
-                        cy="12"
-                        r="10"
-                        stroke="currentColor"
-                        strokeWidth="4"
-                      />
-                      <path
-                        className="opacity-75"
-                        fill="currentColor"
-                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                      />
-                    </svg>
-                    <span className="hidden sm:inline">Running...</span>
-                    <span className="sm:hidden">...</span>
-                  </span>
-                ) : (
-                  "Run Diff"
-                )}
-              </button>
+              <Tooltip content="Check if the API server is reachable and responding">
+                <button
+                  onClick={handleTestApi}
+                  className="px-3 sm:px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors text-sm sm:text-base"
+                  aria-label="Test API connection"
+                >
+                  Test API
+                </button>
+              </Tooltip>
+              <Tooltip content="Download diff results and discussions as JSON">
+                <div>
+                  <ExportButton diff={diff} disabled={!diff} />
+                </div>
+              </Tooltip>
+              <Tooltip content="Compare the two YAML documents and see all changes">
+                <button
+                  onClick={handleRunDiff}
+                  disabled={diffMutation.isPending || !oldYaml.trim() || !newYaml.trim()}
+                  className={`px-3 sm:px-4 py-2 rounded-lg hover:opacity-90 disabled:bg-gray-300 disabled:cursor-not-allowed transition-all text-sm sm:text-base flex-1 sm:flex-initial ${
+                    diffMutation.isPending || !oldYaml.trim() || !newYaml.trim()
+                      ? 'bg-gray-300'
+                      : 'bg-[var(--brand-primary)]'
+                  } text-white`}
+                  aria-label="Run diff to compare documents"
+                >
+                  {diffMutation.isPending ? (
+                    <span className="flex items-center gap-2 justify-center">
+                      <svg
+                        className="animate-spin h-4 w-4"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                      >
+                        <circle
+                          className="opacity-25"
+                          cx="12"
+                          cy="12"
+                          r="10"
+                          stroke="currentColor"
+                          strokeWidth="4"
+                        />
+                        <path
+                          className="opacity-75"
+                          fill="currentColor"
+                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                        />
+                      </svg>
+                      <span className="hidden sm:inline">Running...</span>
+                      <span className="sm:hidden">...</span>
+                    </span>
+                  ) : (
+                    "Run Diff"
+                  )}
+                </button>
+              </Tooltip>
+              <Tooltip content="Open help and documentation">
+                <button
+                  onClick={() => setShowHelp(true)}
+                  className="px-3 sm:px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-sm sm:text-base"
+                  aria-label="Open help"
+                >
+                  Help
+                </button>
+              </Tooltip>
+              <DocumentationLinks
+                variant="dropdown"
+                onDocClick={(path) => {
+                  setDocPath(path);
+                  setShowDocModal(true);
+                }}
+              />
             </div>
           </div>
         </div>
@@ -173,20 +227,26 @@ export default function Home() {
             >
               Editor
             </button>
-            <button
-              onClick={() => setViewMode("diff")}
-              disabled={!diff}
-              className={`py-4 px-1 border-b-2 font-medium text-sm ${
-                viewMode === "diff"
-                  ? "text-[var(--brand-primary)] border-[var(--brand-primary)]"
-                  : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
-              }`}
-            >
-              Diff View
-            </button>
+            <Tooltip content="View changes in split view or cards view">
+              <button
+                onClick={() => setViewMode("diff")}
+                disabled={!diff}
+                className={`py-4 px-1 border-b-2 font-medium text-sm ${
+                  viewMode === "diff"
+                    ? "text-[var(--brand-primary)] border-[var(--brand-primary)]"
+                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                }`}
+                aria-label="View diff results"
+              >
+                Diff View
+              </button>
+            </Tooltip>
           </nav>
         </div>
       </div>
+
+      {/* Demo Section */}
+      <DemoSection onLoadExample={handleLoadExample} />
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
@@ -248,6 +308,19 @@ export default function Home() {
                 <div className="mt-2 text-sm text-red-700">
                   <pre className="whitespace-pre-wrap font-sans">{error}</pre>
                 </div>
+                {error.includes("document:") && (
+                  <div className="mt-3 p-3 bg-red-100 rounded border border-red-300">
+                    <p className="text-xs text-red-800 font-medium mb-1">
+                      How to fix:
+                    </p>
+                    <ul className="text-xs text-red-700 list-disc list-inside space-y-1">
+                      <li>Ensure your YAML has <code className="bg-red-200 px-1 rounded">document:</code> as the top-level key</li>
+                      <li>All sections must have a <code className="bg-red-200 px-1 rounded">marker</code> field</li>
+                      <li>Check that your YAML syntax is valid</li>
+                      <li>Try using one of the demo examples above as a reference</li>
+                    </ul>
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -255,12 +328,43 @@ export default function Home() {
 
         {viewMode === "editor" ? (
           <div className="space-y-6">
+            {!oldYaml && !newYaml && (
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <div className="flex items-start gap-3">
+                  <svg
+                    className="h-5 w-5 text-blue-600 mt-0.5 flex-shrink-0"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                    />
+                  </svg>
+                  <div className="flex-1">
+                    <p className="text-sm text-blue-800">
+                      <strong>Get started:</strong> Upload or paste two YAML
+                      documents, or try an example from the demo section above.
+                      Make sure your documents have <code className="bg-blue-100 px-1 rounded">document:</code> as the
+                      top-level key.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6">
               <div className="space-y-4">
-                <FileUpload
-                  onFileLoad={handleOldYamlLoad}
-                  label="Old Version"
-                />
+                <Tooltip content="Upload a YAML file or paste content directly into the editor">
+                  <div>
+                    <FileUpload
+                      onFileLoad={handleOldYamlLoad}
+                      label="Old Version"
+                    />
+                  </div>
+                </Tooltip>
                 <div className="h-[400px] sm:h-[500px]">
                   <YamlEditor
                     value={oldYaml}
@@ -270,10 +374,14 @@ export default function Home() {
                 </div>
               </div>
               <div className="space-y-4">
-                <FileUpload
-                  onFileLoad={handleNewYamlLoad}
-                  label="New Version"
-                />
+                <Tooltip content="Upload a YAML file or paste content directly into the editor">
+                  <div>
+                    <FileUpload
+                      onFileLoad={handleNewYamlLoad}
+                      label="New Version"
+                    />
+                  </div>
+                </Tooltip>
                 <div className="h-[400px] sm:h-[500px]">
                   <YamlEditor
                     value={newYaml}
@@ -298,6 +406,33 @@ export default function Home() {
           </div>
         )}
       </main>
+
+      {/* Modals */}
+      <OnboardingModal
+        isOpen={showOnboarding}
+        onClose={() => setShowOnboarding(false)}
+        onDontShowAgain={() => {
+          markOnboardingAsSeen();
+          setShowOnboarding(false);
+        }}
+      />
+      <HelpModal
+        isOpen={showHelp}
+        onClose={() => setShowHelp(false)}
+        onDocClick={(path) => {
+          setDocPath(path);
+          setShowHelp(false);
+          setShowDocModal(true);
+        }}
+      />
+      <DocumentationModal
+        isOpen={showDocModal}
+        docPath={docPath}
+        onClose={() => {
+          setShowDocModal(false);
+          setDocPath(null);
+        }}
+      />
     </div>
   );
 }
