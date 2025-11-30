@@ -189,8 +189,17 @@ def diff_command(
                         "Expected: 'array:field' or 'array:field:when_field=when_value'"
                     )
                 )
-            array_name = parts[0]
-            identity_field = parts[1]
+            array_name = parts[0].strip()
+            identity_field = parts[1].strip()
+
+            if not array_name or not identity_field:
+                handle_cli_error(
+                    ValueError(
+                        f"Invalid identity rule format: '{rule_str}'. "
+                        "Array name and identity field cannot be empty."
+                    )
+                )
+
             when_field = None
             when_value = None
 
