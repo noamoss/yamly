@@ -345,16 +345,184 @@ class TestSectionMovedWithMarkerChange:
 
         diff = diff_documents(old_doc, new_doc)
 
-        # Current implementation matches by marker only, so when markers differ,
-        # sections won't be matched as moved even if content+title are the same.
-        # They will be detected as SECTION_REMOVED + SECTION_ADDED instead.
+        # Fixed implementation matches by content similarity + title, so when markers differ
+        # but content+title are the same, sections are correctly detected as MOVED.
         moved_changes = [c for c in diff.changes if c.change_type == ChangeType.SECTION_MOVED]
         removed_changes = [c for c in diff.changes if c.change_type == ChangeType.SECTION_REMOVED]
         added_changes = [c for c in diff.changes if c.change_type == ChangeType.SECTION_ADDED]
 
-        assert len(moved_changes) == 0, "Different markers won't match, so not detected as MOVED"
-        assert len(removed_changes) == 2, "Should be detected as removed (parent + child)"
-        assert len(added_changes) == 2, "Should be detected as added (parent + child)"
+        assert len(moved_changes) == 1, (
+            "Should be detected as MOVED (same content+title, different marker)"
+        )
+        assert moved_changes[0].marker == "1", "Should use old marker"
+        assert moved_changes[0].old_marker_path == ("פרק א'", "1")
+        assert moved_changes[0].new_marker_path == ("פרק ב'", "2")
+        # Parent chapters are still detected as removed/added (empty content, different markers)
+        assert len(removed_changes) == 1, "Parent chapter should be detected as removed"
+        assert len(added_changes) == 1, "Parent chapter should be detected as added"
+
+    def test_section_moved_root_level_marker_change(self, minimal_document: Document):
+        """Test SECTION_MOVED detection at root level when marker changes (user's specific case)."""
+        old_doc = Document(
+            id=minimal_document.id,
+            title=minimal_document.title,
+            type=minimal_document.type,
+            version=minimal_document.version,
+            source=minimal_document.source,
+            sections=[
+                Section(
+                    marker="1",
+                    title="הגדרות",
+                    content='בחוק זה—\n"מוסד" – גוף הפועל לפי הוראות החוק.\n',
+                    sections=[],
+                ),
+            ],
+        )
+
+        new_doc = Document(
+            id=old_doc.id,
+            title=old_doc.title,
+            type=old_doc.type,
+            version=old_doc.version,
+            source=old_doc.source,
+            sections=[
+                Section(
+                    marker="2",  # Marker changed from "1" to "2"
+                    title="הגדרות",  # Same title
+                    content='בחוק זה—\n"מוסד" – גוף הפועל לפי הוראות החוק.\n',  # Same content
+                    sections=[],
+                ),
+            ],
+        )
+
+        diff = diff_documents(old_doc, new_doc)
+
+        moved_changes = [c for c in diff.changes if c.change_type == ChangeType.SECTION_MOVED]
+        removed_changes = [c for c in diff.changes if c.change_type == ChangeType.SECTION_REMOVED]
+        added_changes = [c for c in diff.changes if c.change_type == ChangeType.SECTION_ADDED]
+
+        assert len(moved_changes) == 1, (
+            "Should be detected as MOVED (same content+title, different marker at root)"
+        )
+        assert moved_changes[0].marker == "1", "Should use old marker"
+        assert moved_changes[0].old_marker_path == ("1",)
+        assert moved_changes[0].new_marker_path == ("2",)
+        assert moved_changes[0].old_title == "הגדרות"
+        assert moved_changes[0].new_title == "הגדרות"
+        assert len(removed_changes) == 0, "Should not be detected as removed"
+        assert len(added_changes) == 0, "Should not be detected as added"
+
+    def test_section_moved_with_title_change(self, minimal_document: Document):
+        """Test that sections with same content but different title are still matched as moved.
+
+        Title changes are handled separately as TITLE_CHANGED entries, but don't prevent
+        movement detection based on content similarity.
+        """
+        old_doc = Document(
+            id=minimal_document.id,
+            title=minimal_document.title,
+            type=minimal_document.type,
+            version=minimal_document.version,
+            source=minimal_document.source,
+            sections=[
+                Section(
+                    marker="1",
+                    title="Title A",
+                    content="Same content here",
+                    sections=[],
+                ),
+            ],
+        )
+
+        new_doc = Document(
+            id=old_doc.id,
+            title=old_doc.title,
+            type=old_doc.type,
+            version=old_doc.version,
+            source=old_doc.source,
+            sections=[
+                Section(
+                    marker="2",  # Marker changed
+                    title="Title B",  # Different title
+                    content="Same content here",  # Same content
+                    sections=[],
+                ),
+            ],
+        )
+
+        diff = diff_documents(old_doc, new_doc)
+
+        moved_changes = [c for c in diff.changes if c.change_type == ChangeType.SECTION_MOVED]
+        title_changes = [c for c in diff.changes if c.change_type == ChangeType.TITLE_CHANGED]
+        removed_changes = [c for c in diff.changes if c.change_type == ChangeType.SECTION_REMOVED]
+        added_changes = [c for c in diff.changes if c.change_type == ChangeType.SECTION_ADDED]
+
+        assert len(moved_changes) == 1, (
+            "Should be detected as MOVED (same content, different marker)"
+        )
+        assert len(title_changes) == 1, "Should also have TITLE_CHANGED entry"
+        assert len(removed_changes) == 0, "Should not be detected as removed"
+        assert len(added_changes) == 0, "Should not be detected as added"
+
+    def test_section_moved_multiple_same_content(self, minimal_document: Document):
+        """Test one-to-one matching when multiple sections have same content."""
+        old_doc = Document(
+            id=minimal_document.id,
+            title=minimal_document.title,
+            type=minimal_document.type,
+            version=minimal_document.version,
+            source=minimal_document.source,
+            sections=[
+                Section(
+                    marker="1",
+                    title="Title",
+                    content="Same content",
+                    sections=[],
+                ),
+                Section(
+                    marker="2",
+                    title="Title",
+                    content="Same content",  # Same content as marker "1"
+                    sections=[],
+                ),
+            ],
+        )
+
+        new_doc = Document(
+            id=old_doc.id,
+            title=old_doc.title,
+            type=old_doc.type,
+            version=old_doc.version,
+            source=old_doc.source,
+            sections=[
+                Section(
+                    marker="3",
+                    title="Title",
+                    content="Same content",
+                    sections=[],
+                ),
+                Section(
+                    marker="4",
+                    title="Title",
+                    content="Same content",
+                    sections=[],
+                ),
+            ],
+        )
+
+        diff = diff_documents(old_doc, new_doc)
+
+        moved_changes = [c for c in diff.changes if c.change_type == ChangeType.SECTION_MOVED]
+        removed_changes = [c for c in diff.changes if c.change_type == ChangeType.SECTION_REMOVED]
+        added_changes = [c for c in diff.changes if c.change_type == ChangeType.SECTION_ADDED]
+
+        # Should match 2 sections (one-to-one matching)
+        assert len(moved_changes) == 2, "Should match 2 sections (one-to-one)"
+        assert len(removed_changes) == 0, "All sections should be matched"
+        assert len(added_changes) == 0, "All sections should be matched"
+        # Verify one-to-one matching (each old section matched to exactly one new section)
+        moved_markers = {c.marker for c in moved_changes}
+        assert moved_markers == {"1", "2"}, "Should match both old markers"
 
 
 class TestContentSimilarityInMovementDetection:

@@ -172,13 +172,14 @@ class TestMissingRequiredFields:
             load_and_validate(missing_marker_file)
 
     def test_missing_section_id(self, tmp_path: Path):
-        """Test section missing required id field."""
+        """Test section without id field - should auto-generate ID."""
         missing_id_file = tmp_path / "no_section_id.yaml"
         missing_id_file.write_text(
             """document:
   id: "test"
   title: "חוק"
   type: "law"
+  language: "hebrew"
   version:
     number: "1.0"
   source:
@@ -187,12 +188,241 @@ class TestMissingRequiredFields:
   sections:
     - marker: "1"
       title: "סעיף"
+      sections: []
 """,
             encoding="utf-8",
         )
 
-        with pytest.raises((OpenSpecValidationError, PydanticValidationError)):
-            load_and_validate(missing_id_file)
+        # Should succeed - ID will be auto-generated
+        doc = load_and_validate(missing_id_file)
+        assert doc.sections[0].id is not None
+        assert len(doc.sections[0].id) > 0
+
+    def test_load_document_without_section_ids(self, tmp_path: Path):
+        """Test loading document without any section IDs - should auto-generate all."""
+        no_ids_file = tmp_path / "no_section_ids.yaml"
+        no_ids_file.write_text(
+            """document:
+  id: "test"
+  title: "חוק"
+  type: "law"
+  language: "hebrew"
+  version:
+    number: "1.0"
+  source:
+    url: "https://example.com"
+    fetched_at: "2025-01-20T09:50:00Z"
+  sections:
+    - marker: "1"
+      title: "סעיף ראשון"
+      sections:
+        - marker: "א"
+          content: "תוכן"
+          sections: []
+""",
+            encoding="utf-8",
+        )
+
+        doc = load_and_validate(no_ids_file)
+        # All sections should have auto-generated IDs
+        assert doc.sections[0].id is not None
+        assert len(doc.sections[0].id) > 0
+        assert doc.sections[0].sections[0].id is not None
+        assert len(doc.sections[0].sections[0].id) > 0
+        # IDs should be UUIDs (contain hyphens)
+        assert "-" in doc.sections[0].id or len(doc.sections[0].id) == 36
+
+    def test_load_document_with_explicit_ids(self, tmp_path: Path):
+        """Test loading document with explicit section IDs - should use provided IDs."""
+        with_ids_file = tmp_path / "with_section_ids.yaml"
+        with_ids_file.write_text(
+            """document:
+  id: "test"
+  title: "חוק"
+  type: "law"
+  language: "hebrew"
+  version:
+    number: "1.0"
+  source:
+    url: "https://example.com"
+    fetched_at: "2025-01-20T09:50:00Z"
+  sections:
+    - id: "sec-1"
+      marker: "1"
+      title: "סעיף ראשון"
+      sections:
+        - id: "sec-1-a"
+          marker: "א"
+          content: "תוכן"
+          sections: []
+""",
+            encoding="utf-8",
+        )
+
+        doc = load_and_validate(with_ids_file)
+        # Should use provided IDs
+        assert doc.sections[0].id == "sec-1"
+        assert doc.sections[0].sections[0].id == "sec-1-a"
+
+    def test_load_document_mixed_ids(self, tmp_path: Path):
+        """Test loading document with some sections having IDs and some without."""
+        mixed_ids_file = tmp_path / "mixed_section_ids.yaml"
+        mixed_ids_file.write_text(
+            """document:
+  id: "test"
+  title: "חוק"
+  type: "law"
+  language: "hebrew"
+  version:
+    number: "1.0"
+  source:
+    url: "https://example.com"
+    fetched_at: "2025-01-20T09:50:00Z"
+  sections:
+    - id: "sec-1"
+      marker: "1"
+      title: "סעיף ראשון"
+      sections:
+        - marker: "א"
+          content: "תוכן ללא ID"
+          sections: []
+        - id: "sec-1-b"
+          marker: "ב"
+          content: "תוכן עם ID"
+          sections: []
+""",
+            encoding="utf-8",
+        )
+
+        doc = load_and_validate(mixed_ids_file)
+        # First section should use provided ID
+        assert doc.sections[0].id == "sec-1"
+        # First subsection should have auto-generated ID
+        assert doc.sections[0].sections[0].id is not None
+        assert doc.sections[0].sections[0].id != "sec-1"
+        # Second subsection should use provided ID
+        assert doc.sections[0].sections[1].id == "sec-1-b"
+
+    def test_diff_with_auto_generated_ids(self, tmp_path: Path):
+        """Test that diffing works correctly with auto-generated IDs."""
+        old_file = tmp_path / "old_no_ids.yaml"
+        old_file.write_text(
+            """document:
+  id: "test"
+  title: "חוק"
+  type: "law"
+  language: "hebrew"
+  version:
+    number: "1.0"
+  source:
+    url: "https://example.com"
+    fetched_at: "2025-01-20T09:50:00Z"
+  sections:
+    - marker: "1"
+      content: "תוכן ישן"
+      sections: []
+""",
+            encoding="utf-8",
+        )
+
+        new_file = tmp_path / "new_no_ids.yaml"
+        new_file.write_text(
+            """document:
+  id: "test"
+  title: "חוק"
+  type: "law"
+  language: "hebrew"
+  version:
+    number: "2.0"
+  source:
+    url: "https://example.com"
+    fetched_at: "2025-01-21T09:50:00Z"
+  sections:
+    - marker: "1"
+      content: "תוכן חדש"
+      sections: []
+""",
+            encoding="utf-8",
+        )
+
+        old_doc = load_and_validate(old_file)
+        new_doc = load_and_validate(new_file)
+        diff = diff_documents(old_doc, new_doc)
+
+        # Should detect content change
+        assert diff.modified_count > 0
+        assert any(change.change_type.value == "content_changed" for change in diff.changes)
+        # section_id should be populated (even if auto-generated)
+        content_change = next(
+            change for change in diff.changes if change.change_type.value == "content_changed"
+        )
+        assert content_change.section_id is not None
+        assert len(content_change.section_id) > 0
+
+    def test_diff_result_section_id_populated(self, tmp_path: Path):
+        """Test that DiffResult.section_id and id_path are populated correctly."""
+        old_file = tmp_path / "old_for_id_path.yaml"
+        old_file.write_text(
+            """document:
+  id: "test"
+  title: "חוק"
+  type: "law"
+  language: "hebrew"
+  version:
+    number: "1.0"
+  source:
+    url: "https://example.com"
+    fetched_at: "2025-01-20T09:50:00Z"
+  sections:
+    - marker: "1"
+      content: "תוכן"
+      sections:
+        - marker: "א"
+          content: "תת-תוכן"
+          sections: []
+""",
+            encoding="utf-8",
+        )
+
+        new_file = tmp_path / "new_for_id_path.yaml"
+        new_file.write_text(
+            """document:
+  id: "test"
+  title: "חוק"
+  type: "law"
+  language: "hebrew"
+  version:
+    number: "2.0"
+  source:
+    url: "https://example.com"
+    fetched_at: "2025-01-21T09:50:00Z"
+  sections:
+    - marker: "1"
+      content: "תוכן"
+      sections:
+        - marker: "א"
+          content: "תת-תוכן שונה"
+          sections: []
+""",
+            encoding="utf-8",
+        )
+
+        old_doc = load_and_validate(old_file)
+        new_doc = load_and_validate(new_file)
+        diff = diff_documents(old_doc, new_doc)
+
+        # Find the content change
+        content_change = next(
+            change for change in diff.changes if change.change_type.value == "content_changed"
+        )
+        # section_id should be populated
+        assert content_change.section_id is not None
+        assert len(content_change.section_id) > 0
+        # id_path should be populated (list of IDs from root)
+        assert content_change.old_id_path is not None
+        assert len(content_change.old_id_path) == 2  # Root section + nested section
+        assert content_change.new_id_path is not None
+        assert len(content_change.new_id_path) == 2
 
     def test_missing_version(self, tmp_path: Path):
         """Test document missing required version field."""

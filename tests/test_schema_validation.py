@@ -218,9 +218,9 @@ def test_reject_missing_document_sections(validator):
     assert any("sections" in msg.lower() for msg in error_messages)
 
 
-def test_reject_missing_section_id(validator):
-    """Test that missing section id field fails validation."""
-    invalid_doc = {
+def test_accept_missing_section_id(validator):
+    """Test that missing section id field is accepted (ID is optional)."""
+    valid_doc = {
         "document": {
             "id": "test-1",
             "title": "Test",
@@ -230,16 +230,17 @@ def test_reject_missing_section_id(validator):
             "source": {"url": "https://example.com", "fetched_at": "2025-01-01T00:00:00Z"},
             "sections": [
                 {
+                    "marker": "1",
                     "content": "Test content",
                     "sections": [],
                 }
             ],
         }
     }
-    errors = list(validator.iter_errors(invalid_doc))
-    assert len(errors) > 0
+    errors = list(validator.iter_errors(valid_doc))
+    # Should not have errors about missing id
     error_messages = [e.message for e in errors]
-    assert any("id" in msg.lower() for msg in error_messages)
+    assert not any("id" in msg.lower() and "required" in msg.lower() for msg in error_messages)
 
 
 # Unit tests: Optional fields

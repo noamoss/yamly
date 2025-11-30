@@ -17,7 +17,7 @@ The project supports unlimited nesting, flexible structural markers, Hebrew cont
 ### Key Architecture Points
 
 - **Recursive Structure**: Documents use recursive sections with unlimited nesting depth
-- **Stable IDs**: All sections must have stable UUIDs for reliable diffing across versions
+- **Optional IDs**: Section IDs are optional and will be auto-generated if not provided. IDs are used for tracking but not for matching sections (markers are used instead).
 - **Hebrew Support**: Full UTF-8 support for Hebrew legal text throughout
 - **Multiple Interfaces**: Library (Python), CLI (`yaml-diffs`), and REST API (`/api/v1/*`)
 - **Schema Validation**: Dual validation via OpenSpec (contract) and Pydantic (runtime)
@@ -400,10 +400,10 @@ pytest -m "not slow"
 
 ### Document Schema
 
-- **Stable IDs**: All sections must have stable UUIDs (auto-generated if not provided). IDs are used for tracking but not for matching.
+- **Optional IDs**: Section IDs are optional and will be auto-generated as UUIDs if not provided. IDs are used for tracking but not for matching sections across versions.
 - **Markers Required**: All sections must have a marker (required field). Markers are the primary identifiers for diffing.
 - **Recursive Structure**: Sections can contain nested sections to unlimited depth
-- **Optional Fields**: `title` is optional; `id`, `marker`, and `content` are required
+- **Optional Fields**: `title` and `id` are optional; `marker` and `content` are required (content defaults to empty string)
 - **Content Field**: Contains only text for this section level (not children)
 
 ### Diffing Logic
@@ -418,7 +418,7 @@ pytest -m "not slow"
   - `TITLE_CHANGED`: Title changed (same marker+path+content)
   - `UNCHANGED`: No changes detected
 - **Path Tracking**: Hybrid approach - uses marker paths for matching, ID paths for tracking
-- **Movement Detection**: Sections are detected as moved when path changed (and possibly marker changed) but title+content are the same. Matching is done by content similarity (≥0.95 threshold), not marker. Empty content sections (parent sections) are not matched to avoid false positives.
+- **Movement Detection**: Sections are detected as moved when path changed (and possibly marker changed) and content similarity is ≥0.95. Matching is done by content similarity, not marker or title. Title changes are handled separately as TITLE_CHANGED entries. Empty content sections (parent sections) are not matched to avoid false positives.
 - **Content Similarity**: Uses content similarity scoring (≥0.95 threshold) to detect moved sections. Only sections with non-empty content are matched.
 - **Multiple Changes**: A single section can have multiple change types (e.g., SECTION_MOVED + CONTENT_CHANGED as separate entries)
 - **Nested Handling**: Handle deeply nested structures correctly (5+ levels)
@@ -603,7 +603,7 @@ When making code changes, check:
 - **Always validate** YAML documents before processing
 - **Preserve structure** when loading/transforming documents
 - **Handle Hebrew text** correctly (UTF-8 encoding)
-- **Use stable IDs** for all sections to enable reliable diffing
+- **Section IDs are optional** - they will be auto-generated if not provided. IDs are used for tracking but not for matching (markers are used instead).
 - **Test thoroughly** with both minimal and complex examples
 - **Follow dependencies** - check task dependencies before starting work
 - **Update tests** when modifying functionality

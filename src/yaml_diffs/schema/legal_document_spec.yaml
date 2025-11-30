@@ -140,20 +140,22 @@ $defs:
     type: object
     description: |
       Recursive section definition. Sections can contain nested sections
-      to unlimited depth. Each section must have a stable ID and a marker
-      for diffing. Markers are the primary identifiers used for matching
-      sections across document versions.
+      to unlimited depth. Each section must have a marker for diffing.
+      Section IDs are optional and will be auto-generated if not provided.
+      Markers are the primary identifiers used for matching sections across
+      document versions.
     required:
-      - id
       - marker
       - sections
     properties:
       id:
         type: string
-        description: "Stable section identifier (required for tracking)"
-        # Pattern supports alphanumeric characters, hyphens, and underscores.
-        # This allows for UUIDs (e.g., "550e8400-e29b-41d4-a716-446655440000")
-        # as well as custom identifiers (e.g., "sec-1", "sec-1-a").
+        description: |
+          Optional stable section identifier. If not provided, a UUID will be
+          auto-generated. Used for tracking sections across document versions.
+          Pattern supports alphanumeric characters, hyphens, and underscores.
+          This allows for UUIDs (e.g., "550e8400-e29b-41d4-a716-446655440000")
+          as well as custom identifiers (e.g., "sec-1", "sec-1-a").
         pattern: "^[a-zA-Z0-9_-]+$"
         minLength: 1
         examples:
