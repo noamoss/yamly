@@ -119,8 +119,11 @@ export default function Home() {
               <button
                 onClick={handleRunDiff}
                 disabled={diffMutation.isPending || !oldYaml.trim() || !newYaml.trim()}
-                className="px-3 sm:px-4 py-2 text-white rounded-lg hover:opacity-90 disabled:bg-gray-300 disabled:cursor-not-allowed transition-all text-sm sm:text-base flex-1 sm:flex-initial"
-                style={{ backgroundColor: diffMutation.isPending || !oldYaml.trim() || !newYaml.trim() ? undefined : 'var(--brand-primary)' }}
+                className={`px-3 sm:px-4 py-2 rounded-lg hover:opacity-90 disabled:bg-gray-300 disabled:cursor-not-allowed transition-all text-sm sm:text-base flex-1 sm:flex-initial ${
+                  diffMutation.isPending || !oldYaml.trim() || !newYaml.trim()
+                    ? 'bg-gray-300'
+                    : 'bg-[var(--brand-primary)]'
+                } text-white`}
               >
                 {diffMutation.isPending ? (
                   <span className="flex items-center gap-2 justify-center">
@@ -164,10 +167,9 @@ export default function Home() {
               onClick={() => setViewMode("editor")}
               className={`py-4 px-1 border-b-2 font-medium text-sm ${
                 viewMode === "editor"
-                  ? "text-[var(--brand-primary)]"
+                  ? "text-[var(--brand-primary)] border-[var(--brand-primary)]"
                   : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
               }`}
-              style={viewMode === "editor" ? { borderBottomColor: 'var(--brand-primary)' } : {}}
             >
               Editor
             </button>
@@ -176,10 +178,9 @@ export default function Home() {
               disabled={!diff}
               className={`py-4 px-1 border-b-2 font-medium text-sm ${
                 viewMode === "diff"
-                  ? "text-[var(--brand-primary)]"
+                  ? "text-[var(--brand-primary)] border-[var(--brand-primary)]"
                   : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
               }`}
-              style={viewMode === "diff" ? { borderBottomColor: 'var(--brand-primary)' } : {}}
             >
               Diff View
             </button>
