@@ -420,6 +420,7 @@ export default function Home() {
         onClose={() => setShowHelp(false)}
         onDocClick={(path) => {
           setDocPath(path);
+          setShowHelp(false);
           setShowDocModal(true);
         }}
       />
