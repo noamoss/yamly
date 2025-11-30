@@ -85,6 +85,8 @@ The project uses GitHub Actions to automate testing, linting, building, and depl
 
 **Purpose**: Verify Railway deployment health check after automatic deployment.
 
+> **Quick Setup**: To enable this workflow, you need to configure the `RAILWAY_DOMAIN` secret in GitHub. See [Setting Up RAILWAY_DOMAIN Secret](#setting-up-railway_domain-secret) below for step-by-step instructions.
+
 **Triggers**:
 - Push to `main` branch
 - Manual trigger via `workflow_dispatch`
@@ -96,6 +98,50 @@ The project uses GitHub Actions to automate testing, linting, building, and depl
 
 **Required Secrets**:
 - `RAILWAY_DOMAIN`: Railway deployment domain (for health check)
+
+#### Setting Up RAILWAY_DOMAIN Secret
+
+The `RAILWAY_DOMAIN` secret is required for the deployment workflow to verify that your Railway deployment is healthy. Follow these steps to set it up:
+
+**Step 1: Find Your Railway Domain**
+
+1. Go to [Railway Dashboard](https://railway.app/dashboard)
+2. Select your project (e.g., `yaml_diffs`)
+3. Click on your service
+4. Find your domain in one of these places:
+   - **Settings** → **Domains** tab (if you have a custom domain)
+   - The service URL shown in the dashboard header (e.g., `yaml-diffs.up.railway.app`)
+   - The public URL displayed in the service overview
+
+**Step 2: Note the Domain Format**
+
+The domain format is typically: `[service-name].up.railway.app`
+
+**Important**: Use only the domain name, **without** the protocol (`https://`).
+
+- ✅ **Correct**: `yaml-diffs.up.railway.app`
+- ❌ **Incorrect**: `https://yaml-diffs.up.railway.app` (includes protocol - will cause issues)
+
+**Step 3: Add Secret to GitHub**
+
+1. Go to your GitHub repository
+2. Click **Settings** → **Secrets and variables** → **Actions**
+3. Click **"New repository secret"**
+4. Enter the following:
+   - **Name**: `RAILWAY_DOMAIN`
+   - **Value**: Your Railway domain (e.g., `yaml-diffs.up.railway.app`)
+5. Click **"Add secret"**
+
+**Step 4: Verify the Secret**
+
+After adding the secret, the next deployment workflow run should be able to access it. The workflow will construct the health check URL as: `https://${{ secrets.RAILWAY_DOMAIN }}/health`
+
+**Troubleshooting**:
+
+- **Secret not found**: Ensure the secret name is exactly `RAILWAY_DOMAIN` (case-sensitive)
+- **Health check fails**: Verify the domain is correct and the Railway service is deployed and accessible
+- **Domain format error**: Make sure you're using only the domain name without `https://` or trailing slashes
+- **Can't find domain**: Check Railway dashboard → Your service → Settings → Domains, or look for the public URL in the service overview
 
 **Optional Variables** (can be set in repository variables):
 - `HEALTH_CHECK_TIMEOUT`: Total timeout in seconds (default: 30)
@@ -231,10 +277,16 @@ uv run mypy src/
 ### Deployment Fails
 
 1. **Check Railway git integration**: Ensure Railway is connected to the repository and auto-deploys on push to main
-2. **Check secrets**: Ensure `RAILWAY_DOMAIN` is set in repository secrets
+2. **Check secrets**:
+   - Ensure `RAILWAY_DOMAIN` is set in repository secrets (Settings → Secrets and variables → Actions)
+   - Verify the secret value is correct (domain only, no `https://` prefix)
+   - See [Setting Up RAILWAY_DOMAIN Secret](#setting-up-railway_domain-secret) for detailed instructions
 3. **Check variables**: Optionally set `HEALTH_CHECK_TIMEOUT` and `HEALTH_CHECK_RETRY_DELAY` in repository variables
 4. **Verify Railway service**: Ensure the service exists and is accessible
 5. **Check health endpoint**: Verify `/health` endpoint is available and responding
+   - Test manually: `curl https://[your-railway-domain]/health`
+   - Should return: `{"status":"healthy","version":"0.1.0"}`
+6. **Check domain format**: Ensure `RAILWAY_DOMAIN` secret contains only the domain (e.g., `yaml-diffs.up.railway.app`), not the full URL
 
 ### Coverage Not Uploading
 
