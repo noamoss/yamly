@@ -67,11 +67,16 @@ export async function GET(
       },
     });
   } catch (error) {
+    // Log detailed error for server-side debugging
     console.error("Error reading documentation:", error);
     const errorMessage =
       error instanceof Error ? error.message : "Failed to load documentation";
+    // Only include error details in development mode for debugging
+    // In production, don't expose internal error details to clients
     return NextResponse.json(
-      { error: errorMessage, details: String(error) },
+      process.env.NODE_ENV === "development"
+        ? { error: errorMessage, details: String(error) }
+        : { error: errorMessage },
       { status: 500 }
     );
   }
