@@ -1,16 +1,20 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { DocumentDiff } from "@/lib/types";
+import { DocumentDiff, GenericDiff } from "@/lib/types";
 import DiffSummary from "./DiffSummary";
 import ChangeCard from "./ChangeCard";
 import SplitDiffView from "./SplitDiffView";
 import Tooltip from "./Tooltip";
 
 interface DiffViewProps {
-  diff: DocumentDiff;
+  diff: DocumentDiff | GenericDiff;
   oldYaml: string;
   newYaml: string;
+}
+
+function isDocumentDiff(diff: DocumentDiff | GenericDiff): diff is DocumentDiff {
+  return "added_count" in diff && "deleted_count" in diff && "modified_count" in diff && "moved_count" in diff;
 }
 
 type ViewType = "split" | "cards";
@@ -81,31 +85,46 @@ export default function DiffView({ diff, oldYaml, newYaml }: DiffViewProps) {
       </div>
 
       {/* View content */}
-      {viewType === "split" ? (
-        <SplitDiffView oldYaml={oldYaml} newYaml={newYaml} diff={diff} />
+      {isDocumentDiff(diff) ? (
+        // Document diff view (existing implementation)
+        viewType === "split" ? (
+          <SplitDiffView oldYaml={oldYaml} newYaml={newYaml} diff={diff} />
+        ) : (
+          <div className="px-6 py-4 space-y-4">
+            {diff.changes
+              .slice() // Create a copy to avoid mutating original
+              .sort((a, b) => {
+                // Sort by new line number, fall back to old line number for deleted sections
+                const aLine = a.new_line_number ?? a.old_line_number ?? Infinity;
+                const bLine = b.new_line_number ?? b.old_line_number ?? Infinity;
+                return aLine - bLine;
+              })
+              .map((change, index) => {
+                // Ensure we have a valid key - use id if available, otherwise generate one
+                const key = change.id || `change-${change.section_id}-${change.change_type}-${index}`;
+                return (
+                  <ChangeCard
+                    key={key}
+                    change={change}
+                    index={index}
+                    oldYaml={oldYaml}
+                    newYaml={newYaml}
+                  />
+                );
+              })}
+          </div>
+        )
       ) : (
-        <div className="px-6 py-4 space-y-4">
-          {diff.changes
-            .slice() // Create a copy to avoid mutating original
-            .sort((a, b) => {
-              // Sort by new line number, fall back to old line number for deleted sections
-              const aLine = a.new_line_number ?? a.old_line_number ?? Infinity;
-              const bLine = b.new_line_number ?? b.old_line_number ?? Infinity;
-              return aLine - bLine;
-            })
-            .map((change, index) => {
-              // Ensure we have a valid key - use id if available, otherwise generate one
-              const key = change.id || `change-${change.section_id}-${change.change_type}-${index}`;
-              return (
-                <ChangeCard
-                  key={key}
-                  change={change}
-                  index={index}
-                  oldYaml={oldYaml}
-                  newYaml={newYaml}
-                />
-              );
-            })}
+        // Generic diff view (simple JSON display for now)
+        <div className="px-6 py-4">
+          <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+            <p className="text-sm text-gray-600 mb-2">
+              Generic YAML diff results (JSON format):
+            </p>
+            <pre className="text-xs overflow-auto max-h-96 bg-white p-4 rounded border">
+              {JSON.stringify(diff, null, 2)}
+            </pre>
+          </div>
         </div>
       )}
     </div>

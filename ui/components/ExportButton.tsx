@@ -1,10 +1,10 @@
 "use client";
 
-import { DocumentDiff } from "@/lib/types";
+import { DocumentDiff, GenericDiff } from "@/lib/types";
 import { useDiscussionsStore } from "@/stores/discussions";
 
 interface ExportButtonProps {
-  diff: DocumentDiff | null;
+  diff: DocumentDiff | GenericDiff | null;
   disabled?: boolean;
 }
 

@@ -11,7 +11,9 @@ from typing import Any
 
 from pydantic import BaseModel, Field
 
+from yaml_diffs.diff_router import DiffMode
 from yaml_diffs.diff_types import DocumentDiff
+from yaml_diffs.generic_diff_types import GenericDiff
 from yaml_diffs.models import Document
 
 
@@ -86,12 +88,34 @@ class ValidateResponse(BaseModel):
     )
 
 
+class IdentityRuleRequest(BaseModel):
+    """Request schema for identity rule.
+
+    Attributes:
+        array: Array name this rule applies to
+        identity_field: Field to use as identity
+        when_field: Optional condition field (for polymorphic arrays)
+        when_value: Optional condition value (when when_field matches this)
+    """
+
+    array: str = Field(description="Array name this rule applies to")
+    identity_field: str = Field(description="Field to use as identity")
+    when_field: str | None = Field(
+        default=None, description="Optional condition field (for polymorphic arrays)"
+    )
+    when_value: str | None = Field(
+        default=None, description="Optional condition value (when when_field matches this)"
+    )
+
+
 class DiffRequest(BaseModel):
     """Request schema for document diff endpoint.
 
     Attributes:
         old_yaml: Old document version YAML content as string.
         new_yaml: New document version YAML content as string.
+        mode: Diff mode (auto, general, or legal_document).
+        identity_rules: Optional list of identity rules for generic YAML diffing.
     """
 
     old_yaml: str = Field(
@@ -138,10 +162,36 @@ class DiffRequest(BaseModel):
       sections: []"""
         ],
     )
+    mode: DiffMode = Field(
+        default=DiffMode.AUTO,
+        description="Diff mode: auto (detect), general (generic YAML), or legal_document (marker-based)",
+    )
+    identity_rules: list[IdentityRuleRequest] = Field(
+        default_factory=list,
+        description="Optional list of identity rules for generic YAML diffing",
+    )
+
+
+class UnifiedDiffResponse(BaseModel):
+    """Unified response schema for diff endpoint supporting both modes.
+
+    Attributes:
+        mode: Which mode was used (legal_document or general)
+        document_diff: DocumentDiff for legal document mode (if applicable)
+        generic_diff: GenericDiff for general mode (if applicable)
+    """
+
+    mode: DiffMode = Field(description="Which mode was used")
+    document_diff: DocumentDiff | None = Field(
+        default=None, description="Document diff results (for legal_document mode)"
+    )
+    generic_diff: GenericDiff | None = Field(
+        default=None, description="Generic diff results (for general mode)"
+    )
 
 
 class DiffResponse(BaseModel):
-    """Response schema for document diff endpoint.
+    """Response schema for document diff endpoint (backward compatible).
 
     Attributes:
         diff: DocumentDiff object containing all detected changes.

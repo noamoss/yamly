@@ -1,6 +1,11 @@
 /** API client for Railway backend. */
 
-import { DiffRequest, DiffResponse, ErrorResponse } from "./types";
+import {
+  DiffRequest,
+  DiffResponse,
+  ErrorResponse,
+  UnifiedDiffResponse,
+} from "./types";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
@@ -146,11 +151,20 @@ function enhanceValidationErrorMessage(
 
 export async function diffDocuments(
   oldYaml: string,
-  newYaml: string
-): Promise<DiffResponse> {
+  newYaml: string,
+  mode: "auto" | "general" | "legal_document" = "auto",
+  identityRules: Array<{
+    array: string;
+    identity_field: string;
+    when_field?: string | null;
+    when_value?: string | null;
+  }> = []
+): Promise<UnifiedDiffResponse> {
   const request: DiffRequest = {
     old_yaml: oldYaml,
     new_yaml: newYaml,
+    mode,
+    identity_rules: identityRules,
   };
 
   const requestUrl = `${API_URL}/api/v1/diff`;
@@ -194,11 +208,11 @@ export async function diffDocuments(
       throw new ApiError(errorMessage, response.status, errorDetails);
     }
 
-    const data: DiffResponse = await response.json();
+    const data: UnifiedDiffResponse = await response.json();
 
     // Ensure all changes have an id field (fallback for older API versions)
-    if (data.diff?.changes) {
-      data.diff.changes = data.diff.changes.map((change, index) => {
+    if (data.document_diff?.changes) {
+      data.document_diff.changes = data.document_diff.changes.map((change, index) => {
         if (!change.id) {
           // Generate a fallback ID based on change properties
           const fallbackId = `${change.section_id}-${change.change_type}-${change.marker}-${index}`;
