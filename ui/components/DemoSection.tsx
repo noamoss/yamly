@@ -23,7 +23,7 @@ const exampleDefinitions: Example[] = [
     description: "Demonstrates additions, deletions, and content modifications",
     oldYamlPath: "/examples/space_taco_truck_v1.yaml",
     newYamlPath: "/examples/space_taco_truck_v2.yaml",
-    diffTypes: ["Additions", "Deletions", "Content Changes"],
+    diffTypes: ["Section Added", "Section Removed", "Content Changed", "Item Added"],
     category: "legal",
   },
   {
@@ -32,7 +32,7 @@ const exampleDefinitions: Example[] = [
     description: "Shows nested structural changes and deep modifications",
     oldYamlPath: "/examples/pet_robot_care_v1.yaml",
     newYamlPath: "/examples/pet_robot_care_v2.yaml",
-    diffTypes: ["Nested Changes", "Deep Modifications", "Structural Updates"],
+    diffTypes: ["Deep Nesting", "Nested Content Changes", "Nested Section Added"],
     category: "legal",
   },
   {
@@ -41,7 +41,7 @@ const exampleDefinitions: Example[] = [
     description: "Real-world example with Hebrew content and complex nesting",
     oldYamlPath: "/examples/document_v1.yaml",
     newYamlPath: "/examples/document_v2.yaml",
-    diffTypes: ["Hebrew Content", "Complex Nesting", "Multiple Change Types"],
+    diffTypes: ["Section Moved", "Title Changed", "Section Added/Removed", "Content Changed", "Multiple Languages Content Support"],
     category: "legal",
   },
   // Generic YAML Examples
@@ -51,7 +51,7 @@ const exampleDefinitions: Example[] = [
     description: "Compare K8s deployment changes: replicas, images, resources",
     oldYamlPath: "/examples/kubernetes_v1.yaml",
     newYamlPath: "/examples/kubernetes_v2.yaml",
-    diffTypes: ["Scaling", "Image Updates", "Resource Changes"],
+    diffTypes: ["Value Changed", "Key Added", "Item Changed"],
     category: "generic",
   },
   {
@@ -60,7 +60,7 @@ const exampleDefinitions: Example[] = [
     description: "Configuration file changes: database, cache, features",
     oldYamlPath: "/examples/config_v1.yaml",
     newYamlPath: "/examples/config_v2.yaml",
-    diffTypes: ["Value Changes", "New Sections", "Feature Flags"],
+    diffTypes: ["Key Renamed", "Key Added/Removed", "Value Changed", "Item Changed"],
     category: "generic",
   },
 ];

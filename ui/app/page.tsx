@@ -26,7 +26,7 @@ export default function Home() {
   const [newYaml, setNewYaml] = useState("");
   const [viewMode, setViewMode] = useState<ViewMode>("editor");
   const [diff, setDiff] = useState<DocumentDiff | GenericDiff | null>(null);
-  const [diffMode, setDiffMode] = useState<DiffMode>("auto");
+  const [diffMode, setDiffMode] = useState<DiffMode>("general");
   const [identityRules, setIdentityRules] = useState<IdentityRule[]>([]);
   const [isModeLocked, setIsModeLocked] = useState(false);
   const [error, setError] = useState<string | null>(null);
