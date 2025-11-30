@@ -418,7 +418,7 @@ pytest -m "not slow"
   - `TITLE_CHANGED`: Title changed (same marker+path+content)
   - `UNCHANGED`: No changes detected
 - **Path Tracking**: Hybrid approach - uses marker paths for matching, ID paths for tracking
-- **Movement Detection**: Sections are detected as moved when path changed (and possibly marker changed) but title+content are the same. Matching is done by content similarity (≥0.95 threshold), not marker. Empty content sections (parent sections) are not matched to avoid false positives.
+- **Movement Detection**: Sections are detected as moved when path changed (and possibly marker changed) and content similarity is ≥0.95. Matching is done by content similarity, not marker or title. Title changes are handled separately as TITLE_CHANGED entries. Empty content sections (parent sections) are not matched to avoid false positives.
 - **Content Similarity**: Uses content similarity scoring (≥0.95 threshold) to detect moved sections. Only sections with non-empty content are matched.
 - **Multiple Changes**: A single section can have multiple change types (e.g., SECTION_MOVED + CONTENT_CHANGED as separate entries)
 - **Nested Handling**: Handle deeply nested structures correctly (5+ levels)

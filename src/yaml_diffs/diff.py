@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-from collections import deque
 from typing import TYPE_CHECKING
 from uuid import uuid4
 
@@ -146,12 +145,16 @@ def _find_moved_sections(
     unmatched_old: MarkerMap,
     unmatched_new: MarkerMap,
 ) -> list[tuple[MarkerMapKey, MarkerMapKey]]:
-    """Find sections that moved (same marker, different path).
+    """Find sections that moved (different path, possibly different marker).
 
-    Matches sections by marker with content similarity check (≥0.95 threshold)
-    to detect movements. Filters out empty content sections (parent sections)
-    to avoid false positives. Uses one-to-one matching to avoid cartesian product
-    issues when multiple sections share the same marker.
+    Matches sections by content similarity (≥0.95 threshold) to detect movements,
+    regardless of marker or title changes. Filters out empty content sections
+    (parent sections) to avoid false positives. Uses best-match approach for
+    one-to-one matching to avoid cartesian product issues.
+
+    Note: Title changes are handled separately after movement detection. A section
+    can be detected as moved even if the title changed, as long as content
+    similarity is ≥0.95.
 
     Args:
         unmatched_old: Dictionary of unmatched sections from old document
@@ -161,74 +164,53 @@ def _find_moved_sections(
         List of (old_key, new_key) pairs for moved sections
 
     Examples:
+        >>> # Same marker, different path
         >>> old_key = ("1", ("פרק א'",))
         >>> new_key = ("1", ("פרק ב'",))
+        >>> matches = _find_moved_sections({old_key: ...}, {new_key: ...})
+        >>> assert (old_key, new_key) in matches
+        >>> # Different marker, same content
+        >>> old_key = ("1", ())
+        >>> new_key = ("2", ())
         >>> matches = _find_moved_sections({old_key: ...}, {new_key: ...})
         >>> assert (old_key, new_key) in matches
     """
     matches: list[tuple[MarkerMapKey, MarkerMapKey]] = []
 
-    # Build marker -> keys mapping for new document
-    # Use deque for O(1) popleft() operations instead of O(n) pop(0)
-    marker_to_new_keys: dict[str, deque[MarkerMapKey]] = {}
-    for new_key in unmatched_new.keys():
-        marker = new_key[0]
-        if marker not in marker_to_new_keys:
-            marker_to_new_keys[marker] = deque()
-        marker_to_new_keys[marker].append(new_key)
-
-    # Find matches by marker with content similarity check (one-to-one matching)
-    # BUG FIX: Use popleft() to ensure one-to-one matching and prevent cartesian product
-    # when multiple old sections share the same marker with multiple new sections.
-    # Without this fix, if 2 old sections with marker "1" match 2 new sections with
-    # marker "1", all 4 pairings would be created instead of 2 one-to-one matches.
-    # Using deque.popleft() is O(1) instead of list.pop(0) which is O(n).
+    # Match all unmatched sections by content similarity (one-to-one matching)
+    # Process old sections in order and find best match in new sections
     for old_key in list(unmatched_old.keys()):
-        old_marker = old_key[0]
-        old_section, _, _ = unmatched_old[old_key]
+        old_section, old_marker_path, _ = unmatched_old[old_key]
 
         # Skip empty content sections (parent sections) to avoid false positives
         if not old_section.content:
             continue
 
-        if old_marker in marker_to_new_keys and marker_to_new_keys[old_marker]:
-            # Check each potential match for content similarity
-            # Iterate through available new_keys with this marker
-            matched = False
-            for new_key in list(marker_to_new_keys[old_marker]):
-                new_section, _, _ = unmatched_new[new_key]
+        # Find best match in unmatched_new by content similarity
+        best_match: MarkerMapKey | None = None
+        best_similarity = 0.0
 
-                # Skip empty content sections
-                if not new_section.content:
-                    continue
+        for new_key in list(unmatched_new.keys()):
+            new_section, new_marker_path, _ = unmatched_new[new_key]
 
-                # Check content similarity (≥0.95 threshold)
-                similarity = _calculate_content_similarity(old_section.content, new_section.content)
-                if similarity >= 0.95:
-                    # Found a match - remove from deque and add to matches
-                    marker_to_new_keys[old_marker].remove(new_key)
-                    matches.append((old_key, new_key))
-                    matched = True
+            # Skip empty content sections
+            if not new_section.content:
+                continue
 
-                    # Remove from unmatched_new to avoid duplicate matches
-                    if new_key in unmatched_new:
-                        del unmatched_new[new_key]
+            # Check content similarity (≥0.95 threshold)
+            # Note: Title changes are handled separately after movement detection
+            similarity = _calculate_content_similarity(old_section.content, new_section.content)
+            if similarity >= 0.95 and similarity > best_similarity:
+                # Found a better match - update best match
+                best_match = new_key
+                best_similarity = similarity
 
-                    # Remove from unmatched_old
-                    if old_key in unmatched_old:
-                        del unmatched_old[old_key]
-
-                    # Clean up empty deques
-                    if not marker_to_new_keys[old_marker]:
-                        del marker_to_new_keys[old_marker]
-
-                    # One-to-one matching: break after first match
-                    break
-
-            # Clean up empty deques if no match was found
-            if not matched and old_marker in marker_to_new_keys:
-                if not marker_to_new_keys[old_marker]:
-                    del marker_to_new_keys[old_marker]
+        # If match found, add to matches and remove from unmatched sets
+        if best_match is not None:
+            matches.append((old_key, best_match))
+            # Remove from unmatched sets to ensure one-to-one matching
+            del unmatched_old[old_key]
+            del unmatched_new[best_match]
 
     return matches
 
@@ -464,6 +446,10 @@ def diff_documents(old: Document, new: Document) -> DocumentDiff:
                 new_marker_path=new_marker_path,
                 old_id_path=old_id_path,
                 new_id_path=new_id_path,
+                old_content=old_section.content,
+                new_content=new_section.content,
+                old_title=old_section.title,
+                new_title=new_section.title,
             )
         )
 

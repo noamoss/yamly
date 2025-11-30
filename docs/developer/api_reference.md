@@ -416,7 +416,7 @@ Enumeration of change types.
 - `SECTION_ADDED`: New section added in new version
 - `SECTION_REMOVED`: Section removed from old version
 - `CONTENT_CHANGED`: Content changed (same marker+path)
-- `SECTION_MOVED`: Path changed but title+content same
+- `SECTION_MOVED`: Path changed (and possibly marker changed) but title+content same
 - `TITLE_CHANGED`: Title changed (same marker+path+content)
 - `UNCHANGED`: No changes detected
 
