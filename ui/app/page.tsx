@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import { useMutation } from "@tanstack/react-query";
 import YamlEditor from "@/components/YamlEditor";
 import FileUpload from "@/components/FileUpload";
@@ -84,9 +85,28 @@ export default function Home() {
       <header className="border-b border-gray-200 bg-white sticky top-0 z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between h-auto sm:h-16 py-3 sm:py-0 gap-3 sm:gap-0">
-            <h1 className="text-xl font-semibold text-gray-900">
-              YAML Diff Viewer
-            </h1>
+            <div className="flex items-center gap-4">
+              <a
+                href="https://about.thepitz.studio/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 text-[#1E293B] font-sans text-sm sm:text-base font-normal hover:opacity-80 transition-opacity"
+                aria-label="The Pitz Studio"
+              >
+                <Image
+                  src="/favicon.svg"
+                  alt="The Pitz Studio"
+                  width={24}
+                  height={24}
+                  className="flex-shrink-0"
+                />
+                <span>the pitz studio</span>
+              </a>
+              <span className="text-gray-300 hidden sm:inline">|</span>
+              <h1 className="text-xl font-semibold text-gray-900">
+                YAML Diff Viewer
+              </h1>
+            </div>
             <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
               <button
                 onClick={handleTestApi}
@@ -99,7 +119,8 @@ export default function Home() {
               <button
                 onClick={handleRunDiff}
                 disabled={diffMutation.isPending || !oldYaml.trim() || !newYaml.trim()}
-                className="px-3 sm:px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors text-sm sm:text-base flex-1 sm:flex-initial"
+                className="px-3 sm:px-4 py-2 text-white rounded-lg hover:opacity-90 disabled:bg-gray-300 disabled:cursor-not-allowed transition-all text-sm sm:text-base flex-1 sm:flex-initial"
+                style={{ backgroundColor: diffMutation.isPending || !oldYaml.trim() || !newYaml.trim() ? undefined : '#2563EB' }}
               >
                 {diffMutation.isPending ? (
                   <span className="flex items-center gap-2 justify-center">
@@ -143,9 +164,10 @@ export default function Home() {
               onClick={() => setViewMode("editor")}
               className={`py-4 px-1 border-b-2 font-medium text-sm ${
                 viewMode === "editor"
-                  ? "border-blue-500 text-blue-600"
+                  ? "text-[#2563EB]"
                   : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
               }`}
+              style={viewMode === "editor" ? { borderBottomColor: '#2563EB' } : {}}
             >
               Editor
             </button>
@@ -154,9 +176,10 @@ export default function Home() {
               disabled={!diff}
               className={`py-4 px-1 border-b-2 font-medium text-sm ${
                 viewMode === "diff"
-                  ? "border-blue-500 text-blue-600"
+                  ? "text-[#2563EB]"
                   : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
               }`}
+              style={viewMode === "diff" ? { borderBottomColor: '#2563EB' } : {}}
             >
               Diff View
             </button>

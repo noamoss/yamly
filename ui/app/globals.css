@@ -4,6 +4,11 @@
   --background: #ffffff;
   --foreground: #171717;
 
+  /* Brand colors - The Pitz Studio */
+  --brand-primary: #2563EB;
+  --brand-text: #1E293B;
+  --brand-background: #ffffff;
+
   /* Diff colors - GitHub-inspired */
   --diff-add-bg: #dafbe1;
   --diff-add-text: #1a7f37;
@@ -73,4 +78,21 @@ body {
 
 .cm-discussion-gutter {
   width: 20px;
+}
+
+/* Focus states using brand primary color */
+*:focus-visible {
+  outline: 2px solid var(--brand-primary);
+  outline-offset: 2px;
+}
+
+/* Brand link styling */
+a[href^="https://about.thepitz.studio"] {
+  color: var(--brand-text);
+  text-decoration: none;
+  transition: opacity 0.2s;
+}
+
+a[href^="https://about.thepitz.studio"]:hover {
+  opacity: 0.8;
 }
