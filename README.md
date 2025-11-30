@@ -193,8 +193,24 @@ yaml-diffs diff old.yaml new.yaml --output diff.json
 ### REST API
 
 **Local Development:**
+
+**Quick Start (Recommended):**
 ```bash
-# Start API server
+# Start both backend and frontend servers
+./scripts/dev.sh
+
+# Stop all servers
+./scripts/dev-stop.sh
+```
+
+This will start:
+- Backend API server at http://localhost:8000
+- Frontend UI at http://localhost:3000
+- API documentation at http://localhost:8000/docs
+
+**Manual Start (Alternative):**
+```bash
+# Start API server only
 uvicorn src.yaml_diffs.api_server.main:app --reload --port 8000
 
 # Validate a document
@@ -262,6 +278,16 @@ The Web UI provides a GitHub PR-style interface for viewing and commenting on YA
 
 **Quick Start:**
 
+The easiest way to start both backend and frontend together:
+```bash
+# Start both servers (from project root)
+./scripts/dev.sh
+
+# Stop both servers
+./scripts/dev-stop.sh
+```
+
+**Manual Start (Alternative):**
 ```bash
 # Navigate to UI directory
 cd ui
