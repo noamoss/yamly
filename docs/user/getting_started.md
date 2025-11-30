@@ -68,11 +68,23 @@ print(json_output)
 Use the command-line interface for quick operations:
 
 ```bash
-# Validate a document
+# Validate a legal document
 yaml-diffs validate examples/minimal_document.yaml
 
-# Diff two documents
+# Auto-detect mode and diff two documents
 yaml-diffs diff examples/document_v1.yaml examples/document_v2.yaml
+
+# Force generic YAML mode (any YAML file - configs, K8s manifests, etc.)
+yaml-diffs diff config_v1.yaml config_v2.yaml --mode general
+
+# Generic diff with identity rules (match array items by specific field)
+yaml-diffs diff old.yaml new.yaml --mode general --identity-rule "containers:name"
+
+# Conditional identity rule (books by catalog_id when type=book)
+yaml-diffs diff old.yaml new.yaml --identity-rule "inventory:catalog_id:type=book"
+
+# Force legal document mode
+yaml-diffs diff old.yaml new.yaml --mode legal_document
 
 # Diff with text output
 yaml-diffs diff old.yaml new.yaml --format text
@@ -89,15 +101,27 @@ Start the API server and use HTTP endpoints:
 # Start the server
 uvicorn src.yaml_diffs.api_server.main:app --reload --port 8000
 
-# Validate a document (using curl)
+# Validate a legal document (using curl)
 curl -X POST http://localhost:8000/api/v1/validate \
   -H "Content-Type: application/json" \
   -d '{"yaml": "document:\n  id: \"test\"\n  ..."}'
 
-# Diff two documents
+# Diff two documents (auto-detect mode)
 curl -X POST http://localhost:8000/api/v1/diff \
   -H "Content-Type: application/json" \
   -d '{"old_yaml": "...", "new_yaml": "..."}'
+
+# Diff with explicit mode and identity rules
+curl -X POST http://localhost:8000/api/v1/diff \
+  -H "Content-Type: application/json" \
+  -d '{
+    "old_yaml": "...",
+    "new_yaml": "...",
+    "mode": "general",
+    "identity_rules": [
+      {"array": "containers", "identity_field": "name"}
+    ]
+  }'
 ```
 
 The API also provides interactive documentation at:

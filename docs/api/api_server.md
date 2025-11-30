@@ -1,6 +1,6 @@
 # REST API Server Documentation
 
-The yaml-diffs REST API provides HTTP endpoints for validating and diffing Hebrew legal documents in YAML format. The API is built with FastAPI and designed for Railway deployment.
+The yaml-diffs REST API provides HTTP endpoints for validating and diffing YAML documents. The API supports both **generic YAML files** (configs, K8s manifests, etc.) and **Hebrew legal documents** with schema validation. Built with FastAPI and designed for Railway deployment.
 
 ## Table of Contents
 
@@ -116,20 +116,49 @@ Validates a YAML document against the OpenSpec schema and Pydantic models.
 
 ### POST /api/v1/diff
 
-Compares two YAML documents and returns detected changes.
+Compares two YAML documents and returns detected changes. Supports both **generic YAML mode** and **legal document mode**.
 
 **Request Body:**
 ```json
 {
-  "old_yaml": "document:\n  id: \"law-1234\"\n  ...",
-  "new_yaml": "document:\n  id: \"law-1234\"\n  ..."
+  "old_yaml": "...",
+  "new_yaml": "...",
+  "mode": "auto",
+  "identity_rules": []
 }
 ```
 
-**Response (200 OK):**
+**Parameters:**
+- `old_yaml` (string, required): Old YAML document content
+- `new_yaml` (string, required): New YAML document content
+- `mode` (string, optional): Diff mode - `auto` (default), `general`, or `legal_document`
+- `identity_rules` (array, optional): Rules for matching array items in generic mode
+
+**Identity Rule Format:**
 ```json
 {
-  "diff": {
+  "array": "containers",
+  "identity_field": "name",
+  "when_field": null,
+  "when_value": null
+}
+```
+
+For conditional rules (polymorphic arrays):
+```json
+{
+  "array": "inventory",
+  "identity_field": "catalog_id",
+  "when_field": "type",
+  "when_value": "book"
+}
+```
+
+**Response (200 OK) - Legal Document Mode:**
+```json
+{
+  "mode": "legal_document",
+  "document_diff": {
     "changes": [
       {
         "id": "550e8400-e29b-41d4-a716-446655440000",
@@ -138,14 +167,8 @@ Compares two YAML documents and returns detected changes.
         "marker": "1",
         "old_marker_path": ["1"],
         "new_marker_path": ["1"],
-        "old_id_path": ["sec-1"],
-        "new_id_path": ["sec-1"],
         "old_content": "Original content",
         "new_content": "Updated content",
-        "old_title": "Section Title",
-        "new_title": "Section Title",
-        "old_section_yaml": "id: sec-1\nmarker: '1'\ntitle: Section Title\ncontent: Original content\nsections: []",
-        "new_section_yaml": "id: sec-1\nmarker: '1'\ntitle: Section Title\ncontent: Updated content\nsections: []",
         "old_line_number": 23,
         "new_line_number": 28
       }
@@ -154,15 +177,62 @@ Compares two YAML documents and returns detected changes.
     "deleted_count": 0,
     "modified_count": 1,
     "moved_count": 0
+  },
+  "generic_diff": null
+}
+```
+
+**Response (200 OK) - Generic Mode:**
+```json
+{
+  "mode": "general",
+  "document_diff": null,
+  "generic_diff": {
+    "changes": [
+      {
+        "id": "change-abc123",
+        "change_type": "value_changed",
+        "path": "spec.replicas",
+        "old_value": 2,
+        "new_value": 3,
+        "old_line_number": 10,
+        "new_line_number": 10
+      },
+      {
+        "id": "change-def456",
+        "change_type": "key_added",
+        "path": "metadata.labels.version",
+        "new_value": "2.0",
+        "new_line_number": 8
+      }
+    ],
+    "value_changed_count": 1,
+    "key_added_count": 1,
+    "key_removed_count": 0,
+    "key_renamed_count": 0,
+    "key_moved_count": 0,
+    "item_added_count": 0,
+    "item_removed_count": 0,
+    "item_changed_count": 0,
+    "item_moved_count": 0,
+    "type_changed_count": 0
   }
 }
 ```
 
-**Note:** The `old_section_yaml`, `new_section_yaml`, `old_line_number`, and `new_line_number` fields are populated by the API to provide the full YAML representation and line locations of each changed section. These fields enable UI clients to display section context without client-side YAML parsing.
+**Generic Mode Change Types:**
+- `value_changed`: Same key, different value
+- `key_added` / `key_removed`: Key added or removed from mapping
+- `key_renamed`: Key name changed but value similar
+- `key_moved`: Key+value moved to different path
+- `item_added` / `item_removed`: Array item added or removed
+- `item_changed`: Same array item (by identity), content changed
+- `item_moved`: Array item moved to different array/path
+- `type_changed`: Value type changed (e.g., string → number)
 
 **Error Responses:**
 - `400 Bad Request` - Invalid YAML in either document
-- `422 Unprocessable Entity` - Document validation failed
+- `422 Unprocessable Entity` - Document validation failed (legal document mode)
 - `500 Internal Server Error` - Unexpected error
 
 ### GET /health
@@ -205,6 +275,8 @@ All POST endpoints accept JSON with the following structure:
 - **Diff Request:**
   - `old_yaml` (string, required): Old document version YAML content
   - `new_yaml` (string, required): New document version YAML content
+  - `mode` (string, optional): Diff mode - `auto`, `general`, or `legal_document`
+  - `identity_rules` (array, optional): Array item matching rules for generic mode
 
 ### Response Format
 

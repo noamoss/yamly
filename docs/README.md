@@ -1,6 +1,8 @@
 # Documentation Index
 
-Welcome to the yaml-diffs documentation! This directory contains comprehensive documentation organized by audience and purpose.
+Welcome to the yaml-diffs documentation! yaml-diffs is a powerful YAML diffing service that supports both **generic YAML files** (configs, Kubernetes manifests, etc.) and **Hebrew legal documents** with schema validation.
+
+This directory contains comprehensive documentation organized by audience and purpose.
 
 ## Documentation Structure
 

@@ -4,7 +4,12 @@ This document describes the system architecture of yaml-diffs, including compone
 
 ## Overview
 
-yaml-diffs is a Python library for representing Hebrew legal and regulatory documents in a flexible, nested YAML format. The system is designed with a layered architecture that separates concerns and enables multiple interfaces.
+yaml-diffs is a powerful YAML diffing service that supports both **generic YAML files** and **Hebrew legal documents**. The system provides:
+
+- **Generic Mode**: Diff any YAML file (configs, K8s manifests, etc.) with path-based change tracking
+- **Legal Document Mode**: Schema-validated diffing for Hebrew legal documents with marker-based section matching
+
+The system is designed with a layered architecture that separates concerns and enables multiple interfaces.
 
 ## Architecture Layers
 
@@ -51,11 +56,17 @@ The interface layer provides multiple ways to interact with the system:
 
 The core logic layer implements the main business logic:
 
-- **Diff Engine** - Marker-based document diffing algorithm
+- **Mode Router** - Detects document type and routes to appropriate diff engine
+- **Generic Diff Engine** - Path-based diffing for any YAML file
+- **Legal Document Diff Engine** - Marker-based diffing for legal documents
 - **Formatters** - Output formatting (JSON, text, YAML)
 
 **Key Components:**
-- `src/yaml_diffs/diff.py` - Diff engine implementation
+- `src/yaml_diffs/diff_router.py` - Mode detection and routing
+- `src/yaml_diffs/generic_diff.py` - Generic YAML diff engine
+- `src/yaml_diffs/generic_diff_types.py` - Generic diff types
+- `src/yaml_diffs/diff.py` - Legal document diff engine
+- `src/yaml_diffs/diff_types.py` - Legal document diff types
 - `src/yaml_diffs/formatters/` - Formatter implementations
 
 ### Data Layer
@@ -140,17 +151,42 @@ Document Model
 ### Document Diffing Flow
 
 ```
-Old Document + New Document
+Old YAML + New YAML
     ↓
-Diff Engine (Marker-based matching)
+Mode Detection (diff_router.py)
+    ↓
+┌──────────────────────────────────┐
+│ Generic Mode      │ Legal Mode   │
+│ (general)         │ (legal_doc)  │
+├───────────────────┼──────────────┤
+│ Path-based        │ Marker-based │
+│ generic_diff.py   │ diff.py      │
+└───────────────────┴──────────────┘
     ↓
 Change Detection
     ↓
-DiffResult Objects
+GenericDiffResult or DiffResult Objects
     ↓
 Formatter (JSON/Text/YAML)
     ↓
 Formatted Output
+```
+
+### Generic Diff Algorithm (3-Phase)
+
+```
+Phase 1: Recursive Local Diff
+    - Compare nodes at same paths
+    - Detect: VALUE_CHANGED, KEY_ADDED/REMOVED, ITEM_ADDED/REMOVED
+    - Collect unmatched items for global matching
+    ↓
+Phase 2: Rename Detection
+    - Match removed+added keys with similar values at same parent
+    - Convert to KEY_RENAMED
+    ↓
+Phase 3: Global Move Detection
+    - Match remaining removed vs added globally by identity/content
+    - Convert to KEY_MOVED / ITEM_MOVED
 ```
 
 ### Validation Flow
@@ -169,7 +205,19 @@ Validated Document
 
 ## Key Design Decisions
 
-### 1. Marker-Based Diffing
+### 1. Dual Mode Operation
+
+**Decision:** Support both generic YAML and legal document diffing.
+
+**Rationale:**
+- Generic mode works with any YAML file (configs, K8s manifests, etc.)
+- Legal document mode provides specialized handling for Hebrew legal documents
+- Auto-detection routes to appropriate engine based on structure
+- Users can explicitly specify mode when needed
+
+**Trade-off:** More code to maintain, but significantly broader use case coverage.
+
+### 2. Marker-Based Diffing (Legal Document Mode)
 
 **Decision:** Use markers (not IDs) as primary identifiers for diffing.
 
@@ -180,6 +228,18 @@ Validated Document
 - Supports Hebrew legal document conventions
 
 **Trade-off:** Requires marker uniqueness validation at each nesting level.
+
+### 3. Identity Rules (Generic Mode)
+
+**Decision:** Support configurable identity rules for array item matching.
+
+**Rationale:**
+- Auto-detection of common fields (`id`, `name`, `key`) covers most cases
+- Custom rules allow handling of domain-specific identifiers
+- Conditional rules support polymorphic arrays
+- Fallback to content similarity when no identity available
+
+**Trade-off:** Requires user configuration for complex structures.
 
 ### 2. Dual Validation System
 
@@ -256,9 +316,17 @@ Validated Document
 
 ### Adding New Diff Change Types
 
+**For Legal Document Mode:**
 1. Add to `ChangeType` enum in `src/yaml_diffs/diff_types.py`
 2. Update diff engine logic in `src/yaml_diffs/diff.py`
 3. Update formatters to handle new type
+4. Update tests
+5. Update documentation
+
+**For Generic Mode:**
+1. Add to `GenericChangeType` enum in `src/yaml_diffs/generic_diff_types.py`
+2. Update diff engine logic in `src/yaml_diffs/generic_diff.py`
+3. Update UI to handle new type (`GenericChangeCard.tsx`, `DiffSummary.tsx`)
 4. Update tests
 5. Update documentation
 
@@ -270,8 +338,11 @@ src/yaml_diffs/
 ├── api.py                   # Main library API
 ├── loader.py                # YAML loading
 ├── validator.py             # Validation logic
-├── diff.py                  # Diff engine
-├── diff_types.py            # Diff types and models
+├── diff_router.py           # Mode detection and routing
+├── diff.py                  # Legal document diff engine
+├── diff_types.py            # Legal document diff types
+├── generic_diff.py          # Generic YAML diff engine
+├── generic_diff_types.py    # Generic diff types
 ├── exceptions.py            # Custom exceptions
 ├── models/                  # Pydantic models
 │   ├── document.py
@@ -302,7 +373,9 @@ tests/
 ├── test_models.py           # Model tests
 ├── test_loader.py           # Loader tests
 ├── test_validator.py        # Validator tests
-├── test_diff.py             # Diff engine tests
+├── test_diff.py             # Legal document diff tests
+├── test_generic_diff.py     # Generic YAML diff tests
+├── test_diff_router.py      # Mode detection tests
 ├── test_formatters.py       # Formatter tests
 ├── test_api.py              # Library API tests
 ├── test_cli.py              # CLI tests
