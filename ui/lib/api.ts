@@ -5,6 +5,13 @@ import { DiffRequest, DiffResponse, ErrorResponse } from "./types";
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
 /**
+ * Get the current origin, with fallback for SSR environments
+ */
+function getCurrentOrigin(): string {
+  return typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000';
+}
+
+/**
  * Test API connectivity (for debugging)
  */
 export async function testApiConnection(): Promise<{ success: boolean; message: string }> {
@@ -61,7 +68,7 @@ export async function testApiConnection(): Promise<{ success: boolean; message: 
 
     // Check for CORS-specific errors
     if (errorMsg.includes("CORS") || errorMsg.includes("Failed to fetch")) {
-      const origin = typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000';
+      const origin = getCurrentOrigin();
       return {
         success: false,
         message: `❌ CORS Error: The Railway API is blocking requests from ${origin}. Add "${origin}" to the CORS_ORIGINS environment variable in Railway project settings (Variables tab).`
@@ -219,7 +226,7 @@ export async function diffDocuments(
         errorMessage = `Failed to connect to API at ${API_URL}. Make sure the API server is running locally, or set NEXT_PUBLIC_API_URL environment variable to your Railway API URL.`;
       } else {
         // Most likely CORS issue when connecting to Railway
-        const origin = typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000';
+        const origin = getCurrentOrigin();
         errorMessage = `CORS Error: Railway API is blocking requests from ${origin}. If you've already added it to CORS_ORIGINS, Railway may need to redeploy. Try: 1) Wait 2-3 minutes for auto-redeploy, or 2) Go to Railway dashboard → Your service → Settings → Redeploy, or 3) Make a small change to trigger redeploy.`;
       }
     }
