@@ -1,0 +1,41 @@
+# Kubernetes Deployment - Version 2 (Updated)
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: web-application
+  labels:
+    app: web
+    environment: production
+    version: "2.0"  # Added label
+spec:
+  replicas: 3  # Scaled up from 2
+  selector:
+    matchLabels:
+      app: web
+  template:
+    metadata:
+      labels:
+        app: web
+    spec:
+      containers:
+        - name: web
+          image: nginx:1.21  # Updated from 1.19
+          ports:
+            - containerPort: 80
+            - containerPort: 443  # Added HTTPS port
+          resources:
+            limits:
+              cpu: "1000m"  # Increased from 500m
+              memory: "256Mi"  # Increased from 128Mi
+            requests:
+              cpu: "500m"  # Increased from 250m
+              memory: "128Mi"  # Increased from 64Mi
+          env:
+            - name: NODE_ENV
+              value: "production"
+            - name: LOG_LEVEL  # Added env var
+              value: "info"
+        - name: sidecar
+          image: busybox:1.35  # Updated from 1.32
+          command: ["sh", "-c", "while true; do echo 'heartbeat'; sleep 30; done"]  # Changed interval
+

@@ -1,6 +1,8 @@
 "use client";
 
+import { useState } from "react";
 import { IdentityRule } from "@/lib/types";
+import SchemaViewer from "./SchemaViewer";
 
 interface ModeSelectorProps {
   mode: "auto" | "general" | "legal_document";
@@ -15,32 +17,70 @@ export default function ModeSelector({
   identityRules,
   onIdentityRulesChange,
 }: ModeSelectorProps) {
+  const [showSchema, setShowSchema] = useState(false);
+
   return (
     <div className="space-y-4 border-b border-gray-200 pb-4">
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          Diff Mode
-        </label>
-        <select
-          value={mode}
-          onChange={(e) =>
-            onModeChange(
-              e.target.value as "auto" | "general" | "legal_document"
-            )
-          }
-          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[var(--brand-primary)] focus:border-transparent"
-        >
-          <option value="auto">Auto-detect</option>
-          <option value="general">General YAML</option>
-          <option value="legal_document">Legal Document</option>
-        </select>
-        <p className="mt-1 text-xs text-gray-500">
+        <div className="flex items-center justify-between mb-2">
+          <label className="block text-sm font-medium text-gray-700">
+            Diff Mode
+          </label>
+          {mode === "legal_document" && (
+            <button
+              type="button"
+              onClick={() => setShowSchema(true)}
+              className="text-xs text-[var(--brand-primary)] hover:underline flex items-center gap-1"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+              View Schema
+            </button>
+          )}
+        </div>
+        <div className="flex gap-2">
+          <button
+            type="button"
+            onClick={() => onModeChange("auto")}
+            className={`flex-1 px-3 py-2 text-sm font-medium rounded-lg border transition-colors ${
+              mode === "auto"
+                ? "bg-[var(--brand-primary)] text-white border-[var(--brand-primary)]"
+                : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50"
+            }`}
+          >
+            Auto-detect
+          </button>
+          <button
+            type="button"
+            onClick={() => onModeChange("general")}
+            className={`flex-1 px-3 py-2 text-sm font-medium rounded-lg border transition-colors ${
+              mode === "general"
+                ? "bg-[var(--brand-primary)] text-white border-[var(--brand-primary)]"
+                : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50"
+            }`}
+          >
+            General YAML
+          </button>
+          <button
+            type="button"
+            onClick={() => onModeChange("legal_document")}
+            className={`flex-1 px-3 py-2 text-sm font-medium rounded-lg border transition-colors ${
+              mode === "legal_document"
+                ? "bg-[var(--brand-primary)] text-white border-[var(--brand-primary)]"
+                : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50"
+            }`}
+          >
+            Legal Document
+          </button>
+        </div>
+        <p className="mt-2 text-xs text-gray-500">
           {mode === "auto" &&
-            "Automatically detect document structure"}
+            "Automatically detects if YAML follows legal document structure (document → sections → marker)"}
           {mode === "general" &&
-            "Generic YAML diffing (no schema required)"}
+            "Generic YAML diffing with path-based change tracking. Great for config files, Kubernetes manifests, etc."}
           {mode === "legal_document" &&
-            "Legal document mode (marker-based diffing)"}
+            "Schema-validated diffing for Hebrew legal documents with marker-based section matching"}
         </p>
       </div>
 
@@ -50,6 +90,8 @@ export default function ModeSelector({
           onRulesChange={onIdentityRulesChange}
         />
       )}
+
+      <SchemaViewer isOpen={showSchema} onClose={() => setShowSchema(false)} />
     </div>
   );
 }

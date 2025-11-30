@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { DocumentDiff, GenericDiff } from "@/lib/types";
 import DiffSummary from "./DiffSummary";
 import ChangeCard from "./ChangeCard";
+import GenericChangeCard from "./GenericChangeCard";
 import SplitDiffView from "./SplitDiffView";
 import Tooltip from "./Tooltip";
 
@@ -115,16 +116,23 @@ export default function DiffView({ diff, oldYaml, newYaml }: DiffViewProps) {
           </div>
         )
       ) : (
-        // Generic diff view (simple JSON display for now)
-        <div className="px-6 py-4">
-          <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
-            <p className="text-sm text-gray-600 mb-2">
-              Generic YAML diff results (JSON format):
-            </p>
-            <pre className="text-xs overflow-auto max-h-96 bg-white p-4 rounded border">
-              {JSON.stringify(diff, null, 2)}
-            </pre>
-          </div>
+        // Generic diff view with proper change cards
+        <div className="px-6 py-4 space-y-4">
+          {diff.changes
+            .slice() // Create a copy to avoid mutating original
+            .sort((a, b) => {
+              // Sort by new line number, fall back to old line number
+              const aLine = a.new_line_number ?? a.old_line_number ?? Infinity;
+              const bLine = b.new_line_number ?? b.old_line_number ?? Infinity;
+              return aLine - bLine;
+            })
+            .map((change, index) => (
+              <GenericChangeCard
+                key={change.id || `change-${change.path}-${change.change_type}-${index}`}
+                change={change}
+                index={index}
+              />
+            ))}
         </div>
       )}
     </div>

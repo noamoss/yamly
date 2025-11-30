@@ -9,9 +9,11 @@ interface Example {
   oldYamlPath: string;
   newYamlPath: string;
   diffTypes: string[];
+  category: "legal" | "generic";
 }
 
 const exampleDefinitions: Example[] = [
+  // Legal Document Examples
   {
     id: "space-taco",
     name: "Space Taco Truck Mission",
@@ -19,6 +21,7 @@ const exampleDefinitions: Example[] = [
     oldYamlPath: "/examples/space_taco_truck_v1.yaml",
     newYamlPath: "/examples/space_taco_truck_v2.yaml",
     diffTypes: ["Additions", "Deletions", "Content Changes"],
+    category: "legal",
   },
   {
     id: "pet-robot",
@@ -27,6 +30,7 @@ const exampleDefinitions: Example[] = [
     oldYamlPath: "/examples/pet_robot_care_v1.yaml",
     newYamlPath: "/examples/pet_robot_care_v2.yaml",
     diffTypes: ["Nested Changes", "Deep Modifications", "Structural Updates"],
+    category: "legal",
   },
   {
     id: "legal-doc",
@@ -35,11 +39,100 @@ const exampleDefinitions: Example[] = [
     oldYamlPath: "/examples/document_v1.yaml",
     newYamlPath: "/examples/document_v2.yaml",
     diffTypes: ["Hebrew Content", "Complex Nesting", "Multiple Change Types"],
+    category: "legal",
+  },
+  // Generic YAML Examples
+  {
+    id: "kubernetes",
+    name: "Kubernetes Deployment",
+    description: "Compare K8s deployment changes: replicas, images, resources",
+    oldYamlPath: "/examples/kubernetes_v1.yaml",
+    newYamlPath: "/examples/kubernetes_v2.yaml",
+    diffTypes: ["Scaling", "Image Updates", "Resource Changes"],
+    category: "generic",
+  },
+  {
+    id: "config",
+    name: "Application Config",
+    description: "Configuration file changes: database, cache, features",
+    oldYamlPath: "/examples/config_v1.yaml",
+    newYamlPath: "/examples/config_v2.yaml",
+    diffTypes: ["Value Changes", "New Sections", "Feature Flags"],
+    category: "generic",
   },
 ];
 
 interface DemoSectionProps {
   onLoadExample: (oldYaml: string, newYaml: string) => void;
+}
+
+interface ExampleButtonProps {
+  example: Example;
+  isSelected: boolean;
+  isLoading: boolean;
+  onClick: () => void;
+  disabled: boolean;
+}
+
+function ExampleButton({ example, isSelected, isLoading, onClick, disabled }: ExampleButtonProps) {
+  return (
+    <button
+      onClick={onClick}
+      disabled={disabled}
+      className={`
+        p-3 rounded-lg border-2 text-left transition-all
+        ${
+          isSelected
+            ? "border-[var(--brand-primary)] bg-blue-50"
+            : "border-gray-200 bg-white hover:border-gray-300 hover:shadow-md"
+        }
+        ${disabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}
+        focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)] focus:ring-offset-2
+      `}
+      aria-label={`Load ${example.name} example`}
+    >
+      <div className="flex items-start justify-between mb-1.5">
+        <h4 className="font-semibold text-gray-900 text-sm">
+          {example.name}
+        </h4>
+        {isLoading && (
+          <svg
+            className="animate-spin h-4 w-4 text-[var(--brand-primary)]"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+          >
+            <circle
+              className="opacity-25"
+              cx="12"
+              cy="12"
+              r="10"
+              stroke="currentColor"
+              strokeWidth="4"
+            />
+            <path
+              className="opacity-75"
+              fill="currentColor"
+              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+            />
+          </svg>
+        )}
+      </div>
+      <p className="text-xs text-gray-600 mb-2">
+        {example.description}
+      </p>
+      <div className="flex flex-wrap gap-1">
+        {example.diffTypes.map((type) => (
+          <span
+            key={type}
+            className="inline-block px-1.5 py-0.5 text-xs bg-gray-100 text-gray-700 rounded"
+          >
+            {type}
+          </span>
+        ))}
+      </div>
+    </button>
+  );
 }
 
 export default function DemoSection({ onLoadExample }: DemoSectionProps) {
@@ -169,33 +262,54 @@ export default function DemoSection({ onLoadExample }: DemoSectionProps) {
             </button>
             {expandedSection === "requirements" && (
               <div className="px-4 pb-4 border-t border-gray-200 bg-blue-50">
-                <ul className="text-sm text-blue-800 space-y-2 mt-3">
-                  <li className="flex items-start gap-2">
-                    <span className="text-blue-600 mt-0.5">•</span>
-                    <span>
-                      Accepted formats: <code className="bg-blue-100 px-1 rounded">.yaml</code> or{" "}
-                      <code className="bg-blue-100 px-1 rounded">.yml</code>
-                    </span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <span className="text-blue-600 mt-0.5">•</span>
-                    <span>
-                      Documents must have <code className="bg-blue-100 px-1 rounded">document:</code> as the
-                      top-level key
-                    </span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <span className="text-blue-600 mt-0.5">•</span>
-                    <span>
-                      All sections require a <code className="bg-blue-100 px-1 rounded">marker</code> field
-                      (unique identifier)
-                    </span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <span className="text-blue-600 mt-0.5">•</span>
-                    <span>Supports unlimited nesting levels</span>
-                  </li>
-                </ul>
+                <div className="mt-3 grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <h4 className="font-semibold text-blue-900 mb-2 text-sm">General YAML Mode</h4>
+                    <ul className="text-sm text-blue-800 space-y-1.5">
+                      <li className="flex items-start gap-2">
+                        <span className="text-blue-600 mt-0.5">•</span>
+                        <span>Any valid YAML file works</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <span className="text-blue-600 mt-0.5">•</span>
+                        <span>Uses path-based change tracking</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <span className="text-blue-600 mt-0.5">•</span>
+                        <span>Auto-detects array item identity</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <span className="text-blue-600 mt-0.5">•</span>
+                        <span>Great for configs, K8s manifests</span>
+                      </li>
+                    </ul>
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-blue-900 mb-2 text-sm">Legal Document Mode</h4>
+                    <ul className="text-sm text-blue-800 space-y-1.5">
+                      <li className="flex items-start gap-2">
+                        <span className="text-blue-600 mt-0.5">•</span>
+                        <span>
+                          Requires <code className="bg-blue-100 px-1 rounded text-xs">document:</code> top-level key
+                        </span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <span className="text-blue-600 mt-0.5">•</span>
+                        <span>
+                          Sections need <code className="bg-blue-100 px-1 rounded text-xs">marker</code> field
+                        </span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <span className="text-blue-600 mt-0.5">•</span>
+                        <span>Schema validation built-in</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <span className="text-blue-600 mt-0.5">•</span>
+                        <span>Hebrew legal documents</span>
+                      </li>
+                    </ul>
+                  </div>
+                </div>
               </div>
             )}
           </div>
@@ -243,66 +357,43 @@ export default function DemoSection({ onLoadExample }: DemoSectionProps) {
             </button>
             {expandedSection === "examples" && (
               <div className="px-4 pb-4 border-t border-gray-200">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-3">
-            {exampleDefinitions.map((example) => (
-              <button
-                key={example.id}
-                onClick={() => handleLoadExample(example)}
-                disabled={isLoading}
-                className={`
-                  p-4 rounded-lg border-2 text-left transition-all
-                  ${
-                    selectedExample === example.id
-                      ? "border-[var(--brand-primary)] bg-blue-50"
-                      : "border-gray-200 bg-white hover:border-gray-300 hover:shadow-md"
-                  }
-                  ${isLoading ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}
-                  focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)] focus:ring-offset-2
-                `}
-                aria-label={`Load ${example.name} example`}
-              >
-                <div className="flex items-start justify-between mb-2">
-                  <h4 className="font-semibold text-gray-900 text-sm">
-                    {example.name}
+                {/* Generic YAML Examples */}
+                <div className="mt-3">
+                  <h4 className="text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-green-500"></span>
+                    Generic YAML
                   </h4>
-                  {selectedExample === example.id && isLoading && (
-                    <svg
-                      className="animate-spin h-4 w-4 text-[var(--brand-primary)]"
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                    >
-                      <circle
-                        className="opacity-25"
-                        cx="12"
-                        cy="12"
-                        r="10"
-                        stroke="currentColor"
-                        strokeWidth="4"
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    {exampleDefinitions.filter(e => e.category === "generic").map((example) => (
+                      <ExampleButton
+                        key={example.id}
+                        example={example}
+                        isSelected={selectedExample === example.id}
+                        isLoading={isLoading && selectedExample === example.id}
+                        onClick={() => handleLoadExample(example)}
+                        disabled={isLoading}
                       />
-                      <path
-                        className="opacity-75"
-                        fill="currentColor"
-                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                    ))}
+                  </div>
+                </div>
+                {/* Legal Document Examples */}
+                <div className="mt-4">
+                  <h4 className="text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-purple-500"></span>
+                    Legal Documents
+                  </h4>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                    {exampleDefinitions.filter(e => e.category === "legal").map((example) => (
+                      <ExampleButton
+                        key={example.id}
+                        example={example}
+                        isSelected={selectedExample === example.id}
+                        isLoading={isLoading && selectedExample === example.id}
+                        onClick={() => handleLoadExample(example)}
+                        disabled={isLoading}
                       />
-                    </svg>
-                  )}
-                </div>
-                <p className="text-xs text-gray-600 mb-3">
-                  {example.description}
-                </p>
-                <div className="flex flex-wrap gap-1">
-                  {example.diffTypes.map((type) => (
-                    <span
-                      key={type}
-                      className="inline-block px-2 py-1 text-xs bg-gray-100 text-gray-700 rounded"
-                    >
-                      {type}
-                    </span>
-                  ))}
-                </div>
-              </button>
-            ))}
+                    ))}
+                  </div>
                 </div>
               </div>
             )}

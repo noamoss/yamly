@@ -1,26 +1,32 @@
 # yaml-diffs
 
-Python service for representing Hebrew legal and regulatory documents in a flexible, nested YAML format.
+A powerful YAML diffing service that supports both **generic YAML files** and **Hebrew legal documents**.
 
 ## Overview
 
-**yaml-diffs** provides a comprehensive solution for working with Hebrew legal documents in YAML format, offering:
+**yaml-diffs** provides a comprehensive solution for comparing YAML documents, offering:
 
-- **Schema Layer**: OpenSpec definition (language-agnostic contract) for document structure
-- **Model Layer**: Pydantic models for Python runtime validation
-- **Core Logic**: Document diffing, validation, and transformation utilities
-- **Interface Layer**: Python library API, CLI tool, and REST API (FastAPI)
+- **Dual Mode Support**: 
+  - **Generic Mode**: Diff any YAML file (configs, Kubernetes manifests, etc.) with path-based tracking
+  - **Legal Document Mode**: Schema-validated diffing for Hebrew legal documents with marker-based section matching
+- **Smart Array Matching**: Auto-detects identity fields (`id`, `name`, `key`) or use custom rules
+- **Complete Change Detection**: VALUE_CHANGED, KEY_ADDED, KEY_REMOVED, KEY_RENAMED, KEY_MOVED, ITEM_ADDED, ITEM_REMOVED, ITEM_MOVED, TYPE_CHANGED
+- **Multiple Interfaces**: Python library, CLI tool, REST API (FastAPI), MCP Server, and Web UI (Next.js)
 - **Deployment**: Railway-hosted REST API service
-
-The project supports unlimited nesting, flexible structural markers, Hebrew content, and provides foundation for RAG integration with exact citation tracking.
 
 ## Key Features
 
-- **Recursive Structure**: Documents use recursive sections with unlimited nesting depth
-- **Marker-Based Diffing**: Sections are matched by markers (not IDs) for reliable diffing across versions. All sections must have unique markers at each nesting level.
+### Generic YAML Mode
+- **Any YAML Works**: No schema required - compare any valid YAML files
+- **Path-Based Tracking**: Changes tracked by their path in the document (e.g., `spec.replicas`, `database.host`)
+- **Identity Rules**: Define how array items are matched (by `name`, `id`, or custom fields)
+- **Conditional Rules**: Different identity fields for different item types (e.g., books by `catalog_id`, videos by `media_id`)
+
+### Legal Document Mode
+- **Schema Validation**: OpenSpec/Pydantic validation for legal document structure
+- **Marker-Based Diffing**: Sections matched by markers (not IDs) for reliable diffing across versions
 - **Hebrew Support**: Full UTF-8 support for Hebrew legal text throughout
-- **Multiple Interfaces**: Library (Python), CLI (`yaml-diffs`), REST API (`/api/v1/*`), MCP Server, and Web UI (Next.js)
-- **Schema Validation**: Dual validation via OpenSpec (contract) and Pydantic (runtime)
+- **Recursive Structure**: Unlimited nesting depth for document sections
 
 ## CI/CD Status
 
@@ -177,11 +183,23 @@ print(json_output)
 ### CLI
 
 ```bash
-# Validate a document
+# Validate a legal document
 yaml-diffs validate examples/minimal_document.yaml
 
-# Diff two documents
+# Auto-detect mode and diff two documents
 yaml-diffs diff examples/document_v1.yaml examples/document_v2.yaml
+
+# Force generic YAML mode (any YAML file)
+yaml-diffs diff config_v1.yaml config_v2.yaml --mode general
+
+# Generic diff with identity rules (match containers by name)
+yaml-diffs diff old.yaml new.yaml --mode general --identity-rule "containers:name"
+
+# Conditional identity rule (books by catalog_id when type=book)
+yaml-diffs diff old.yaml new.yaml --identity-rule "inventory:catalog_id:type=book"
+
+# Force legal document mode
+yaml-diffs diff old.yaml new.yaml --mode legal_document
 
 # Diff with text output
 yaml-diffs diff old.yaml new.yaml --format text
@@ -218,10 +236,22 @@ curl -X POST http://localhost:8000/api/v1/validate \
   -H "Content-Type: application/json" \
   -d '{"yaml": "document:\n  id: \"test\"\n  ..."}'
 
-# Diff two documents
+# Diff two documents (auto-detect mode)
 curl -X POST http://localhost:8000/api/v1/diff \
   -H "Content-Type: application/json" \
   -d '{"old_yaml": "...", "new_yaml": "..."}'
+
+# Diff with explicit mode and identity rules
+curl -X POST http://localhost:8000/api/v1/diff \
+  -H "Content-Type: application/json" \
+  -d '{
+    "old_yaml": "...",
+    "new_yaml": "...",
+    "mode": "general",
+    "identity_rules": [
+      {"array": "containers", "identity_field": "name"}
+    ]
+  }'
 
 # Health check
 curl http://localhost:8000/health
