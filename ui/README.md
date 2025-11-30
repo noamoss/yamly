@@ -103,19 +103,19 @@ These colors are accessible via CSS variables:
 
 Brand assets are stored in `public/`:
 
-- **Favicon**: `public/favicon.png` - Studio favicon (1024x1024 PNG, sourced from about.thepitz.studio)
+- **Favicon**: `public/favicon.svg` - Studio favicon (SVG format, sourced from about.thepitz.studio)
 - **Logo**: Currently using text-based wordmark "the pitz studio" in the header
 
 To update the favicon:
-1. Replace `public/favicon.png` with the new favicon file
-2. Ensure the file is optimized (PNG format, recommended size: 1024x1024)
+1. Replace `public/favicon.svg` with the new favicon file
+2. Ensure the file is optimized (SVG format is recommended for scalability)
 3. The favicon is referenced in `app/layout.tsx` via the metadata API
 
 ### Branding Components
 
 - **Header Wordmark**: Text-based "the pitz studio" wordmark in the header, linking to `https://about.thepitz.studio/`
 - **BrandingBubble**: Floating bubble component (`components/BrandingBubble.tsx`) anchored to bottom-right corner
-  - Displays "The Pitz Studio" with "AI Catalyst" tagline
+  - Displays "The Pitz Studio"
   - Links to `https://about.thepitz.studio/`
   - Hidden on mobile devices (visible on `md` breakpoint and above)
   - Fully accessible with keyboard navigation and screen reader support
