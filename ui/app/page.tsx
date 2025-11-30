@@ -15,6 +15,7 @@ import OnboardingModal, {
 import HelpModal from "@/components/HelpModal";
 import Tooltip from "@/components/Tooltip";
 import DocumentationLinks from "@/components/DocumentationLinks";
+import DocumentationModal from "@/components/DocumentationModal";
 import { diffDocuments, ApiError, testApiConnection } from "@/lib/api";
 import { DocumentDiff } from "@/lib/types";
 
@@ -29,6 +30,8 @@ export default function Home() {
   const [apiTestResult, setApiTestResult] = useState<string | null>(null);
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [showHelp, setShowHelp] = useState(false);
+  const [showDocModal, setShowDocModal] = useState(false);
+  const [docPath, setDocPath] = useState<string | null>(null);
 
   // Check for onboarding on mount
   useEffect(() => {
@@ -197,7 +200,13 @@ export default function Home() {
                   Help
                 </button>
               </Tooltip>
-              <DocumentationLinks variant="dropdown" />
+              <DocumentationLinks
+                variant="dropdown"
+                onDocClick={(path) => {
+                  setDocPath(path);
+                  setShowDocModal(true);
+                }}
+              />
             </div>
           </div>
         </div>
@@ -406,7 +415,22 @@ export default function Home() {
           setShowOnboarding(false);
         }}
       />
-      <HelpModal isOpen={showHelp} onClose={() => setShowHelp(false)} />
+      <HelpModal
+        isOpen={showHelp}
+        onClose={() => setShowHelp(false)}
+        onDocClick={(path) => {
+          setDocPath(path);
+          setShowDocModal(true);
+        }}
+      />
+      <DocumentationModal
+        isOpen={showDocModal}
+        docPath={docPath}
+        onClose={() => {
+          setShowDocModal(false);
+          setDocPath(null);
+        }}
+      />
     </div>
   );
 }

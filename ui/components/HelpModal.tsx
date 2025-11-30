@@ -5,9 +5,14 @@ import DocumentationLinks from "./DocumentationLinks";
 interface HelpModalProps {
   isOpen: boolean;
   onClose: () => void;
+  onDocClick?: (docPath: string) => void;
 }
 
-export default function HelpModal({ isOpen, onClose }: HelpModalProps) {
+export default function HelpModal({
+  isOpen,
+  onClose,
+  onDocClick,
+}: HelpModalProps) {
   if (!isOpen) return null;
 
   return (
@@ -216,7 +221,7 @@ export default function HelpModal({ isOpen, onClose }: HelpModalProps) {
               <p className="text-sm text-gray-600 mb-3">
                 Explore additional ways to use yaml-diffs:
               </p>
-              <DocumentationLinks variant="list" />
+              <DocumentationLinks variant="list" onDocClick={onDocClick} />
             </section>
           </div>
 

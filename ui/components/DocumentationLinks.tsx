@@ -7,41 +7,43 @@ interface DocumentationLink {
   icon: string;
 }
 
+interface DocumentationLinksProps {
+  variant?: "dropdown" | "list";
+  className?: string;
+  onDocClick?: (docPath: string) => void;
+}
+
 const documentationLinks: DocumentationLink[] = [
   {
+    label: "Getting Started",
+    url: "user/getting_started",
+    description: "Quick start guide",
+    icon: "📚",
+  },
+  {
     label: "REST API",
-    url: "https://github.com/noamoss/yaml_diffs/blob/main/docs/api/api_server.md",
+    url: "api/api_server",
     description: "Use yaml-diffs via HTTP endpoints",
     icon: "🌐",
   },
   {
     label: "MCP Server",
-    url: "https://github.com/noamoss/yaml_diffs/blob/main/docs/api/mcp_server.md",
+    url: "api/mcp_server",
     description: "Integrate with AI assistants",
     icon: "🤖",
   },
   {
     label: "Python Library",
-    url: "https://github.com/noamoss/yaml_diffs/blob/main/docs/developer/api_reference.md",
+    url: "developer/api_reference",
     description: "Use yaml-diffs in your Python code",
     icon: "🐍",
   },
-  {
-    label: "Getting Started",
-    url: "https://github.com/noamoss/yaml_diffs/blob/main/docs/user/getting_started.md",
-    description: "Quick start guide",
-    icon: "📚",
-  },
 ];
-
-interface DocumentationLinksProps {
-  variant?: "dropdown" | "list";
-  className?: string;
-}
 
 export default function DocumentationLinks({
   variant = "list",
   className = "",
+  onDocClick,
 }: DocumentationLinksProps) {
   if (variant === "dropdown") {
     return (
@@ -69,12 +71,10 @@ export default function DocumentationLinks({
         <div className="absolute right-0 mt-2 w-64 bg-white rounded-lg shadow-lg border border-gray-200 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
           <div className="py-2">
             {documentationLinks.map((link) => (
-              <a
+              <button
                 key={link.label}
-                href={link.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="block px-4 py-3 hover:bg-gray-50 transition-colors"
+                onClick={() => onDocClick?.(link.url)}
+                className="w-full text-left block px-4 py-3 hover:bg-gray-50 transition-colors"
               >
                 <div className="flex items-start gap-3">
                   <span className="text-xl flex-shrink-0">{link.icon}</span>
@@ -100,7 +100,7 @@ export default function DocumentationLinks({
                     />
                   </svg>
                 </div>
-              </a>
+              </button>
             ))}
           </div>
         </div>
@@ -112,12 +112,10 @@ export default function DocumentationLinks({
   return (
     <div className={`space-y-3 ${className}`}>
       {documentationLinks.map((link) => (
-        <a
+        <button
           key={link.label}
-          href={link.url}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="block p-3 border border-gray-200 rounded-lg hover:border-[var(--brand-primary)] hover:bg-blue-50 transition-all group"
+          onClick={() => onDocClick?.(link.url)}
+          className="w-full text-left block p-3 border border-gray-200 rounded-lg hover:border-[var(--brand-primary)] hover:bg-blue-50 transition-all group"
         >
           <div className="flex items-start gap-3">
             <span className="text-xl flex-shrink-0">{link.icon}</span>
@@ -143,7 +141,7 @@ export default function DocumentationLinks({
               />
             </svg>
           </div>
-        </a>
+        </button>
       ))}
     </div>
   );

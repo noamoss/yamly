@@ -46,6 +46,7 @@ export default function DemoSection({ onLoadExample }: DemoSectionProps) {
   const [selectedExample, setSelectedExample] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
+  const [expandedSection, setExpandedSection] = useState<string | null>(null);
 
   const handleLoadExample = async (example: Example) => {
     setIsLoading(true);
@@ -76,69 +77,144 @@ export default function DemoSection({ onLoadExample }: DemoSectionProps) {
     }
   };
 
+  const toggleSection = (section: string) => {
+    setExpandedSection(expandedSection === section ? null : section);
+  };
+
   return (
-    <div className="bg-gray-50 border-b border-gray-200 py-8">
+    <div className="bg-gray-50 border-b border-gray-200 py-4">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Service Explanation */}
-        <div className="mb-6">
-          <h2 className="text-2xl font-semibold text-gray-900 mb-3">
+        {/* Service Explanation - Always visible, compact */}
+        <div className="mb-4">
+          <h2 className="text-xl font-semibold text-gray-900 mb-2">
             What is yaml-diffs?
           </h2>
-          <p className="text-gray-700 text-base leading-relaxed">
-            This tool compares two YAML files and highlights what has changed between them.
-            Perfect for tracking changes in legal documents, configuration files, and structured data.
-            See exactly what was added, removed, modified, or moved between document versions.
+          <p className="text-gray-700 text-sm leading-relaxed">
+            Compare two YAML files and see what changed. Perfect for tracking
+            changes in legal documents, configuration files, and structured data.
           </p>
         </div>
 
-        {/* Input Requirements */}
-        <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-          <div className="flex items-start gap-3">
-            <svg
-              className="h-5 w-5 text-blue-600 mt-0.5 flex-shrink-0"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
+        {/* Accordion Sections */}
+        <div className="space-y-2">
+          {/* Input Requirements Accordion */}
+          <div className="border border-gray-200 rounded-lg bg-white overflow-hidden">
+            <button
+              onClick={() => toggleSection("requirements")}
+              className="w-full px-4 py-3 flex items-center justify-between hover:bg-gray-50 transition-colors text-left"
+              aria-expanded={expandedSection === "requirements"}
             >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-              />
-            </svg>
-            <div className="flex-1">
-              <h3 className="text-sm font-semibold text-blue-900 mb-2">
-                Input Requirements
-              </h3>
-              <ul className="text-sm text-blue-800 space-y-1">
-                <li className="flex items-center gap-2">
-                  <span className="text-blue-600">•</span>
-                  <span>Accepted formats: <code className="bg-blue-100 px-1 rounded">.yaml</code> or <code className="bg-blue-100 px-1 rounded">.yml</code></span>
-                </li>
-                <li className="flex items-center gap-2">
-                  <span className="text-blue-600">•</span>
-                  <span>Documents must have <code className="bg-blue-100 px-1 rounded">document:</code> as the top-level key</span>
-                </li>
-                <li className="flex items-center gap-2">
-                  <span className="text-blue-600">•</span>
-                  <span>All sections require a <code className="bg-blue-100 px-1 rounded">marker</code> field (unique identifier)</span>
-                </li>
-                <li className="flex items-center gap-2">
-                  <span className="text-blue-600">•</span>
-                  <span>Supports unlimited nesting levels</span>
-                </li>
-              </ul>
-            </div>
+              <div className="flex items-center gap-2">
+                <svg
+                  className="h-5 w-5 text-blue-600 flex-shrink-0"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
+                </svg>
+                <span className="font-medium text-gray-900">
+                  Input Requirements
+                </span>
+              </div>
+              <svg
+                className={`h-5 w-5 text-gray-500 transition-transform ${
+                  expandedSection === "requirements" ? "rotate-180" : ""
+                }`}
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M19 9l-7 7-7-7"
+                />
+              </svg>
+            </button>
+            {expandedSection === "requirements" && (
+              <div className="px-4 pb-4 border-t border-gray-200 bg-blue-50">
+                <ul className="text-sm text-blue-800 space-y-2 mt-3">
+                  <li className="flex items-start gap-2">
+                    <span className="text-blue-600 mt-0.5">•</span>
+                    <span>
+                      Accepted formats: <code className="bg-blue-100 px-1 rounded">.yaml</code> or{" "}
+                      <code className="bg-blue-100 px-1 rounded">.yml</code>
+                    </span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-blue-600 mt-0.5">•</span>
+                    <span>
+                      Documents must have <code className="bg-blue-100 px-1 rounded">document:</code> as the
+                      top-level key
+                    </span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-blue-600 mt-0.5">•</span>
+                    <span>
+                      All sections require a <code className="bg-blue-100 px-1 rounded">marker</code> field
+                      (unique identifier)
+                    </span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-blue-600 mt-0.5">•</span>
+                    <span>Supports unlimited nesting levels</span>
+                  </li>
+                </ul>
+              </div>
+            )}
           </div>
-        </div>
 
-        {/* Example Selector */}
-        <div>
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">
-            Try Example Documents
-          </h3>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {/* Example Documents Accordion */}
+          <div className="border border-gray-200 rounded-lg bg-white overflow-hidden">
+            <button
+              onClick={() => toggleSection("examples")}
+              className="w-full px-4 py-3 flex items-center justify-between hover:bg-gray-50 transition-colors text-left"
+              aria-expanded={expandedSection === "examples"}
+            >
+              <div className="flex items-center gap-2">
+                <svg
+                  className="h-5 w-5 text-[var(--brand-primary)] flex-shrink-0"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                  />
+                </svg>
+                <span className="font-medium text-gray-900">
+                  Try Example Documents
+                </span>
+              </div>
+              <svg
+                className={`h-5 w-5 text-gray-500 transition-transform ${
+                  expandedSection === "examples" ? "rotate-180" : ""
+                }`}
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M19 9l-7 7-7-7"
+                />
+              </svg>
+            </button>
+            {expandedSection === "examples" && (
+              <div className="px-4 pb-4 border-t border-gray-200">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-3">
             {exampleDefinitions.map((example) => (
               <button
                 key={example.id}
@@ -198,6 +274,9 @@ export default function DemoSection({ onLoadExample }: DemoSectionProps) {
                 </div>
               </button>
             ))}
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
