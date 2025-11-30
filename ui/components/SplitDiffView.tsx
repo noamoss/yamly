@@ -5,14 +5,22 @@ import { EditorView, lineNumbers, Decoration, gutter, GutterMarker } from "@code
 import { EditorState, Extension, Range, RangeSet } from "@codemirror/state";
 import { syntaxHighlighting, defaultHighlightStyle } from "@codemirror/language";
 import { yaml } from "@codemirror/lang-yaml";
-import { DocumentDiff, DiffResult, ChangeType } from "@/lib/types";
+import { DocumentDiff, DiffResult, ChangeType, GenericDiff, GenericDiffResult, GenericChangeType } from "@/lib/types";
 import { useDiscussionsStore } from "@/stores/discussions";
 import InlineDiscussion from "./InlineDiscussion";
 
 interface SplitDiffViewProps {
   oldYaml: string;
   newYaml: string;
-  diff: DocumentDiff;
+  diff: DocumentDiff | GenericDiff;
+}
+
+function isDocumentDiff(diff: DocumentDiff | GenericDiff): diff is DocumentDiff {
+  return "added_count" in diff && "deleted_count" in diff && "modified_count" in diff && "moved_count" in diff;
+}
+
+function isDocumentDiffResult(change: DiffResult | GenericDiffResult): change is DiffResult {
+  return "section_id" in change && "marker" in change;
 }
 
 // Gutter marker to display discussion icon
@@ -73,7 +81,7 @@ export default function SplitDiffView({ oldYaml, newYaml, diff }: SplitDiffViewP
   const getDiscussion = useDiscussionsStore((state) => state.getDiscussion);
 
   // Map changes to line ranges using line numbers from API
-  const mapChangesToLines = useCallback((changes: DiffResult[]) => {
+  const mapChangesToLines = useCallback((changes: (DiffResult | GenericDiffResult)[]) => {
     const changeMap = new Map<string, { oldLine?: number; newLine?: number }>();
 
     for (const change of changes) {
@@ -204,7 +212,10 @@ export default function SplitDiffView({ oldYaml, newYaml, diff }: SplitDiffViewP
 
     for (const change of diff.changes) {
       // Skip unchanged items
-      if (change.change_type === ChangeType.UNCHANGED) continue;
+      const isUnchanged = 
+        ('change_type' in change && change.change_type === ChangeType.UNCHANGED) ||
+        ('change_type' in change && change.change_type === GenericChangeType.UNCHANGED);
+      if (isUnchanged) continue;
 
       if (change.old_line_number) {
         oldLines.add(change.old_line_number);
@@ -532,7 +543,10 @@ export default function SplitDiffView({ oldYaml, newYaml, diff }: SplitDiffViewP
     })
     .filter(({ change }) => {
       // Show if not unchanged, or if unchanged but has discussion
-      if (change.change_type !== ChangeType.UNCHANGED) {
+      const isUnchanged = 
+        ('change_type' in change && change.change_type === ChangeType.UNCHANGED) ||
+        ('change_type' in change && change.change_type === GenericChangeType.UNCHANGED);
+      if (!isUnchanged) {
         return true;
       }
       const discussion = getDiscussion(change.id);
@@ -725,13 +739,26 @@ export default function SplitDiffView({ oldYaml, newYaml, diff }: SplitDiffViewP
                           />
                         </svg>
                       </div>
-                      {isExpanded && (
+                      {isExpanded && isDocumentDiffResult(change) && (
                         <div className="p-3">
                           <InlineDiscussion
                             change={change}
                             lineNumber={lineNumber || 0}
                             side={side}
                           />
+                        </div>
+                      )}
+                      {isExpanded && !isDocumentDiffResult(change) && (
+                        <div className="p-3">
+                          <div className="text-sm text-gray-700">
+                            <div className="font-semibold mb-1">
+                              {('change_type' in change ? change.change_type : 'unknown').split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')}
+                            </div>
+                            <div className="text-xs text-gray-600 font-mono">
+                              Path: {('path' in change ? change.path : 'unknown')}
+                            </div>
+                            {/* Discussions not yet supported for generic diffs */}
+                          </div>
                         </div>
                       )}
                     </div>

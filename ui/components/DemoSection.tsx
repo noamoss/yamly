@@ -249,8 +249,7 @@ export default function DemoSection({
             What is yaml-diffs?
           </h2>
           <p className="text-gray-700 text-sm leading-relaxed">
-            Compare two YAML files and see what changed. Perfect for tracking
-            changes in legal documents, configuration files, and structured data.
+            <strong>Semantic YAML diffing</strong> that understands structure, not just lines. Unlike standard diff tools that compare line-by-line, yaml-diffs intelligently detects moves, renames, and structural changes while reducing noise from formatting. Perfect for tracking configuration changes, infrastructure-as-code updates, legal document revisions, and any structured YAML data where context matters.
           </p>
         </div>
 
@@ -404,29 +403,79 @@ export default function DemoSection({
                 ) : (
                   // Show only Legal Document mode with schema reference
                   <div className="mt-3">
-                    <h4 className="font-semibold text-blue-900 mb-2 text-sm">Legal Document Mode Requirements</h4>
-                    <ul className="text-sm text-blue-800 space-y-1.5">
-                      <li className="flex items-start gap-2">
-                        <span className="text-blue-600 mt-0.5">•</span>
-                        <span>
-                          Must have <code className="bg-blue-100 px-1 rounded text-xs">document:</code> as the top-level key
-                        </span>
-                      </li>
-                      <li className="flex items-start gap-2">
-                        <span className="text-blue-600 mt-0.5">•</span>
-                        <span>
-                          All sections require a unique <code className="bg-blue-100 px-1 rounded text-xs">marker</code> field
-                        </span>
-                      </li>
-                      <li className="flex items-start gap-2">
-                        <span className="text-blue-600 mt-0.5">•</span>
-                        <span>Schema validation is applied automatically</span>
-                      </li>
-                      <li className="flex items-start gap-2">
-                        <span className="text-blue-600 mt-0.5">•</span>
-                        <span>Designed for Hebrew legal and regulatory documents</span>
-                      </li>
-                    </ul>
+                    <h4 className="font-semibold text-blue-900 mb-2 text-sm">Legal Document Mode - Schema Requirements</h4>
+                    
+                    <div className="space-y-3">
+                      <div>
+                        <h5 className="text-xs font-semibold text-blue-800 mb-1.5">Document (all required fields):</h5>
+                        <ul className="text-sm text-blue-800 space-y-1">
+                          <li className="flex items-start gap-2">
+                            <span className="text-blue-600 mt-0.5">•</span>
+                            <span>
+                              <code className="bg-blue-100 px-1 rounded text-xs">id</code>: String identifier (UUID or custom)
+                            </span>
+                          </li>
+                          <li className="flex items-start gap-2">
+                            <span className="text-blue-600 mt-0.5">•</span>
+                            <span>
+                              <code className="bg-blue-100 px-1 rounded text-xs">title</code>: Document title (Hebrew)
+                            </span>
+                          </li>
+                          <li className="flex items-start gap-2">
+                            <span className="text-blue-600 mt-0.5">•</span>
+                            <span>
+                              <code className="bg-blue-100 px-1 rounded text-xs">type</code>: Must be <code className="bg-blue-100 px-0.5 rounded text-xs">'law'</code>, <code className="bg-blue-100 px-0.5 rounded text-xs">'regulation'</code>, <code className="bg-blue-100 px-0.5 rounded text-xs">'directive'</code>, <code className="bg-blue-100 px-0.5 rounded text-xs">'circular'</code>, <code className="bg-blue-100 px-0.5 rounded text-xs">'policy'</code>, or <code className="bg-blue-100 px-0.5 rounded text-xs">'other'</code>
+                            </span>
+                          </li>
+                          <li className="flex items-start gap-2">
+                            <span className="text-blue-600 mt-0.5">•</span>
+                            <span>
+                              <code className="bg-blue-100 px-1 rounded text-xs">language</code>: Must be <code className="bg-blue-100 px-0.5 rounded text-xs">'hebrew'</code>
+                            </span>
+                          </li>
+                          <li className="flex items-start gap-2">
+                            <span className="text-blue-600 mt-0.5">•</span>
+                            <span>
+                              <code className="bg-blue-100 px-1 rounded text-xs">version</code>: Object with required <code className="bg-blue-100 px-0.5 rounded text-xs">number</code> field
+                            </span>
+                          </li>
+                          <li className="flex items-start gap-2">
+                            <span className="text-blue-600 mt-0.5">•</span>
+                            <span>
+                              <code className="bg-blue-100 px-1 rounded text-xs">source</code>: Object with required <code className="bg-blue-100 px-0.5 rounded text-xs">url</code> and <code className="bg-blue-100 px-0.5 rounded text-xs">fetched_at</code> fields
+                            </span>
+                          </li>
+                          <li className="flex items-start gap-2">
+                            <span className="text-blue-600 mt-0.5">•</span>
+                            <span>
+                              <code className="bg-blue-100 px-1 rounded text-xs">sections</code>: Array of section objects
+                            </span>
+                          </li>
+                        </ul>
+                      </div>
+                      
+                      <div>
+                        <h5 className="text-xs font-semibold text-blue-800 mb-1.5">Section (required fields):</h5>
+                        <ul className="text-sm text-blue-800 space-y-1">
+                          <li className="flex items-start gap-2">
+                            <span className="text-blue-600 mt-0.5">•</span>
+                            <span>
+                              <code className="bg-blue-100 px-1 rounded text-xs">marker</code>: Unique structural marker (e.g., "1", "1.א", "(b)") - must be unique at same nesting level
+                            </span>
+                          </li>
+                          <li className="flex items-start gap-2">
+                            <span className="text-blue-600 mt-0.5">•</span>
+                            <span>
+                              <code className="bg-blue-100 px-1 rounded text-xs">sections</code>: Array of nested sections (can be empty)
+                            </span>
+                          </li>
+                        </ul>
+                        <p className="text-xs text-blue-700 mt-1.5 italic">
+                          Optional: <code className="bg-blue-100 px-0.5 rounded text-xs">id</code> (auto-generated if not provided), <code className="bg-blue-100 px-0.5 rounded text-xs">title</code>, <code className="bg-blue-100 px-0.5 rounded text-xs">content</code>
+                        </p>
+                      </div>
+                    </div>
+
                     {/* Schema Reference Box */}
                     <div className="mt-4 p-4 bg-white border border-blue-200 rounded-lg">
                       <div className="flex items-center justify-between mb-2">
