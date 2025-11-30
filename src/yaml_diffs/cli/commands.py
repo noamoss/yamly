@@ -208,6 +208,17 @@ def diff_command(
                 condition = ":".join(parts[2:])  # Rejoin in case value contains ':'
                 if "=" in condition:
                     when_field, when_value = condition.split("=", 1)
+                    when_field = when_field.strip() if when_field else None
+                    when_value = when_value.strip() if when_value else None
+
+                    # Validate that when_field is not empty if condition is specified
+                    if not when_field:
+                        handle_cli_error(
+                            ValueError(
+                                f"Invalid identity rule format: '{rule_str}'. "
+                                "when_field cannot be empty when condition is specified."
+                            )
+                        )
                 else:
                     handle_cli_error(
                         ValueError(
