@@ -208,6 +208,16 @@ yaml-diffs diff --output diff.json old.yaml new.yaml
 
 ### API Server Commands
 
+**Quick Start (Recommended):**
+```bash
+# Start both backend and frontend servers
+./scripts/dev.sh
+
+# Stop all servers
+./scripts/dev-stop.sh
+```
+
+**Manual Start:**
 ```bash
 # Run API server locally
 uvicorn src.yaml_diffs.api_server.main:app --reload --port 8000
@@ -220,6 +230,16 @@ uvicorn src.yaml_diffs.api_server.main:app --host 0.0.0.0 --port ${PORT:-8000}
 
 The Web UI is a Next.js application located in the `ui/` directory.
 
+**Quick Start (Recommended):**
+```bash
+# Start both backend and frontend servers (from project root)
+./scripts/dev.sh
+
+# Stop all servers
+./scripts/dev-stop.sh
+```
+
+**Manual Start:**
 ```bash
 # Navigate to UI directory
 cd ui
