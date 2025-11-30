@@ -61,7 +61,7 @@ export async function testApiConnection(): Promise<{ success: boolean; message: 
 
     // Check for CORS-specific errors
     if (errorMsg.includes("CORS") || errorMsg.includes("Failed to fetch")) {
-      const origin = typeof window !== 'undefined' ? window.location.origin : 'localhost:3000';
+      const origin = typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000';
       return {
         success: false,
         message: `❌ CORS Error: The Railway API is blocking requests from ${origin}. Add "${origin}" to the CORS_ORIGINS environment variable in Railway project settings (Variables tab).`
