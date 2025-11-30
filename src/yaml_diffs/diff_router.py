@@ -45,10 +45,10 @@ def detect_mode(yaml_data: dict[str, Any]) -> DiffMode:
         if isinstance(doc, dict) and "sections" in doc:
             sections = doc["sections"]
             if isinstance(sections, list) and sections:
-                # Check if first section has a marker field
-                first_section = sections[0]
-                if isinstance(first_section, dict) and "marker" in first_section:
-                    return DiffMode.LEGAL_DOCUMENT
+                # Check if ANY section has a marker field (not just first)
+                for section in sections:
+                    if isinstance(section, dict) and "marker" in section:
+                        return DiffMode.LEGAL_DOCUMENT
 
     return DiffMode.GENERAL
 
@@ -94,11 +94,20 @@ def diff_yaml_with_mode(
         # Use existing legal document diff
         from io import StringIO
 
-        old_io = StringIO(old_yaml)
-        new_io = StringIO(new_yaml)
-        old_doc = load_document(old_io)
-        new_doc = load_document(new_io)
-        return diff_documents(old_doc, new_doc)
+        try:
+            old_io = StringIO(old_yaml)
+            new_io = StringIO(new_yaml)
+            old_doc = load_document(old_io)
+            new_doc = load_document(new_io)
+            return diff_documents(old_doc, new_doc)
+        except (ValueError, TypeError) as e:
+            # Handle validation errors with clearer context
+            if mode == DiffMode.LEGAL_DOCUMENT:
+                # Mode was explicitly set, so provide clearer error
+                raise ValueError(
+                    f"Documents do not match legal document schema (mode was explicitly set to 'legal_document'): {e}"
+                ) from e
+            raise
     else:
         # Use generic YAML diff
         if options is None:

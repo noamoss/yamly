@@ -102,6 +102,7 @@ def _calculate_similarity(obj1: Any, obj2: Any) -> float:
     """Calculate structural similarity between two objects (0.0 to 1.0).
 
     Uses JSON serialization and word-based Jaccard similarity.
+    For very large objects (>10KB), uses simple equality check for performance.
 
     Args:
         obj1: First object
@@ -112,6 +113,16 @@ def _calculate_similarity(obj1: Any, obj2: Any) -> float:
     """
     if obj1 == obj2:
         return 1.0
+
+    # Skip similarity for very large objects (performance optimization)
+    try:
+        size1 = len(str(obj1))
+        size2 = len(str(obj2))
+        if size1 > 10000 or size2 > 10000:  # Configurable threshold (10KB)
+            # For very large objects, use simple equality check
+            return 1.0 if obj1 == obj2 else 0.0
+    except (TypeError, ValueError):
+        pass
 
     try:
         # Serialize to JSON strings
@@ -205,6 +216,9 @@ def diff_sequence(
         matched_new_indices.add(new_idx)
 
         # Recurse to find nested changes
+        # Note: Path uses old index for consistency, even when items are matched by identity
+        # and might be at different positions in the new array. This ensures stable paths
+        # for tracking changes across versions.
         item_path = f"{path}[{old_idx}]"
         nested_changes = diff_node(old_item, new_item, item_path, parent_key, options, ctx)
 

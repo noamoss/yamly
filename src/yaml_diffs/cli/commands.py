@@ -216,8 +216,19 @@ def diff_command(
                 )
             )
 
-        # Convert mode string to enum
-        mode_enum = DiffMode[mode.upper()]
+        # Convert mode string to enum with error handling
+        MODE_MAP = {
+            "auto": DiffMode.AUTO,
+            "general": DiffMode.GENERAL,
+            "legal_document": DiffMode.LEGAL_DOCUMENT,
+        }
+        mode_enum = MODE_MAP.get(mode.lower())
+        if mode_enum is None:
+            handle_cli_error(
+                ValueError(f"Invalid mode '{mode}'. Must be one of: auto, general, legal_document")
+            )
+            # handle_cli_error calls sys.exit(1) and never returns
+            return  # type: ignore[unreachable]
 
         # Convert filter_change_types to ChangeType enum if provided
         change_type_filters: list[ChangeType] | None = None

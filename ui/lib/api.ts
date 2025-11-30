@@ -225,6 +225,20 @@ export async function diffDocuments(
       });
     }
 
+    // Also handle generic_diff changes
+    if (data.generic_diff?.changes) {
+      data.generic_diff.changes = data.generic_diff.changes.map((change, index) => {
+        if (!change.id) {
+          const fallbackId = `${change.path}-${change.change_type}-${index}`;
+          if (process.env.NODE_ENV === 'development') {
+            console.warn(`Generic change missing id field, using fallback ID: ${fallbackId}`);
+          }
+          return { ...change, id: fallbackId };
+        }
+        return change;
+      });
+    }
+
     return data;
   } catch (error) {
 
