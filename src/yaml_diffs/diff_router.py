@@ -7,6 +7,11 @@ from typing import Any
 
 from yaml_diffs.diff import diff_documents
 from yaml_diffs.diff_types import DocumentDiff
+from yaml_diffs.exceptions import (
+    PydanticValidationError,
+    ValidationError,
+    YAMLLoadError,
+)
 from yaml_diffs.generic_diff import diff_yaml_generic
 from yaml_diffs.generic_diff_types import DiffOptions, GenericDiff
 from yaml_diffs.loader import load_document
@@ -100,12 +105,19 @@ def diff_yaml_with_mode(
             old_doc = load_document(old_io)
             new_doc = load_document(new_io)
             return diff_documents(old_doc, new_doc)
-        except (ValueError, TypeError) as e:
+        except (YAMLLoadError, PydanticValidationError, ValidationError) as e:
             # Handle validation errors with clearer context
             if mode == DiffMode.LEGAL_DOCUMENT:
                 # Mode was explicitly set, so provide clearer error
                 raise ValueError(
                     f"Documents do not match legal document schema (mode was explicitly set to 'legal_document'): {e}"
+                ) from e
+            raise
+        except (ValueError, TypeError) as e:
+            # Handle other value/type errors
+            if mode == DiffMode.LEGAL_DOCUMENT:
+                raise ValueError(
+                    f"Error processing legal document (mode was explicitly set to 'legal_document'): {e}"
                 ) from e
             raise
     else:
