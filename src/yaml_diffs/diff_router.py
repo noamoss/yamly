@@ -79,10 +79,18 @@ def diff_yaml_with_mode(
         ValueError: If mode is LEGAL_DOCUMENT but documents don't match schema
     """
     import yaml  # type: ignore[import-untyped]
+    from yaml import YAMLError  # type: ignore[import-untyped]
 
-    # Parse YAML
-    old_data = yaml.safe_load(old_yaml)
-    new_data = yaml.safe_load(new_yaml)
+    # Parse YAML with error handling
+    try:
+        old_data = yaml.safe_load(old_yaml)
+    except YAMLError as e:
+        raise ValueError(f"Invalid YAML in old_yaml: {e}") from e
+
+    try:
+        new_data = yaml.safe_load(new_yaml)
+    except YAMLError as e:
+        raise ValueError(f"Invalid YAML in new_yaml: {e}") from e
 
     if old_data is None or new_data is None:
         raise ValueError("YAML documents cannot be empty")

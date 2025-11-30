@@ -222,4 +222,3 @@ class TestErrorHandling:
 
         with pytest.raises(yaml.YAMLError):
             diff_yaml_with_mode("invalid: yaml: content:", "valid: true", mode=DiffMode.AUTO)
-
