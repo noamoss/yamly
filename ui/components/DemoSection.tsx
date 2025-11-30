@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import { DiffMode, IdentityRule } from "@/lib/types";
 import ModeSelector from "./ModeSelector";
+import SchemaViewer from "./SchemaViewer";
 
 interface Example {
   id: string;
@@ -66,6 +67,7 @@ const exampleDefinitions: Example[] = [
 
 interface DemoSectionProps {
   onLoadExample: (oldYaml: string, newYaml: string, mode: "general" | "legal_document") => void;
+  onClearExample: () => void;
   mode: DiffMode;
   onModeChange: (mode: DiffMode) => void;
   isModeLocked: boolean;
@@ -145,6 +147,7 @@ function ExampleButton({ example, isSelected, isLoading, onClick, disabled }: Ex
 
 export default function DemoSection({
   onLoadExample,
+  onClearExample,
   mode,
   onModeChange,
   isModeLocked,
@@ -156,6 +159,7 @@ export default function DemoSection({
   const [isLoading, setIsLoading] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [expandedSection, setExpandedSection] = useState<string | null>(null);
+  const [showSchema, setShowSchema] = useState(false);
   const abortControllerRef = useRef<AbortController | null>(null);
 
   const handleLoadExample = async (example: Example) => {
@@ -269,6 +273,7 @@ export default function DemoSection({
                 onClick={() => {
                   onModeLockChange(false);
                   setSelectedExample(null);
+                  onClearExample();
                 }}
                 className="text-xs text-[var(--brand-primary)] hover:underline"
               >
@@ -323,54 +328,127 @@ export default function DemoSection({
             </button>
             {expandedSection === "requirements" && (
               <div className="px-4 pb-4 border-t border-gray-200 bg-blue-50">
-                <div className="mt-3 grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <h4 className="font-semibold text-blue-900 mb-2 text-sm">General YAML Mode</h4>
+                {mode === "auto" ? (
+                  // Show both modes when auto-detect
+                  <div className="mt-3 grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <h4 className="font-semibold text-blue-900 mb-2 text-sm">General YAML Mode</h4>
+                      <ul className="text-sm text-blue-800 space-y-1.5">
+                        <li className="flex items-start gap-2">
+                          <span className="text-blue-600 mt-0.5">•</span>
+                          <span>Any valid YAML file works</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <span className="text-blue-600 mt-0.5">•</span>
+                          <span>Uses path-based change tracking</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <span className="text-blue-600 mt-0.5">•</span>
+                          <span>Auto-detects array item identity</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <span className="text-blue-600 mt-0.5">•</span>
+                          <span>Great for configs, K8s manifests</span>
+                        </li>
+                      </ul>
+                    </div>
+                    <div>
+                      <h4 className="font-semibold text-blue-900 mb-2 text-sm">Legal Document Mode</h4>
+                      <ul className="text-sm text-blue-800 space-y-1.5">
+                        <li className="flex items-start gap-2">
+                          <span className="text-blue-600 mt-0.5">•</span>
+                          <span>
+                            Requires <code className="bg-blue-100 px-1 rounded text-xs">document:</code> top-level key
+                          </span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <span className="text-blue-600 mt-0.5">•</span>
+                          <span>
+                            Sections need <code className="bg-blue-100 px-1 rounded text-xs">marker</code> field
+                          </span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <span className="text-blue-600 mt-0.5">•</span>
+                          <span>Schema validation built-in</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <span className="text-blue-600 mt-0.5">•</span>
+                          <span>Hebrew legal documents</span>
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+                ) : mode === "general" ? (
+                  // Show only General YAML mode
+                  <div className="mt-3">
+                    <h4 className="font-semibold text-blue-900 mb-2 text-sm">General YAML Mode Requirements</h4>
                     <ul className="text-sm text-blue-800 space-y-1.5">
                       <li className="flex items-start gap-2">
                         <span className="text-blue-600 mt-0.5">•</span>
-                        <span>Any valid YAML file works</span>
+                        <span>Any valid YAML file works - no specific structure required</span>
                       </li>
                       <li className="flex items-start gap-2">
                         <span className="text-blue-600 mt-0.5">•</span>
-                        <span>Uses path-based change tracking</span>
+                        <span>Uses path-based change tracking (e.g., <code className="bg-blue-100 px-1 rounded text-xs">spec.replicas</code>)</span>
                       </li>
                       <li className="flex items-start gap-2">
                         <span className="text-blue-600 mt-0.5">•</span>
-                        <span>Auto-detects array item identity</span>
+                        <span>Auto-detects array item identity by common fields (<code className="bg-blue-100 px-1 rounded text-xs">id</code>, <code className="bg-blue-100 px-1 rounded text-xs">name</code>, <code className="bg-blue-100 px-1 rounded text-xs">key</code>)</span>
                       </li>
                       <li className="flex items-start gap-2">
                         <span className="text-blue-600 mt-0.5">•</span>
-                        <span>Great for configs, K8s manifests</span>
+                        <span>Perfect for config files, Kubernetes manifests, CI/CD pipelines, and more</span>
                       </li>
                     </ul>
                   </div>
-                  <div>
-                    <h4 className="font-semibold text-blue-900 mb-2 text-sm">Legal Document Mode</h4>
+                ) : (
+                  // Show only Legal Document mode with schema reference
+                  <div className="mt-3">
+                    <h4 className="font-semibold text-blue-900 mb-2 text-sm">Legal Document Mode Requirements</h4>
                     <ul className="text-sm text-blue-800 space-y-1.5">
                       <li className="flex items-start gap-2">
                         <span className="text-blue-600 mt-0.5">•</span>
                         <span>
-                          Requires <code className="bg-blue-100 px-1 rounded text-xs">document:</code> top-level key
+                          Must have <code className="bg-blue-100 px-1 rounded text-xs">document:</code> as the top-level key
                         </span>
                       </li>
                       <li className="flex items-start gap-2">
                         <span className="text-blue-600 mt-0.5">•</span>
                         <span>
-                          Sections need <code className="bg-blue-100 px-1 rounded text-xs">marker</code> field
+                          All sections require a unique <code className="bg-blue-100 px-1 rounded text-xs">marker</code> field
                         </span>
                       </li>
                       <li className="flex items-start gap-2">
                         <span className="text-blue-600 mt-0.5">•</span>
-                        <span>Schema validation built-in</span>
+                        <span>Schema validation is applied automatically</span>
                       </li>
                       <li className="flex items-start gap-2">
                         <span className="text-blue-600 mt-0.5">•</span>
-                        <span>Hebrew legal documents</span>
+                        <span>Designed for Hebrew legal and regulatory documents</span>
                       </li>
                     </ul>
+                    {/* Schema Reference Box */}
+                    <div className="mt-4 p-4 bg-white border border-blue-200 rounded-lg">
+                      <div className="flex items-center justify-between mb-2">
+                        <h5 className="font-semibold text-blue-900 text-sm flex items-center gap-2">
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                          </svg>
+                          Predefined Schema
+                        </h5>
+                        <button
+                          onClick={() => setShowSchema(true)}
+                          className="text-xs text-[var(--brand-primary)] hover:underline flex items-center gap-1"
+                        >
+                          View Full Schema →
+                        </button>
+                      </div>
+                      <p className="text-xs text-blue-800">
+                        Legal documents must follow the OpenSpec schema with recursive sections. Each section contains a <code className="bg-blue-100 px-1 rounded">marker</code> (required), optional <code className="bg-blue-100 px-1 rounded">title</code>, <code className="bg-blue-100 px-1 rounded">content</code>, and nested <code className="bg-blue-100 px-1 rounded">sections</code>.
+                      </p>
+                    </div>
                   </div>
-                </div>
+                )}
               </div>
             )}
           </div>
@@ -531,6 +609,9 @@ export default function DemoSection({
           </div>
         )}
       </div>
+
+      {/* Schema Viewer Modal */}
+      <SchemaViewer isOpen={showSchema} onClose={() => setShowSchema(false)} />
     </div>
   );
 }

@@ -140,6 +140,12 @@ export default function Home() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
+  const handleClearExample = () => {
+    setOldYaml("");
+    setNewYaml("");
+    setIsModeLocked(false);
+  };
+
   return (
     <div className="min-h-screen bg-white">
       {/* Header */}
@@ -280,6 +286,7 @@ export default function Home() {
       {/* Demo Section */}
       <DemoSection
         onLoadExample={handleLoadExample}
+        onClearExample={handleClearExample}
         mode={diffMode}
         onModeChange={setDiffMode}
         isModeLocked={isModeLocked}
