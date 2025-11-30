@@ -81,3 +81,66 @@ CORS_ORIGINS=http://localhost:3000,https://your-vercel-app.vercel.app
 - **React Query** - API state management
 - **Zustand** - Local state for discussions
 - **diff-match-patch** - Character-level diff highlighting
+
+## Branding
+
+The UI uses The Pitz Studio's branding guidelines.
+
+### Brand Colors
+
+Brand colors are defined as CSS variables in `app/globals.css`:
+
+- **Primary Blue**: `#2563EB` - Used for buttons, links, active states, and focus outlines
+- **Dark Slate**: `#1E293B` - Used for headings, body text, and the wordmark
+- **Background**: `#ffffff` - Clean white background
+
+These colors are accessible via CSS variables:
+- `--brand-primary: #2563EB`
+- `--brand-text: #1E293B`
+- `--brand-background: #ffffff`
+
+### Brand Assets
+
+Brand assets are stored in `public/`:
+
+- **Favicon**: `public/favicon.svg` - Studio favicon (SVG format, sourced from about.thepitz.studio)
+- **Logo**: Currently using text-based wordmark "the pitz studio" in the header
+
+To update the favicon:
+1. Replace `public/favicon.svg` with the new favicon file
+2. Ensure the file is optimized (SVG format is recommended for scalability)
+3. The favicon is referenced in `app/layout.tsx` via the metadata API
+
+### Branding Components
+
+- **Header Wordmark**: Text-based "the pitz studio" wordmark in the header, linking to `https://about.thepitz.studio/`
+- **BrandingBubble**: Floating bubble component (`components/BrandingBubble.tsx`) anchored to bottom-right corner
+  - Displays "The Pitz Studio"
+  - Links to `https://about.thepitz.studio/`
+  - Hidden on mobile devices (visible on `md` breakpoint and above)
+  - Fully accessible with keyboard navigation and screen reader support
+
+### Accessibility Requirements
+
+All branding elements must meet WCAG AA contrast requirements:
+- Text contrast: Minimum 4.5:1 ratio
+- UI component contrast: Minimum 3:1 ratio
+- All interactive elements must be keyboard accessible
+- Focus states must be visible using the brand primary color
+- Screen reader labels must be descriptive (e.g., `aria-label="Made by The Pitz Studio"`)
+
+### Updating Branding
+
+To update branding in the future:
+
+1. **Colors**: Update CSS variables in `app/globals.css` under `:root`
+2. **Wordmark**: Modify the header wordmark in `app/page.tsx` (around line 87)
+3. **Favicon**: Replace `public/favicon.svg` with the new asset
+4. **Bubble**: Update `components/BrandingBubble.tsx` for bubble styling or content
+5. **Metadata**: Update page title and description in `app/layout.tsx`
+
+Always verify:
+- Color contrast ratios meet WCAG AA standards
+- All links work correctly
+- Responsive behavior on mobile/tablet/desktop
+- Keyboard navigation and accessibility
