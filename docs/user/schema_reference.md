@@ -173,14 +173,16 @@ content: string         # Optional: Section content (defaults to empty string)
 
 ### Section Fields
 
-#### `id` (string, required)
+#### `id` (string, optional)
 
-Stable section identifier. Must match pattern: `^[a-zA-Z0-9_-]+$`
+Optional stable section identifier. If not provided, a UUID will be auto-generated automatically. Must match pattern: `^[a-zA-Z0-9_-]+$` when provided.
 
 **Examples:**
 - `"sec-1"`
 - `"sec-1-a"`
 - `"550e8400-e29b-41d4-a716-446655440000"`
+
+**Note:** IDs are used for tracking sections across document versions but are not used for matching (markers are used instead). Auto-generated IDs are UUIDs.
 
 #### `marker` (string, required)
 

@@ -12,12 +12,14 @@ class Section(BaseModel):
     """Represents a section in a legal document.
 
     Sections can be nested recursively to unlimited depth. Each section
-    must have a stable identifier and a marker for reliable diffing across
-    versions. Markers are the primary identifiers used for matching sections.
+    must have a marker for reliable diffing across versions. Section IDs
+    are optional and will be auto-generated if not provided. Markers are
+    the primary identifiers used for matching sections.
 
     Attributes:
-        id: Unique identifier (string). Auto-generated UUID if not provided.
-            Must match pattern: alphanumeric characters, hyphens, underscores.
+        id: Optional unique identifier (string). Auto-generated UUID if not
+            provided. Must match pattern: alphanumeric characters, hyphens,
+            underscores. Used for tracking but not for matching sections.
         marker: Required structural marker (e.g., "א", "1", "a"). Used as
             primary identifier for diffing. Must be unique within same nesting level.
         content: Text content for this section level only (not children).
@@ -26,8 +28,11 @@ class Section(BaseModel):
         sections: Required list of nested child sections (can be empty).
 
     Examples:
+        >>> # With explicit ID
         >>> section = Section(id="sec-1", marker="1", content="Hello")
-        >>> nested = Section(id="sec-1-a", marker="א", content="World", sections=[section])
+        >>> # Without ID (will be auto-generated)
+        >>> section_auto = Section(marker="1", content="Hello")
+        >>> nested = Section(marker="א", content="World", sections=[section])
     """
 
     id: str = Field(
