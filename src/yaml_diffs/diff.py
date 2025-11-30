@@ -436,7 +436,7 @@ def diff_documents(old: Document, new: Document) -> DocumentDiff:
     unmatched_old = {k: v for k, v in old_map.items() if k not in exact_matches}
     unmatched_new = {k: v for k, v in new_map.items() if k not in exact_matches}
 
-    # Find moved sections (same marker, different path)
+    # Find moved sections (different path, possibly different marker)
     moved_matches = _find_moved_sections(unmatched_old, unmatched_new)
 
     for old_key, new_key in moved_matches:
