@@ -152,7 +152,8 @@ def _find_moved_sections(
     (parent sections) to avoid false positives. Uses best-match approach for
     one-to-one matching to avoid cartesian product issues.
 
-    Note: Title changes are handled separately after movement detection. A section
+    Note: Title differences don't prevent movement detection - they're tracked as
+    a separate change type (TITLE_CHANGED) after movement is detected. A section
     can be detected as moved even if the title changed, as long as content
     similarity is ≥0.95.
 
@@ -179,6 +180,13 @@ def _find_moved_sections(
 
     # Match all unmatched sections by content similarity (one-to-one matching)
     # Process old sections in order and find best match in new sections
+    #
+    # Performance note: This algorithm is O(n*m) where n is the number of unmatched
+    # old sections and m is the number of unmatched new sections. This is necessary
+    # to correctly detect movements when markers change. For most use cases, this
+    # is acceptable since unmatched sections are typically a small subset of the
+    # document. The previous marker-based approach was O(n) but couldn't handle
+    # marker changes.
     for old_key in list(unmatched_old.keys()):
         old_section, old_marker_path, _ = unmatched_old[old_key]
 
@@ -202,6 +210,10 @@ def _find_moved_sections(
             similarity = _calculate_content_similarity(old_section.content, new_section.content)
             if similarity >= 0.95 and similarity > best_similarity:
                 # Found a better match - update best match
+                # Note: If multiple sections have identical similarity scores, the first
+                # one encountered (based on iteration order) will be selected. This is
+                # deterministic but worth noting if non-deterministic behavior would be
+                # problematic for a use case.
                 best_match = new_key
                 best_similarity = similarity
 
