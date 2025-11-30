@@ -4,9 +4,11 @@ import { join } from "path";
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { path: string[] } }
+  context: { params: Promise<{ path: string[] }> | { path: string[] } }
 ) {
   try {
+    // Handle both sync and async params (Next.js 15+ uses async)
+    const params = await Promise.resolve(context.params);
     // Build the file path from the route params
     const filePath = params.path.join("/");
 
@@ -35,7 +37,25 @@ export async function GET(
     }
 
     // Read the markdown file from the project root
-    const fullPath = join(process.cwd(), "..", actualPath);
+    // In Next.js, process.cwd() in API routes is the project root (ui/)
+    // So we need to go up one level to reach the actual project root
+    const projectRoot = join(process.cwd(), "..");
+    const fullPath = join(projectRoot, actualPath);
+
+    // Verify file exists before reading
+    try {
+      const { access, constants } = await import("fs/promises");
+      await access(fullPath, constants.F_OK);
+    } catch (accessError) {
+      console.error("File does not exist:", fullPath);
+      console.error("Project root:", projectRoot);
+      console.error("Actual path:", actualPath);
+      return NextResponse.json(
+        { error: `File not found: ${fullPath}` },
+        { status: 404 }
+      );
+    }
+
     const content = await readFile(fullPath, "utf-8");
 
     return NextResponse.json({ content }, {
@@ -45,8 +65,10 @@ export async function GET(
     });
   } catch (error) {
     console.error("Error reading documentation:", error);
+    const errorMessage =
+      error instanceof Error ? error.message : "Failed to load documentation";
     return NextResponse.json(
-      { error: "Failed to load documentation" },
+      { error: errorMessage, details: String(error) },
       { status: 500 }
     );
   }

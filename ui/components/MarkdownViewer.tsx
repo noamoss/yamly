@@ -24,12 +24,23 @@ export default function MarkdownViewer({
       try {
         const response = await fetch(`/api/docs/${docPath}`);
         if (!response.ok) {
-          throw new Error("Failed to load documentation");
+          const errorData = await response.json().catch(() => ({}));
+          throw new Error(
+            errorData.error || `Failed to load documentation (${response.status})`
+          );
         }
         const data = await response.json();
+        if (!data.content) {
+          throw new Error("Documentation content is empty");
+        }
         setContent(data.content);
       } catch (err) {
-        setError(err instanceof Error ? err.message : "Failed to load documentation");
+        const errorMsg =
+          err instanceof Error
+            ? err.message
+            : "Failed to load documentation";
+        console.error("Error loading documentation:", err);
+        setError(errorMsg);
       } finally {
         setIsLoading(false);
       }
