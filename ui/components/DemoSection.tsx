@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 
 interface Example {
   id: string;
@@ -47,17 +47,27 @@ export default function DemoSection({ onLoadExample }: DemoSectionProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [expandedSection, setExpandedSection] = useState<string | null>(null);
+  const abortControllerRef = useRef<AbortController | null>(null);
 
   const handleLoadExample = async (example: Example) => {
+    // Abort previous request if any
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+
+    // Create new abort controller
+    abortControllerRef.current = new AbortController();
+    const signal = abortControllerRef.current.signal;
+
     setIsLoading(true);
     setSelectedExample(example.id);
     setLoadError(null);
 
     try {
-      // Fetch both YAML files
+      // Fetch both YAML files with abort signal
       const [oldResponse, newResponse] = await Promise.all([
-        fetch(example.oldYamlPath),
-        fetch(example.newYamlPath),
+        fetch(example.oldYamlPath, { signal }),
+        fetch(example.newYamlPath, { signal }),
       ]);
 
       if (!oldResponse.ok || !newResponse.ok) {
@@ -69,13 +79,32 @@ export default function DemoSection({ onLoadExample }: DemoSectionProps) {
         newResponse.text(),
       ]);
 
-      onLoadExample(oldYaml, newYaml);
-      setIsLoading(false);
+      // Only update state if request wasn't aborted
+      if (!signal.aborted) {
+        onLoadExample(oldYaml, newYaml);
+        setIsLoading(false);
+      }
     } catch (error) {
-      setLoadError(error instanceof Error ? error.message : "Failed to load example");
-      setIsLoading(false);
+      // Ignore abort errors
+      if (error instanceof Error && error.name === "AbortError") {
+        return;
+      }
+      // Only update state if request wasn't aborted
+      if (!signal.aborted) {
+        setLoadError(error instanceof Error ? error.message : "Failed to load example");
+        setIsLoading(false);
+      }
     }
   };
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+    };
+  }, []);
 
   const toggleSection = (section: string) => {
     setExpandedSection(expandedSection === section ? null : section);

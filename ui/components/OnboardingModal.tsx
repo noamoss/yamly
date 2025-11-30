@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 
 interface OnboardingModalProps {
   isOpen: boolean;
@@ -26,14 +26,25 @@ export default function OnboardingModal({
   onDontShowAgain,
 }: OnboardingModalProps) {
   const [isClosing, setIsClosing] = useState(false);
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const handleClose = () => {
     setIsClosing(true);
-    setTimeout(() => {
+    timeoutRef.current = setTimeout(() => {
       onClose();
       setIsClosing(false);
+      timeoutRef.current = null;
     }, 200);
   };
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
+  }, []);
 
   const handleDontShowAgain = () => {
     markOnboardingAsSeen();

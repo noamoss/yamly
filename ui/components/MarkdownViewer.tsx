@@ -18,11 +18,15 @@ export default function MarkdownViewer({
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    const abortController = new AbortController();
+
     const fetchMarkdown = async () => {
       setIsLoading(true);
       setError(null);
       try {
-        const response = await fetch(`/api/docs/${docPath}`);
+        const response = await fetch(`/api/docs/${docPath}`, {
+          signal: abortController.signal,
+        });
         if (!response.ok) {
           const errorData = await response.json().catch(() => ({}));
           throw new Error(
@@ -33,20 +37,37 @@ export default function MarkdownViewer({
         if (!data.content) {
           throw new Error("Documentation content is empty");
         }
-        setContent(data.content);
+        // Only update state if request wasn't aborted
+        if (!abortController.signal.aborted) {
+          setContent(data.content);
+        }
       } catch (err) {
-        const errorMsg =
-          err instanceof Error
-            ? err.message
-            : "Failed to load documentation";
-        console.error("Error loading documentation:", err);
-        setError(errorMsg);
+        // Ignore abort errors
+        if (err instanceof Error && err.name === "AbortError") {
+          return;
+        }
+        // Only update state if request wasn't aborted
+        if (!abortController.signal.aborted) {
+          const errorMsg =
+            err instanceof Error
+              ? err.message
+              : "Failed to load documentation";
+          console.error("Error loading documentation:", err);
+          setError(errorMsg);
+        }
       } finally {
-        setIsLoading(false);
+        // Only update loading state if request wasn't aborted
+        if (!abortController.signal.aborted) {
+          setIsLoading(false);
+        }
       }
     };
 
     fetchMarkdown();
+
+    return () => {
+      abortController.abort();
+    };
   }, [docPath]);
 
   if (isLoading) {

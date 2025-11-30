@@ -1,5 +1,7 @@
 "use client";
 
+import { useState } from "react";
+
 interface DocumentationLink {
   label: string;
   url: string;
@@ -45,13 +47,28 @@ export default function DocumentationLinks({
   className = "",
   onDocClick,
 }: DocumentationLinksProps) {
+  const [isOpen, setIsOpen] = useState(false);
+
   if (variant === "dropdown") {
     return (
-      <div className={`relative group ${className}`}>
+      <div
+        className={`relative ${className}`}
+        onMouseEnter={() => setIsOpen(true)}
+        onMouseLeave={() => setIsOpen(false)}
+      >
         <button
           className="px-3 sm:px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-sm sm:text-base flex items-center gap-2"
           aria-label="Documentation menu"
-          aria-expanded="false"
+          aria-expanded={isOpen}
+          onClick={() => setIsOpen(!isOpen)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              setIsOpen(!isOpen);
+            } else if (e.key === "Escape") {
+              setIsOpen(false);
+            }
+          }}
         >
           Documentation
           <svg
@@ -68,7 +85,11 @@ export default function DocumentationLinks({
             />
           </svg>
         </button>
-        <div className="absolute right-0 mt-2 w-64 bg-white rounded-lg shadow-lg border border-gray-200 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+        <div
+          className={`absolute right-0 mt-2 w-64 bg-white rounded-lg shadow-lg border border-gray-200 transition-all duration-200 z-50 ${
+            isOpen ? "opacity-100 visible" : "opacity-0 invisible"
+          }`}
+        >
           <div className="py-2">
             {documentationLinks.map((link) => (
               <button

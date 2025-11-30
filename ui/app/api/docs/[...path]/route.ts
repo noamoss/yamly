@@ -37,9 +37,10 @@ export async function GET(
     }
 
     // Read the markdown file from the project root
+    // Use environment variable if available, otherwise resolve relative to ui/ directory
     // In Next.js, process.cwd() in API routes is the project root (ui/)
     // So we need to go up one level to reach the actual project root
-    const projectRoot = join(process.cwd(), "..");
+    const projectRoot = process.env.PROJECT_ROOT || join(process.cwd(), "..");
     const fullPath = join(projectRoot, actualPath);
 
     // Verify file exists before reading
@@ -47,11 +48,13 @@ export async function GET(
       const { access, constants } = await import("fs/promises");
       await access(fullPath, constants.F_OK);
     } catch (accessError) {
+      // Log detailed error for server-side debugging
       console.error("File does not exist:", fullPath);
       console.error("Project root:", projectRoot);
       console.error("Actual path:", actualPath);
+      // Don't expose file system paths to client
       return NextResponse.json(
-        { error: `File not found: ${fullPath}` },
+        { error: "Documentation file not found" },
         { status: 404 }
       );
     }

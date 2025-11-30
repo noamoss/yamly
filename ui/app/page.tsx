@@ -74,13 +74,14 @@ export default function Home() {
     // Allow whitespace/comments before document: key
     const oldYamlTrimmed = oldYaml.trim();
     const newYamlTrimmed = newYaml.trim();
-    const documentKeyPattern = /^#.*\n?document:|^document:/m;
+    // Pattern matches 'document:' at start of line, optionally preceded by comments
+    const DOCUMENT_KEY_PATTERN = /^#.*\n?document:|^document:/m;
 
-    if (!documentKeyPattern.test(oldYamlTrimmed)) {
+    if (!DOCUMENT_KEY_PATTERN.test(oldYamlTrimmed)) {
       setError("YAML must have 'document:' as the top-level key. Example:\n\ndocument:\n  id: \"test\"\n  title: \"Test\"\n  ...");
       return;
     }
-    if (!documentKeyPattern.test(newYamlTrimmed)) {
+    if (!DOCUMENT_KEY_PATTERN.test(newYamlTrimmed)) {
       setError("YAML must have 'document:' as the top-level key. Example:\n\ndocument:\n  id: \"test\"\n  title: \"Test\"\n  ...");
       return;
     }

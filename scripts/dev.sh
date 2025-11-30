@@ -2,12 +2,8 @@
 # Start both backend and frontend dev servers
 # Usage: ./scripts/dev.sh
 
-# Activate virtual environment
-source .venv/bin/activate
-
 # Set CORS_ORIGINS for local development
 export CORS_ORIGINS="http://localhost:3000"
-
 
 set -e  # Exit on error
 
