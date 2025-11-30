@@ -9,6 +9,7 @@ interface ModeSelectorProps {
   onModeChange: (mode: "auto" | "general" | "legal_document") => void;
   identityRules: IdentityRule[];
   onIdentityRulesChange: (rules: IdentityRule[]) => void;
+  disabled?: boolean;
 }
 
 export default function ModeSelector({
@@ -16,6 +17,7 @@ export default function ModeSelector({
   onModeChange,
   identityRules,
   onIdentityRulesChange,
+  disabled = false,
 }: ModeSelectorProps) {
   const [showSchema, setShowSchema] = useState(false);
 
@@ -23,9 +25,19 @@ export default function ModeSelector({
     <div className="space-y-4 border-b border-gray-200 pb-4">
       <div>
         <div className="flex items-center justify-between mb-2">
-          <label className="block text-sm font-medium text-gray-700">
-            Diff Mode
-          </label>
+          <div className="flex items-center gap-2">
+            <label className="block text-sm font-medium text-gray-700">
+              Diff Mode
+            </label>
+            {disabled && (
+              <span className="text-xs text-gray-500 flex items-center gap-1">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                </svg>
+                Locked
+              </span>
+            )}
+          </div>
           {mode === "legal_document" && (
             <button
               type="button"
@@ -42,34 +54,37 @@ export default function ModeSelector({
         <div className="flex gap-2">
           <button
             type="button"
-            onClick={() => onModeChange("auto")}
+            onClick={() => !disabled && onModeChange("auto")}
+            disabled={disabled}
             className={`flex-1 px-3 py-2 text-sm font-medium rounded-lg border transition-colors ${
               mode === "auto"
                 ? "bg-[var(--brand-primary)] text-white border-[var(--brand-primary)]"
                 : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50"
-            }`}
+            } ${disabled ? "opacity-50 cursor-not-allowed" : ""}`}
           >
             Auto-detect
           </button>
           <button
             type="button"
-            onClick={() => onModeChange("general")}
+            onClick={() => !disabled && onModeChange("general")}
+            disabled={disabled}
             className={`flex-1 px-3 py-2 text-sm font-medium rounded-lg border transition-colors ${
               mode === "general"
                 ? "bg-[var(--brand-primary)] text-white border-[var(--brand-primary)]"
                 : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50"
-            }`}
+            } ${disabled ? "opacity-50 cursor-not-allowed" : ""}`}
           >
             General YAML
           </button>
           <button
             type="button"
-            onClick={() => onModeChange("legal_document")}
+            onClick={() => !disabled && onModeChange("legal_document")}
+            disabled={disabled}
             className={`flex-1 px-3 py-2 text-sm font-medium rounded-lg border transition-colors ${
               mode === "legal_document"
                 ? "bg-[var(--brand-primary)] text-white border-[var(--brand-primary)]"
                 : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50"
-            }`}
+            } ${disabled ? "opacity-50 cursor-not-allowed" : ""}`}
           >
             Legal Document
           </button>

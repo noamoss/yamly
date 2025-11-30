@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
+import { DiffMode, IdentityRule } from "@/lib/types";
+import ModeSelector from "./ModeSelector";
 
 interface Example {
   id: string;
@@ -63,7 +65,13 @@ const exampleDefinitions: Example[] = [
 ];
 
 interface DemoSectionProps {
-  onLoadExample: (oldYaml: string, newYaml: string) => void;
+  onLoadExample: (oldYaml: string, newYaml: string, mode: "general" | "legal_document") => void;
+  mode: DiffMode;
+  onModeChange: (mode: DiffMode) => void;
+  isModeLocked: boolean;
+  onModeLockChange: (locked: boolean) => void;
+  identityRules: IdentityRule[];
+  onIdentityRulesChange: (rules: IdentityRule[]) => void;
 }
 
 interface ExampleButtonProps {
@@ -135,7 +143,15 @@ function ExampleButton({ example, isSelected, isLoading, onClick, disabled }: Ex
   );
 }
 
-export default function DemoSection({ onLoadExample }: DemoSectionProps) {
+export default function DemoSection({
+  onLoadExample,
+  mode,
+  onModeChange,
+  isModeLocked,
+  onModeLockChange,
+  identityRules,
+  onIdentityRulesChange,
+}: DemoSectionProps) {
   const [selectedExample, setSelectedExample] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
@@ -174,7 +190,11 @@ export default function DemoSection({ onLoadExample }: DemoSectionProps) {
 
       // Only update state if request wasn't aborted
       if (!signal.aborted) {
-        onLoadExample(oldYaml, newYaml);
+        // Set mode to match example category and lock it
+        const exampleMode: "general" | "legal_document" = example.category === "generic" ? "general" : "legal_document";
+        onModeChange(exampleMode);
+        onModeLockChange(true);
+        onLoadExample(oldYaml, newYaml, exampleMode);
         setIsLoading(false);
       }
     } catch (error) {
@@ -189,6 +209,19 @@ export default function DemoSection({ onLoadExample }: DemoSectionProps) {
       }
     }
   };
+
+  // Filter examples based on mode
+  const getFilteredExamples = () => {
+    if (mode === "auto") {
+      return exampleDefinitions;
+    } else if (mode === "general") {
+      return exampleDefinitions.filter((e) => e.category === "generic");
+    } else {
+      return exampleDefinitions.filter((e) => e.category === "legal");
+    }
+  };
+
+  const filteredExamples = getFilteredExamples();
 
   // Cleanup on unmount
   useEffect(() => {
@@ -215,6 +248,34 @@ export default function DemoSection({ onLoadExample }: DemoSectionProps) {
             Compare two YAML files and see what changed. Perfect for tracking
             changes in legal documents, configuration files, and structured data.
           </p>
+        </div>
+
+        {/* Mode Selector - At the top */}
+        <div className="mb-4 bg-white rounded-lg p-4 border border-gray-200">
+          <ModeSelector
+            mode={mode}
+            onModeChange={onModeChange}
+            identityRules={identityRules}
+            onIdentityRulesChange={onIdentityRulesChange}
+            disabled={isModeLocked}
+          />
+          {isModeLocked && (
+            <div className="mt-3 flex items-center justify-between">
+              <p className="text-xs text-gray-600">
+                Mode is locked to match the selected example. Clear the example to change mode.
+              </p>
+              <button
+                type="button"
+                onClick={() => {
+                  onModeLockChange(false);
+                  setSelectedExample(null);
+                }}
+                className="text-xs text-[var(--brand-primary)] hover:underline"
+              >
+                Clear & Unlock
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Accordion Sections */}
@@ -357,44 +418,71 @@ export default function DemoSection({ onLoadExample }: DemoSectionProps) {
             </button>
             {expandedSection === "examples" && (
               <div className="px-4 pb-4 border-t border-gray-200">
-                {/* Generic YAML Examples */}
-                <div className="mt-3">
-                  <h4 className="text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-green-500"></span>
-                    Generic YAML
-                  </h4>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    {exampleDefinitions.filter(e => e.category === "generic").map((example) => (
-                      <ExampleButton
-                        key={example.id}
-                        example={example}
-                        isSelected={selectedExample === example.id}
-                        isLoading={isLoading && selectedExample === example.id}
-                        onClick={() => handleLoadExample(example)}
-                        disabled={isLoading}
-                      />
-                    ))}
+                {filteredExamples.length === 0 ? (
+                  <div className="mt-3 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                    <p className="text-sm text-yellow-800">
+                      No examples available for the selected mode. Switch to "Auto-detect" to see all examples.
+                    </p>
                   </div>
-                </div>
-                {/* Legal Document Examples */}
-                <div className="mt-4">
-                  <h4 className="text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-purple-500"></span>
-                    Legal Documents
-                  </h4>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                    {exampleDefinitions.filter(e => e.category === "legal").map((example) => (
-                      <ExampleButton
-                        key={example.id}
-                        example={example}
-                        isSelected={selectedExample === example.id}
-                        isLoading={isLoading && selectedExample === example.id}
-                        onClick={() => handleLoadExample(example)}
-                        disabled={isLoading}
-                      />
-                    ))}
+                ) : (
+                  <div className="mt-3">
+                    {mode === "auto" ? (
+                      // Show both categories when in auto mode
+                      <>
+                        <div className="mb-4">
+                          <h4 className="text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
+                            <span className="w-2 h-2 rounded-full bg-green-500"></span>
+                            Generic YAML
+                          </h4>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            {filteredExamples.filter(e => e.category === "generic").map((example) => (
+                              <ExampleButton
+                                key={example.id}
+                                example={example}
+                                isSelected={selectedExample === example.id}
+                                isLoading={isLoading && selectedExample === example.id}
+                                onClick={() => handleLoadExample(example)}
+                                disabled={isLoading}
+                              />
+                            ))}
+                          </div>
+                        </div>
+                        <div>
+                          <h4 className="text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
+                            <span className="w-2 h-2 rounded-full bg-purple-500"></span>
+                            Legal Documents
+                          </h4>
+                          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                            {filteredExamples.filter(e => e.category === "legal").map((example) => (
+                              <ExampleButton
+                                key={example.id}
+                                example={example}
+                                isSelected={selectedExample === example.id}
+                                isLoading={isLoading && selectedExample === example.id}
+                                onClick={() => handleLoadExample(example)}
+                                disabled={isLoading}
+                              />
+                            ))}
+                          </div>
+                        </div>
+                      </>
+                    ) : (
+                      // Show single category when mode is specific
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        {filteredExamples.map((example) => (
+                          <ExampleButton
+                            key={example.id}
+                            example={example}
+                            isSelected={selectedExample === example.id}
+                            isLoading={isLoading && selectedExample === example.id}
+                            onClick={() => handleLoadExample(example)}
+                            disabled={isLoading}
+                          />
+                        ))}
+                      </div>
+                    )}
                   </div>
-                </div>
+                )}
               </div>
             )}
           </div>

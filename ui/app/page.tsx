@@ -18,7 +18,6 @@ import DocumentationLinks from "@/components/DocumentationLinks";
 import DocumentationModal from "@/components/DocumentationModal";
 import { diffDocuments, ApiError, testApiConnection } from "@/lib/api";
 import { DocumentDiff, DiffMode, GenericDiff, IdentityRule, UnifiedDiffResponse } from "@/lib/types";
-import ModeSelector from "@/components/ModeSelector";
 
 type ViewMode = "editor" | "diff";
 
@@ -29,6 +28,7 @@ export default function Home() {
   const [diff, setDiff] = useState<DocumentDiff | GenericDiff | null>(null);
   const [diffMode, setDiffMode] = useState<DiffMode>("auto");
   const [identityRules, setIdentityRules] = useState<IdentityRule[]>([]);
+  const [isModeLocked, setIsModeLocked] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [apiTestResult, setApiTestResult] = useState<string | null>(null);
   const [showOnboarding, setShowOnboarding] = useState(false);
@@ -131,9 +131,10 @@ export default function Home() {
     setError(null);
   };
 
-  const handleLoadExample = (oldYaml: string, newYaml: string) => {
+  const handleLoadExample = (oldYaml: string, newYaml: string, mode: "general" | "legal_document") => {
     setOldYaml(oldYaml);
     setNewYaml(newYaml);
+    setDiffMode(mode);
     setError(null);
     // Optionally scroll to editor area
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -277,7 +278,15 @@ export default function Home() {
       </div>
 
       {/* Demo Section */}
-      <DemoSection onLoadExample={handleLoadExample} />
+      <DemoSection
+        onLoadExample={handleLoadExample}
+        mode={diffMode}
+        onModeChange={setDiffMode}
+        isModeLocked={isModeLocked}
+        onModeLockChange={setIsModeLocked}
+        identityRules={identityRules}
+        onIdentityRulesChange={setIdentityRules}
+      />
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
@@ -387,12 +396,6 @@ export default function Home() {
                 </div>
               </div>
             )}
-            <ModeSelector
-              mode={diffMode}
-              onModeChange={setDiffMode}
-              identityRules={identityRules}
-              onIdentityRulesChange={setIdentityRules}
-            />
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6">
               <div className="space-y-4">
                 <Tooltip content="Upload a YAML file or paste content directly into the editor">

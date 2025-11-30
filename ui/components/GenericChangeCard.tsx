@@ -85,8 +85,8 @@ function ValueDisplay({ value, label, className }: { value: unknown; label: stri
   const isObject = typeof value === "object" && value !== null;
   
   return (
-    <div className={`rounded p-3 ${className}`}>
-      <div className="text-xs font-semibold text-gray-600 mb-1">{label}:</div>
+    <div className={`rounded ${className}`}>
+      {label && <div className="text-xs font-semibold text-gray-600 mb-1">{label}:</div>}
       {isObject ? (
         <pre className="whitespace-pre-wrap text-sm font-mono break-words">
           {formatted}
@@ -103,6 +103,9 @@ function ValueDisplay({ value, label, className }: { value: unknown; label: stri
 export default function GenericChangeCard({ change, index }: GenericChangeCardProps) {
   const [isExpanded, setIsExpanded] = useState(true);
   const styles = getChangeTypeStyles(change.change_type);
+
+  // Detect if content is unchanged
+  const isUnchanged = change.change_type === GenericChangeType.UNCHANGED;
 
   // Determine what to show based on change type
   const showOldValue = change.change_type !== GenericChangeType.KEY_ADDED && 
@@ -198,30 +201,45 @@ export default function GenericChangeCard({ change, index }: GenericChangeCardPr
               <h4 className="text-sm font-semibold text-gray-700 mb-2">
                 {change.change_type === GenericChangeType.TYPE_CHANGED ? "Type Change:" : "Value:"}
               </h4>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {showOldValue ? (
-                  <ValueDisplay 
-                    value={change.old_value} 
-                    label="Old Value" 
-                    className="bg-red-50 border border-red-200" 
-                  />
-                ) : (
-                  <div className="bg-gray-100 border border-gray-200 rounded p-3">
-                    <div className="text-xs text-gray-500 italic">(not applicable)</div>
+              {isUnchanged ? (
+                // Unchanged content: show single gray column
+                <div>
+                  <div className="bg-gray-50 border border-gray-200 rounded p-3">
+                    <div className="text-xs font-semibold text-gray-600 mb-1">Content (unchanged):</div>
+                    <ValueDisplay 
+                      value={change.old_value ?? change.new_value} 
+                      label="" 
+                      className="bg-transparent border-0 p-0" 
+                    />
                   </div>
-                )}
-                {showNewValue ? (
-                  <ValueDisplay 
-                    value={change.new_value} 
-                    label="New Value" 
-                    className="bg-green-50 border border-green-200" 
-                  />
-                ) : (
-                  <div className="bg-gray-100 border border-gray-200 rounded p-3">
-                    <div className="text-xs text-gray-500 italic">(not applicable)</div>
-                  </div>
-                )}
-              </div>
+                </div>
+              ) : (
+                // Changed content: show two-column layout
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {showOldValue ? (
+                    <ValueDisplay 
+                      value={change.old_value} 
+                      label="Old Value" 
+                      className="bg-red-50 border border-red-200" 
+                    />
+                  ) : (
+                    <div className="bg-gray-100 border border-gray-200 rounded p-3">
+                      <div className="text-xs text-gray-500 italic">(not applicable)</div>
+                    </div>
+                  )}
+                  {showNewValue ? (
+                    <ValueDisplay 
+                      value={change.new_value} 
+                      label="New Value" 
+                      className="bg-green-50 border border-green-200" 
+                    />
+                  ) : (
+                    <div className="bg-gray-100 border border-gray-200 rounded p-3">
+                      <div className="text-xs text-gray-500 italic">(not applicable)</div>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           )}
 
