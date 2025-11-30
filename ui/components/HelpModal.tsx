@@ -1,5 +1,7 @@
 "use client";
 
+import DocumentationLinks from "./DocumentationLinks";
+
 interface HelpModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -208,13 +210,13 @@ export default function HelpModal({ isOpen, onClose }: HelpModalProps) {
 
             {/* Documentation Links */}
             <section>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">
+              <h3 className="text-lg font-semibold text-gray-900 mb-3">
                 Learn More
               </h3>
-              <p className="text-sm text-gray-600 mb-2">
-                For more detailed documentation, see the links in the header
-                menu or footer.
+              <p className="text-sm text-gray-600 mb-3">
+                Explore additional ways to use yaml-diffs:
               </p>
+              <DocumentationLinks variant="list" />
             </section>
           </div>
 

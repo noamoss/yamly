@@ -14,6 +14,7 @@ import OnboardingModal, {
 } from "@/components/OnboardingModal";
 import HelpModal from "@/components/HelpModal";
 import Tooltip from "@/components/Tooltip";
+import DocumentationLinks from "@/components/DocumentationLinks";
 import { diffDocuments, ApiError, testApiConnection } from "@/lib/api";
 import { DocumentDiff } from "@/lib/types";
 
@@ -196,6 +197,7 @@ export default function Home() {
                   Help
                 </button>
               </Tooltip>
+              <DocumentationLinks variant="dropdown" />
             </div>
           </div>
         </div>
