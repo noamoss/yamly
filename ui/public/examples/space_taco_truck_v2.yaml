@@ -1,0 +1,103 @@
+# Space Taco Truck Mission Configuration - Version 2
+# Modified version demonstrating additions, deletions, and modifications
+
+document:
+  id: "space-taco-mission-001"
+  title: "Galactic Taco Delivery Mission"
+  type: "mission_config"
+  version:
+    number: "2.0"
+    description: "Updated mission configuration with new requirements"
+  mission:
+    name: "Taco Truck Alpha"
+    destination: "Mars Colony Beta"
+    estimated_arrival: "2025-06-15T14:30:00Z"
+    crew:
+      - name: "Captain Taco"
+        role: "Pilot"
+        experience_years: 12
+        # MODIFIED: Experience increased from 10 to 12
+      - name: "Salsa Bot"
+        role: "Chef"
+        experience_years: 5
+      # ADDED: New crew member
+      - name: "Guac Master 3000"
+        role: "Assistant Chef"
+        experience_years: 3
+    cargo:
+      - item: "Tortillas"
+        quantity: 1500
+        unit: "pieces"
+        # MODIFIED: Quantity increased from 1000 to 1500
+      - item: "Space Salsa"
+        quantity: 50
+        unit: "liters"
+      - item: "Zero-G Guacamole"
+        quantity: 30
+        unit: "kilograms"
+      # ADDED: New cargo item
+      - item: "Cosmic Cheese"
+        quantity: 25
+        unit: "kilograms"
+    route:
+      waypoints:
+        - name: "Earth Orbit Station"
+          coordinates: [0, 0, 400]
+        - name: "Lunar Base"
+          coordinates: [384400, 0, 0]
+        # DELETED: Direct route to Mars removed
+        # ADDED: New waypoint
+        - name: "Asteroid Belt Checkpoint"
+          coordinates: [150000000, 0, 0]
+        - name: "Mars Colony Beta"
+          coordinates: [225000000, 0, 0]
+    safety_protocols:
+      - "Emergency taco deployment system"
+      - "Atmospheric pressure monitoring"
+      - "Crew health checks every 4 hours"
+      # MODIFIED: Health check frequency changed from 6 to 4 hours
+      # ADDED: New safety protocol
+      - "Radiation shielding verification"
+    sections:
+      - marker: "mission-objectives"
+        title: "Primary Objectives"
+        content: |
+          Deliver fresh tacos to Mars Colony Beta.
+          Maintain food quality during transit.
+          Complete mission within 72 hours.
+          # MODIFIED: Added new objective
+          Ensure customer satisfaction ratings above 4.5/5.
+        sections:
+          - marker: "objective-1"
+            title: "Food Quality"
+            content: |
+              Ensure all ingredients remain fresh and safe for consumption.
+              # MODIFIED: Added temperature monitoring requirement
+              Monitor storage temperatures continuously.
+            sections: []
+          - marker: "objective-2"
+            title: "Timely Delivery"
+            content: |
+              Arrive at destination within scheduled time window.
+            sections: []
+          # ADDED: New objective section
+          - marker: "objective-3"
+            title: "Customer Service"
+            content: |
+              Provide excellent customer experience during delivery.
+            sections: []
+
+      # DELETED: Entire "equipment" section removed
+      # (This demonstrates section deletion)
+
+      # ADDED: New section
+      - marker: "communication"
+        title: "Communication Protocols"
+        content: |
+          Maintain constant communication with mission control.
+        sections:
+          - marker: "comm-1"
+            title: "Status Updates"
+            content: |
+              Send status updates every 2 hours.
+            sections: []

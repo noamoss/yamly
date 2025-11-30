@@ -7,6 +7,7 @@ import YamlEditor from "@/components/YamlEditor";
 import FileUpload from "@/components/FileUpload";
 import DiffView from "@/components/DiffView";
 import ExportButton from "@/components/ExportButton";
+import DemoSection from "@/components/DemoSection";
 import { diffDocuments, ApiError, testApiConnection } from "@/lib/api";
 import { DocumentDiff } from "@/lib/types";
 
@@ -77,6 +78,14 @@ export default function Home() {
   const handleNewYamlLoad = (content: string) => {
     setNewYaml(content);
     setError(null);
+  };
+
+  const handleLoadExample = (oldYaml: string, newYaml: string) => {
+    setOldYaml(oldYaml);
+    setNewYaml(newYaml);
+    setError(null);
+    // Optionally scroll to editor area
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   return (
@@ -187,6 +196,9 @@ export default function Home() {
           </nav>
         </div>
       </div>
+
+      {/* Demo Section */}
+      <DemoSection onLoadExample={handleLoadExample} />
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
