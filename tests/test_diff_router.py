@@ -218,7 +218,5 @@ class TestErrorHandling:
 
     def test_invalid_yaml_raises_error(self):
         """Test that invalid YAML raises an error."""
-        import yaml
-
-        with pytest.raises(yaml.YAMLError):
+        with pytest.raises(ValueError, match="Invalid YAML"):
             diff_yaml_with_mode("invalid: yaml: content:", "valid: true", mode=DiffMode.AUTO)
