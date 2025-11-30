@@ -13,6 +13,7 @@ from yaml_diffs.api_server.schemas import (
 from yaml_diffs.diff import enrich_diff_with_yaml_extraction
 from yaml_diffs.diff_router import DiffMode, diff_yaml_with_mode
 from yaml_diffs.diff_types import DocumentDiff
+from yaml_diffs.generic_diff import enrich_generic_diff_with_line_numbers
 from yaml_diffs.generic_diff_types import DiffOptions, GenericDiff, IdentityRule
 
 router = APIRouter()
@@ -89,6 +90,8 @@ def diff_documents_endpoint(request: DiffRequest) -> UnifiedDiffResponse:
         )
     elif isinstance(result, GenericDiff):
         # Generic mode
+        # Enrich with line numbers
+        enrich_generic_diff_with_line_numbers(result, request.old_yaml, request.new_yaml)
         return UnifiedDiffResponse(
             mode=DiffMode.GENERAL,
             document_diff=None,

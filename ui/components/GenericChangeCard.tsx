@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { GenericDiffResult, GenericChangeType } from "@/lib/types";
+import { computeCharDiff, DiffChunk } from "@/lib/diff-utils";
 
 interface GenericChangeCardProps {
   change: GenericDiffResult;
@@ -66,6 +67,43 @@ function formatChangeType(changeType: GenericChangeType): string {
     .join(" ");
 }
 
+function renderDiffedText(chunks: DiffChunk[], type: "old" | "new") {
+  // Filter chunks based on side:
+  // - Old side: show only "removed" and "unchanged" chunks
+  // - New side: show only "added" and "unchanged" chunks
+  const filteredChunks = chunks.filter((chunk) => {
+    if (chunk.type === "unchanged") return true;
+    if (type === "old") return chunk.type === "removed";
+    if (type === "new") return chunk.type === "added";
+    return false;
+  });
+
+  return (
+    <pre className="whitespace-pre-wrap text-sm font-mono break-words">
+      {filteredChunks.map((chunk, i) => {
+        if (chunk.type === "unchanged") {
+          return <span key={i}>{chunk.text}</span>;
+        }
+        if (chunk.type === "removed" && type === "old") {
+          return (
+            <span key={i} className="bg-red-200 line-through">
+              {chunk.text}
+            </span>
+          );
+        }
+        if (chunk.type === "added" && type === "new") {
+          return (
+            <span key={i} className="bg-green-200 font-semibold">
+              {chunk.text}
+            </span>
+          );
+        }
+        return <span key={i}>{chunk.text}</span>;
+      })}
+    </pre>
+  );
+}
+
 function formatValue(value: unknown): string {
   if (value === null || value === undefined) {
     return "(empty)";
@@ -80,14 +118,30 @@ function formatValue(value: unknown): string {
   return String(value);
 }
 
-function ValueDisplay({ value, label, className }: { value: unknown; label: string; className: string }) {
+function ValueDisplay({
+  value,
+  label,
+  className,
+  diffChunks,
+  diffType
+}: {
+  value: unknown;
+  label: string;
+  className: string;
+  diffChunks?: DiffChunk[];
+  diffType?: "old" | "new";
+}) {
   const formatted = formatValue(value);
   const isObject = typeof value === "object" && value !== null;
-  
+  const useDiff = diffChunks && diffChunks.length > 0 && diffType && !isObject;
+
   return (
-    <div className={`rounded ${className}`}>
+    <div className={`rounded ${className} ${className.includes('p-') ? '' : 'p-3'}`}>
       {label && <div className="text-xs font-semibold text-gray-600 mb-1">{label}:</div>}
-      {isObject ? (
+      {useDiff ? (
+        // Use character-level diff highlighting
+        renderDiffedText(diffChunks, diffType)
+      ) : isObject ? (
         <pre className="whitespace-pre-wrap text-sm font-mono break-words">
           {formatted}
         </pre>
@@ -102,18 +156,38 @@ function ValueDisplay({ value, label, className }: { value: unknown; label: stri
 
 export default function GenericChangeCard({ change, index }: GenericChangeCardProps) {
   const [isExpanded, setIsExpanded] = useState(true);
+  const [diffChunks, setDiffChunks] = useState<DiffChunk[]>([]);
   const styles = getChangeTypeStyles(change.change_type);
 
   // Detect if content is unchanged
   const isUnchanged = change.change_type === GenericChangeType.UNCHANGED;
 
+  // Compute character-level diff for value changes
+  useEffect(() => {
+    const computeDiff = async () => {
+      // Only compute diff for value changes (strings/primitives)
+      if (
+        change.change_type === GenericChangeType.VALUE_CHANGED ||
+        change.change_type === GenericChangeType.ITEM_CHANGED
+      ) {
+        const oldStr = formatValue(change.old_value);
+        const newStr = formatValue(change.new_value);
+        const chunks = await computeCharDiff(oldStr, newStr);
+        setDiffChunks(chunks);
+      } else {
+        setDiffChunks([]);
+      }
+    };
+    computeDiff();
+  }, [change.change_type, change.old_value, change.new_value]);
+
   // Determine what to show based on change type
-  const showOldValue = change.change_type !== GenericChangeType.KEY_ADDED && 
+  const showOldValue = change.change_type !== GenericChangeType.KEY_ADDED &&
                        change.change_type !== GenericChangeType.ITEM_ADDED;
-  const showNewValue = change.change_type !== GenericChangeType.KEY_REMOVED && 
+  const showNewValue = change.change_type !== GenericChangeType.KEY_REMOVED &&
                        change.change_type !== GenericChangeType.ITEM_REMOVED;
   const showKeyChange = change.change_type === GenericChangeType.KEY_RENAMED;
-  const showPathChange = change.change_type === GenericChangeType.KEY_MOVED || 
+  const showPathChange = change.change_type === GenericChangeType.KEY_MOVED ||
                          change.change_type === GenericChangeType.ITEM_MOVED;
 
   return (
@@ -206,10 +280,10 @@ export default function GenericChangeCard({ change, index }: GenericChangeCardPr
                 <div>
                   <div className="bg-gray-50 border border-gray-200 rounded p-3">
                     <div className="text-xs font-semibold text-gray-600 mb-1">Content (unchanged):</div>
-                    <ValueDisplay 
-                      value={change.old_value ?? change.new_value} 
-                      label="" 
-                      className="bg-transparent border-0 p-0" 
+                    <ValueDisplay
+                      value={change.old_value ?? change.new_value}
+                      label=""
+                      className="bg-transparent border-0 p-0"
                     />
                   </div>
                 </div>
@@ -217,10 +291,12 @@ export default function GenericChangeCard({ change, index }: GenericChangeCardPr
                 // Changed content: show two-column layout
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {showOldValue ? (
-                    <ValueDisplay 
-                      value={change.old_value} 
-                      label="Old Value" 
-                      className="bg-red-50 border border-red-200" 
+                    <ValueDisplay
+                      value={change.old_value}
+                      label="Old Value"
+                      className="bg-red-50 border border-red-200"
+                      diffChunks={diffChunks}
+                      diffType="old"
                     />
                   ) : (
                     <div className="bg-gray-100 border border-gray-200 rounded p-3">
@@ -228,10 +304,12 @@ export default function GenericChangeCard({ change, index }: GenericChangeCardPr
                     </div>
                   )}
                   {showNewValue ? (
-                    <ValueDisplay 
-                      value={change.new_value} 
-                      label="New Value" 
-                      className="bg-green-50 border border-green-200" 
+                    <ValueDisplay
+                      value={change.new_value}
+                      label="New Value"
+                      className="bg-green-50 border border-green-200"
+                      diffChunks={diffChunks}
+                      diffType="new"
                     />
                   ) : (
                     <div className="bg-gray-100 border border-gray-200 rounded p-3">
@@ -259,4 +337,3 @@ export default function GenericChangeCard({ change, index }: GenericChangeCardPr
     </div>
   );
 }
-

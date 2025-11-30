@@ -249,7 +249,7 @@ export default function DemoSection({
             What is yaml-diffs?
           </h2>
           <p className="text-gray-700 text-sm leading-relaxed">
-            <strong>Semantic YAML diffing</strong> that understands structure, not just lines. Unlike standard diff tools that compare line-by-line, yaml-diffs intelligently detects moves, renames, and structural changes while reducing noise from formatting. Perfect for tracking configuration changes, infrastructure-as-code updates, legal document revisions, and any structured YAML data where context matters.
+            <strong>Semantic YAML diffing</strong> that understands structure, not just lines. Unlike standard diff tools that compare line-by-line, yaml-diffs intelligently detects moves, renames, and structural changes while reducing noise from formatting. Features advanced array matching with custom identity rules, dual-mode operation (generic YAML + legal documents), and a complete API/UI ecosystem. Perfect for tracking configuration changes, infrastructure-as-code updates, legal document revisions, and any structured YAML data where context matters.
           </p>
         </div>
 
@@ -404,7 +404,7 @@ export default function DemoSection({
                   // Show only Legal Document mode with schema reference
                   <div className="mt-3">
                     <h4 className="font-semibold text-blue-900 mb-2 text-sm">Legal Document Mode - Schema Requirements</h4>
-                    
+
                     <div className="space-y-3">
                       <div>
                         <h5 className="text-xs font-semibold text-blue-800 mb-1.5">Document (all required fields):</h5>
@@ -453,7 +453,7 @@ export default function DemoSection({
                           </li>
                         </ul>
                       </div>
-                      
+
                       <div>
                         <h5 className="text-xs font-semibold text-blue-800 mb-1.5">Section (required fields):</h5>
                         <ul className="text-sm text-blue-800 space-y-1">

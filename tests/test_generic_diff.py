@@ -1,12 +1,9 @@
 """Tests for generic YAML diffing functionality."""
 
-import pytest
-
 from yaml_diffs.generic_diff import diff_yaml_generic
 from yaml_diffs.generic_diff_types import (
     DiffOptions,
     GenericChangeType,
-    GenericDiff,
     IdentityRule,
 )
 
@@ -61,7 +58,9 @@ class TestBasicValueChanges:
         result = diff_yaml_generic(old, new, DiffOptions())
 
         assert result.type_changed_count == 1
-        type_changes = [c for c in result.changes if c.change_type == GenericChangeType.TYPE_CHANGED]
+        type_changes = [
+            c for c in result.changes if c.change_type == GenericChangeType.TYPE_CHANGED
+        ]
         assert len(type_changes) == 1
         assert type_changes[0].old_value == "123"
         assert type_changes[0].new_value == 123
@@ -292,10 +291,16 @@ class TestDiffCounts:
         result = diff_yaml_generic(old, new, DiffOptions())
 
         # Count actual changes
-        value_changed = len([c for c in result.changes if c.change_type == GenericChangeType.VALUE_CHANGED])
+        value_changed = len(
+            [c for c in result.changes if c.change_type == GenericChangeType.VALUE_CHANGED]
+        )
         key_added = len([c for c in result.changes if c.change_type == GenericChangeType.KEY_ADDED])
-        key_removed = len([c for c in result.changes if c.change_type == GenericChangeType.KEY_REMOVED])
-        item_added = len([c for c in result.changes if c.change_type == GenericChangeType.ITEM_ADDED])
+        key_removed = len(
+            [c for c in result.changes if c.change_type == GenericChangeType.KEY_REMOVED]
+        )
+        item_added = len(
+            [c for c in result.changes if c.change_type == GenericChangeType.ITEM_ADDED]
+        )
 
         assert result.value_changed_count == value_changed
         assert result.key_added_count == key_added
@@ -351,7 +356,8 @@ class TestRealWorldExamples:
 
         # Should detect replica change
         replica_change = [
-            c for c in result.changes 
+            c
+            for c in result.changes
             if c.path == "spec.replicas" and c.change_type == GenericChangeType.VALUE_CHANGED
         ]
         assert len(replica_change) == 1
@@ -388,3 +394,70 @@ class TestRealWorldExamples:
         monitoring_added = [c for c in result.changes if "monitoring" in c.path]
         assert len(monitoring_added) >= 1
 
+
+class TestLineNumberExtraction:
+    """Test line number extraction for generic diffs."""
+
+    def test_line_numbers_populated(self):
+        """Test that line numbers are populated after enrichment."""
+        from yaml_diffs.generic_diff import enrich_generic_diff_with_line_numbers
+
+        old_yaml = """app:
+  name: MyApp
+  version: "1.0.0"
+database:
+  host: localhost
+  port: 5432
+"""
+        new_yaml = """app:
+  name: MyApp
+  version: "2.0.0"
+database:
+  host: localhost
+  port: 5432
+"""
+
+        old = {
+            "app": {"name": "MyApp", "version": "1.0.0"},
+            "database": {"host": "localhost", "port": 5432},
+        }
+        new = {
+            "app": {"name": "MyApp", "version": "2.0.0"},
+            "database": {"host": "localhost", "port": 5432},
+        }
+
+        result = diff_yaml_generic(old, new, DiffOptions())
+        enrich_generic_diff_with_line_numbers(result, old_yaml, new_yaml)
+
+        # Find the version change
+        version_change = [c for c in result.changes if c.path == "app.version"][0]
+        assert version_change.change_type == GenericChangeType.VALUE_CHANGED
+        # Line numbers should be populated (exact values depend on YAML structure)
+        # At minimum, they should not be None
+        assert (
+            version_change.old_line_number is not None or version_change.new_line_number is not None
+        )
+
+    def test_line_numbers_for_added_key(self):
+        """Test line numbers for added keys."""
+        from yaml_diffs.generic_diff import enrich_generic_diff_with_line_numbers
+
+        old_yaml = """app:
+  name: MyApp
+"""
+        new_yaml = """app:
+  name: MyApp
+  version: "1.0.0"
+"""
+
+        old = {"app": {"name": "MyApp"}}
+        new = {"app": {"name": "MyApp", "version": "1.0.0"}}
+
+        result = diff_yaml_generic(old, new, DiffOptions())
+        enrich_generic_diff_with_line_numbers(result, old_yaml, new_yaml)
+
+        # Find the added key
+        added = [c for c in result.changes if c.change_type == GenericChangeType.KEY_ADDED][0]
+        assert added.path == "app.version"
+        # Should have new_line_number but not old_line_number
+        assert added.new_line_number is not None

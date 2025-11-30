@@ -742,3 +742,43 @@ def diff_yaml_generic(
     }
 
     return GenericDiff(changes=changes, **counts)
+
+
+def enrich_generic_diff_with_line_numbers(
+    diff: GenericDiff,
+    old_yaml: str,
+    new_yaml: str,
+) -> None:
+    """Enrich generic diff results with line numbers.
+
+    Mutates the diff in place, populating old_line_number and
+    new_line_number based on the path in each change.
+
+    Args:
+        diff: GenericDiff to enrich
+        old_yaml: Old YAML document as string
+        new_yaml: New YAML document as string
+    """
+    from yaml_diffs.generic_diff_types import GenericChangeType
+    from yaml_diffs.yaml_extract import find_path_line_number
+
+    for change in diff.changes:
+        # Determine which path to use for old/new line lookup
+        old_path = change.old_path or change.path
+        new_path = change.new_path or change.path
+
+        # Populate line numbers based on change type
+        if change.change_type in (
+            GenericChangeType.KEY_REMOVED,
+            GenericChangeType.ITEM_REMOVED,
+        ):
+            change.old_line_number = find_path_line_number(old_yaml, old_path)
+        elif change.change_type in (
+            GenericChangeType.KEY_ADDED,
+            GenericChangeType.ITEM_ADDED,
+        ):
+            change.new_line_number = find_path_line_number(new_yaml, new_path)
+        else:
+            # For other change types, try to find line numbers in both documents
+            change.old_line_number = find_path_line_number(old_yaml, old_path)
+            change.new_line_number = find_path_line_number(new_yaml, new_path)
