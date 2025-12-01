@@ -55,7 +55,7 @@ jobs:
           # Use uv sync for better dependency resolution (includes dev dependencies)
           uv sync --extra dev
           # Verify installation
-          uv run python -c "import yaml_diffs; print('✅ Package installed successfully')"
+          uv run python -c "import yamly; print('✅ Package installed successfully')"
 
       - name: Run ruff check (linting)
         timeout-minutes: 5
