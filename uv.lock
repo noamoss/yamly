@@ -1612,7 +1612,7 @@ wheels = [
 ]
 
 [[package]]
-name = "yaml-diffs"
+name = "yamly"
 version = "0.1.0"
 source = { editable = "." }
 dependencies = [

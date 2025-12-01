@@ -159,7 +159,7 @@ class TestAPIClient:
         assert headers["Authorization"] == "Bearer test-key"
         await client.close()
 
-    @patch("yaml_diffs.mcp_server.client.httpx.AsyncClient")
+    @patch("yamly.mcp_server.client.httpx.AsyncClient")
     @pytest.mark.asyncio
     async def test_validate_document_success(self, mock_client_class: MagicMock) -> None:
         """Test successful document validation."""
@@ -183,7 +183,7 @@ class TestAPIClient:
         )
         await client.close()
 
-    @patch("yaml_diffs.mcp_server.client.httpx.AsyncClient")
+    @patch("yamly.mcp_server.client.httpx.AsyncClient")
     @pytest.mark.asyncio
     async def test_validate_document_error(self, mock_client_class: MagicMock) -> None:
         """Test document validation with API error."""
@@ -206,7 +206,7 @@ class TestAPIClient:
 
         await client.close()
 
-    @patch("yaml_diffs.mcp_server.client.httpx.AsyncClient")
+    @patch("yamly.mcp_server.client.httpx.AsyncClient")
     @pytest.mark.asyncio
     async def test_diff_documents_success(self, mock_client_class: MagicMock) -> None:
         """Test successful document diffing."""
@@ -230,7 +230,7 @@ class TestAPIClient:
         )
         await client.close()
 
-    @patch("yaml_diffs.mcp_server.client.httpx.AsyncClient")
+    @patch("yamly.mcp_server.client.httpx.AsyncClient")
     @pytest.mark.asyncio
     async def test_health_check_success(self, mock_client_class: MagicMock) -> None:
         """Test successful health check."""
@@ -260,7 +260,7 @@ class TestAPIClient:
         # Client should be closed after context exit
         assert client._client.is_closed
 
-    @patch("yaml_diffs.mcp_server.client.httpx.AsyncClient")
+    @patch("yamly.mcp_server.client.httpx.AsyncClient")
     @pytest.mark.asyncio
     async def test_client_timeout_zero_converted_to_none(
         self, mock_client_class: MagicMock
@@ -278,7 +278,7 @@ class TestAPIClient:
         assert call_kwargs["timeout"] is None
         await client.close()
 
-    @patch("yaml_diffs.mcp_server.client.httpx.AsyncClient")
+    @patch("yamly.mcp_server.client.httpx.AsyncClient")
     @pytest.mark.asyncio
     async def test_client_timeout_positive_preserved(self, mock_client_class: MagicMock) -> None:
         """Test that positive timeout values are preserved."""
