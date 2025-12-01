@@ -86,7 +86,7 @@ trap cleanup INT TERM EXIT
 
 # Start backend in background
 echo -e "${BLUE}📡 Starting backend API server on http://localhost:8000...${NC}"
-uvicorn src.yaml_diffs.api_server.main:app --reload --port 8000 > /tmp/yaml-diffs-backend.log 2>&1 &
+uvicorn src.yamly.api_server.main:app --reload --port 8000 > /tmp/yamly-backend.log 2>&1 &
 BACKEND_PID=$!
 echo "$BACKEND_PID" > "$PID_FILE"
 
@@ -96,7 +96,7 @@ sleep 2
 # Check if backend started successfully
 if ! kill -0 "$BACKEND_PID" 2>/dev/null; then
     echo -e "${RED}❌ Backend server failed to start${NC}"
-    echo "Check logs: cat /tmp/yaml-diffs-backend.log"
+    echo "Check logs: cat /tmp/yamly-backend.log"
     exit 1
 fi
 
@@ -105,7 +105,7 @@ echo -e "${GREEN}✓ Backend server started (PID: $BACKEND_PID)${NC}"
 # Start frontend
 echo -e "${BLUE}🎨 Starting frontend dev server on http://localhost:3000...${NC}"
 cd ui
-npm run dev > /tmp/yaml-diffs-frontend.log 2>&1 &
+npm run dev > /tmp/yamly-frontend.log 2>&1 &
 FRONTEND_PID=$!
 echo "$FRONTEND_PID" >> "$PID_FILE"
 cd ..
@@ -116,7 +116,7 @@ sleep 2
 # Check if frontend started successfully
 if ! kill -0 "$FRONTEND_PID" 2>/dev/null; then
     echo -e "${RED}❌ Frontend server failed to start${NC}"
-    echo "Check logs: cat /tmp/yaml-diffs-frontend.log"
+    echo "Check logs: cat /tmp/yamly-frontend.log"
     exit 1
 fi
 
@@ -135,7 +135,7 @@ echo ""
 
 # Tail logs in the foreground (optional - comment out if you don't want logs)
 # You can uncomment these lines if you want to see logs in the terminal:
-# tail -f /tmp/yaml-diffs-backend.log /tmp/yaml-diffs-frontend.log &
+# tail -f /tmp/yamly-backend.log /tmp/yamly-frontend.log &
 
 # Wait for both processes
 wait

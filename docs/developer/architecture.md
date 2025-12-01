@@ -1,10 +1,10 @@
 # Architecture
 
-This document describes the system architecture of yaml-diffs, including component relationships, design decisions, and extension points.
+This document describes the system architecture of yamly, including component relationships, design decisions, and extension points.
 
 ## Overview
 
-yaml-diffs is a powerful YAML diffing service that supports both **generic YAML files** and **Hebrew legal documents**. The system provides:
+yamly is a powerful YAML diffing service that supports both **generic YAML files** and **Hebrew legal documents**. The system provides:
 
 - **Generic Mode**: Diff any YAML file (configs, K8s manifests, etc.) with path-based change tracking
 - **Legal Document Mode**: Schema-validated diffing for Hebrew legal documents with marker-based section matching
@@ -41,16 +41,16 @@ The system is organized into four main layers:
 
 The interface layer provides multiple ways to interact with the system:
 
-- **CLI Tool** (`yaml-diffs` command) - Command-line interface for quick operations
-- **Library API** (`yaml_diffs` package) - Python library for programmatic use
+- **CLI Tool** (`yamly` command) - Command-line interface for quick operations
+- **Library API** (`yamly` package) - Python library for programmatic use
 - **REST API** (FastAPI server) - HTTP endpoints for remote access
 - **MCP Server** - Model Context Protocol server for AI assistants
 
 **Key Components:**
-- `src/yaml_diffs/cli/` - CLI implementation
-- `src/yaml_diffs/api.py` - Main library API
-- `src/yaml_diffs/api_server/` - REST API server
-- `src/yaml_diffs/mcp_server/` - MCP server
+- `src/yamly/cli/` - CLI implementation
+- `src/yamly/api.py` - Main library API
+- `src/yamly/api_server/` - REST API server
+- `src/yamly/mcp_server/` - MCP server
 
 ### Core Logic Layer
 
@@ -62,12 +62,12 @@ The core logic layer implements the main business logic:
 - **Formatters** - Output formatting (JSON, text, YAML)
 
 **Key Components:**
-- `src/yaml_diffs/diff_router.py` - Mode detection and routing
-- `src/yaml_diffs/generic_diff.py` - Generic YAML diff engine
-- `src/yaml_diffs/generic_diff_types.py` - Generic diff types
-- `src/yaml_diffs/diff.py` - Legal document diff engine
-- `src/yaml_diffs/diff_types.py` - Legal document diff types
-- `src/yaml_diffs/formatters/` - Formatter implementations
+- `src/yamly/diff_router.py` - Mode detection and routing
+- `src/yamly/generic_diff.py` - Generic YAML diff engine
+- `src/yamly/generic_diff_types.py` - Generic diff types
+- `src/yamly/diff.py` - Legal document diff engine
+- `src/yamly/diff_types.py` - Legal document diff types
+- `src/yamly/formatters/` - Formatter implementations
 
 ### Data Layer
 
@@ -77,8 +77,8 @@ The data layer handles data loading and validation:
 - **Validator** - Validates documents against OpenSpec schema and Pydantic models
 
 **Key Components:**
-- `src/yaml_diffs/loader.py` - YAML loading utilities
-- `src/yaml_diffs/validator.py` - Validation logic
+- `src/yamly/loader.py` - YAML loading utilities
+- `src/yamly/validator.py` - Validation logic
 
 ### Model Layer
 
@@ -88,8 +88,8 @@ The model layer defines the data structures:
 - **OpenSpec Schema** - Language-agnostic contract definition
 
 **Key Components:**
-- `src/yaml_diffs/models/` - Pydantic models (Document, Section)
-- `src/yaml_diffs/schema/legal_document_spec.yaml` - OpenSpec schema
+- `src/yamly/models/` - Pydantic models (Document, Section)
+- `src/yamly/schema/legal_document_spec.yaml` - OpenSpec schema
 
 ## Component Relationships
 
@@ -287,38 +287,38 @@ Validated Document
 
 ### Adding a New Formatter
 
-1. Create a new formatter class in `src/yaml_diffs/formatters/`
+1. Create a new formatter class in `src/yamly/formatters/`
 2. Implement the formatter interface
-3. Register in `src/yaml_diffs/formatters/__init__.py`
+3. Register in `src/yamly/formatters/__init__.py`
 4. Add to `format_diff()` function
 
 ### Adding a New Interface
 
-1. Create interface module (e.g., `src/yaml_diffs/graphql_server/`)
-2. Use the library API (`yaml_diffs.api`) for core functionality
+1. Create interface module (e.g., `src/yamly/graphql_server/`)
+2. Use the library API (`yamly.api`) for core functionality
 3. Add interface-specific logic
 4. Document in appropriate documentation section
 
 ### Extending the Schema
 
-1. Update `src/yaml_diffs/schema/legal_document_spec.yaml`
-2. Update Pydantic models in `src/yaml_diffs/models/`
-3. Update validation logic in `src/yaml_diffs/validator.py`
+1. Update `src/yamly/schema/legal_document_spec.yaml`
+2. Update Pydantic models in `src/yamly/models/`
+3. Update validation logic in `src/yamly/validator.py`
 4. Update tests
 5. Update documentation
 
 ### Adding New Diff Change Types
 
 **For Legal Document Mode:**
-1. Add to `ChangeType` enum in `src/yaml_diffs/diff_types.py`
-2. Update diff engine logic in `src/yaml_diffs/diff.py`
+1. Add to `ChangeType` enum in `src/yamly/diff_types.py`
+2. Update diff engine logic in `src/yamly/diff.py`
 3. Update formatters to handle new type
 4. Update tests
 5. Update documentation
 
 **For Generic Mode:**
-1. Add to `GenericChangeType` enum in `src/yaml_diffs/generic_diff_types.py`
-2. Update diff engine logic in `src/yaml_diffs/generic_diff.py`
+1. Add to `GenericChangeType` enum in `src/yamly/generic_diff_types.py`
+2. Update diff engine logic in `src/yamly/generic_diff.py`
 3. Update UI to handle new type (`GenericChangeCard.tsx`, `DiffSummary.tsx`)
 4. Update tests
 5. Update documentation
@@ -326,7 +326,7 @@ Validated Document
 ## File Organization
 
 ```
-src/yaml_diffs/
+src/yamly/
 ├── __init__.py              # Package exports
 ├── api.py                   # Main library API
 ├── loader.py                # YAML loading

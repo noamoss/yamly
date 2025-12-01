@@ -4,10 +4,10 @@ from pathlib import Path
 
 import pytest
 
-from yaml_diffs.api import diff_documents, diff_files, format_diff, load_and_validate
-from yaml_diffs.loader import load_document
-from yaml_diffs.models import Document
-from yaml_diffs.validator import validate_document
+from yamly.api import diff_documents, diff_files, format_diff, load_and_validate
+from yamly.loader import load_document
+from yamly.models import Document
+from yamly.validator import validate_document
 
 
 @pytest.fixture
@@ -250,7 +250,7 @@ class TestErrorPropagation:
         )
 
         # Should raise validation error
-        from yaml_diffs.exceptions import OpenSpecValidationError, PydanticValidationError
+        from yamly.exceptions import OpenSpecValidationError, PydanticValidationError
 
         with pytest.raises((OpenSpecValidationError, PydanticValidationError)):
             load_and_validate(invalid_file)
@@ -264,7 +264,7 @@ class TestErrorPropagation:
         )
 
         # Should raise YAMLLoadError
-        from yaml_diffs.exceptions import YAMLLoadError
+        from yamly.exceptions import YAMLLoadError
 
         with pytest.raises(YAMLLoadError):
             load_and_validate(invalid_yaml_file)

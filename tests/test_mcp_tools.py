@@ -10,9 +10,9 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
-from yaml_diffs.mcp_server.client import APIClient
-from yaml_diffs.mcp_server.config import MCPServerConfig
-from yaml_diffs.mcp_server.tools import (
+from yamly.mcp_server.client import APIClient
+from yamly.mcp_server.config import MCPServerConfig
+from yamly.mcp_server.tools import (
     call_tool,
     get_tool_definitions,
     handle_diff_documents,

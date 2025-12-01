@@ -1,5 +1,5 @@
 # Include schema YAML files
-include src/yaml_diffs/schema/*.yaml
+include src/yamly/schema/*.yaml
 
 # Include README
 include README.md

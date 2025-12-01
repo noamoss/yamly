@@ -59,13 +59,13 @@ export default function HelpModal({
 
           {/* Content */}
           <div className="space-y-6 text-gray-700">
-            {/* What is yaml-diffs */}
+            {/* What is yamly */}
             <section>
               <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                What is yaml-diffs?
+                What is yamly?
               </h3>
               <p className="text-sm leading-relaxed">
-                yaml-diffs reads YAML as structured data rather than plain text. It highlights meaningful changes and filters out noise, making it easier to review config updates, infrastructure changes, and YAML produced or rewritten by LLM-powered tools.
+                yamly reads YAML as structured data rather than plain text. It highlights meaningful changes and filters out noise, making it easier to review config updates, infrastructure changes, and YAML produced or rewritten by LLM-powered tools.
               </p>
             </section>
 
@@ -201,7 +201,7 @@ export default function HelpModal({
                     Can I use this with Hebrew content?
                   </h4>
                   <p className="text-gray-600">
-                    Yes! yaml-diffs fully supports Hebrew content and RTL
+                    Yes! yamly fully supports Hebrew content and RTL
                     (right-to-left) text. The tool was designed with Hebrew
                     legal documents in mind.
                   </p>
@@ -215,7 +215,7 @@ export default function HelpModal({
                 Learn More
               </h3>
               <p className="text-sm text-gray-600 mb-3">
-                Explore additional ways to use yaml-diffs:
+                Explore additional ways to use yamly:
               </p>
               <DocumentationLinks variant="list" onDocClick={onDocClick} />
             </section>

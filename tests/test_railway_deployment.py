@@ -10,8 +10,8 @@ from unittest.mock import patch
 import pytest
 from fastapi.testclient import TestClient
 
-from yaml_diffs.api_server.config import Settings, settings
-from yaml_diffs.api_server.main import app
+from yamly.api_server.config import Settings, settings
+from yamly.api_server.main import app
 
 
 class TestRailwayEnvironmentVariables:
@@ -174,8 +174,8 @@ class TestRailwayStartCommand:
     def test_start_command_uses_uvicorn(self) -> None:
         """Test that start command uses uvicorn (as specified in railway.json)."""
         # This is a documentation/configuration test
-        # The actual command is: uvicorn yaml_diffs.api_server.main:app --host 0.0.0.0 --port $PORT
-        # Railway installs the package, so it uses the installed package name (yaml_diffs, not src.yaml_diffs)
+        # The actual command is: uvicorn yamly.api_server.main:app --host 0.0.0.0 --port $PORT
+        # Railway installs the package, so it uses the installed package name (yamly, not src.yamly)
         # We verify the app can be imported and used with uvicorn
         assert app is not None
         assert hasattr(app, "openapi")
@@ -184,7 +184,7 @@ class TestRailwayStartCommand:
     def test_app_module_structure(self) -> None:
         """Test that the app module structure matches Railway start command."""
         # Verify the import path matches railway.json start command
-        from yaml_diffs.api_server import main
+        from yamly.api_server import main
 
         assert hasattr(main, "app")
         assert main.app == app

@@ -1,12 +1,12 @@
-# yaml-diffs
+# yamly
 
 A powerful YAML diffing service that supports both **generic YAML files** and **Hebrew legal documents**.
 
 ## Overview
 
-**yaml-diffs** provides a comprehensive solution for comparing YAML documents, offering:
+**yamly** provides a comprehensive solution for comparing YAML documents, offering:
 
-- **Dual Mode Support**: 
+- **Dual Mode Support**:
   - **Generic Mode**: Diff any YAML file (configs, Kubernetes manifests, etc.) with path-based tracking
   - **Legal Document Mode**: Schema-validated diffing for Hebrew legal documents with marker-based section matching
 - **Smart Array Matching**: Auto-detects identity fields (`id`, `name`, `key`) or use custom rules
@@ -30,9 +30,9 @@ A powerful YAML diffing service that supports both **generic YAML files** and **
 
 ## CI/CD Status
 
-[![Tests](https://github.com/noamoss/yaml_diffs/actions/workflows/test.yml/badge.svg)](https://github.com/noamoss/yaml_diffs/actions/workflows/test.yml)
-[![Lint](https://github.com/noamoss/yaml_diffs/actions/workflows/lint.yml/badge.svg)](https://github.com/noamoss/yaml_diffs/actions/workflows/lint.yml)
-[![Build](https://github.com/noamoss/yaml_diffs/actions/workflows/build.yml/badge.svg)](https://github.com/noamoss/yaml_diffs/actions/workflows/build.yml)
+[![Tests](https://github.com/noamoss/yamly/actions/workflows/test.yml/badge.svg)](https://github.com/noamoss/yamly/actions/workflows/test.yml)
+[![Lint](https://github.com/noamoss/yamly/actions/workflows/lint.yml/badge.svg)](https://github.com/noamoss/yamly/actions/workflows/lint.yml)
+[![Build](https://github.com/noamoss/yamly/actions/workflows/build.yml/badge.svg)](https://github.com/noamoss/yamly/actions/workflows/build.yml)
 
 ## Installation
 
@@ -46,8 +46,8 @@ A powerful YAML diffing service that supports both **generic YAML files** and **
 
 ```bash
 # Clone the repository
-git clone https://github.com/noamoss/yaml_diffs.git
-cd yaml_diffs
+git clone https://github.com/noamoss/yamly.git
+cd yamly
 
 # Create virtual environment and install dependencies
 uv venv
@@ -75,16 +75,16 @@ cp .env.example .env
 The `.env.example` file includes:
 - **API Server Configuration**: PORT, HOST, LOG_LEVEL, etc.
 - **CORS Configuration**: CORS_ORIGINS, CORS_ALLOW_CREDENTIALS, etc.
-- **API Client Configuration**: `YAML_DIFFS_API_URL` (defaults to production: `https://yaml-diffs.up.railway.app`)
+- **API Client Configuration**: `YAMLY_API_URL` (set in `.env` file, defaults to `http://localhost:8000` in code)
 
 **Note**: The `.env` file is for local development only. Railway deployments use environment variables set in the Railway dashboard.
 
 ## Project Structure
 
 ```
-yaml-diffs/
+yamly/
 ├── src/
-│   └── yaml_diffs/          # Main package
+│   └── yamly/               # Main package
 │       ├── __init__.py
 │       ├── api.py           # Main library API
 │       ├── loader.py        # YAML loading utilities
@@ -127,7 +127,7 @@ yaml-diffs/
 pytest
 
 # Run with coverage
-pytest --cov=src/yaml_diffs --cov-report=html
+pytest --cov=src/yamly --cov-report=html
 
 # Run specific test file
 pytest tests/test_models.py
@@ -156,7 +156,7 @@ mypy src/
 python -m build
 
 # Install from built package
-uv pip install dist/yaml_diffs-*.whl
+uv pip install dist/yamly-*.whl
 ```
 
 ## Quick Start
@@ -164,7 +164,7 @@ uv pip install dist/yaml_diffs-*.whl
 ### Python Library
 
 ```python
-from yaml_diffs import load_document, diff_documents, format_diff
+from yamly import load_document, diff_documents, format_diff
 
 # Load a document
 doc = load_document("examples/minimal_document.yaml")
@@ -184,28 +184,28 @@ print(json_output)
 
 ```bash
 # Validate a legal document
-yaml-diffs validate examples/minimal_document.yaml
+yamly validate examples/minimal_document.yaml
 
 # Auto-detect mode and diff two documents
-yaml-diffs diff examples/document_v1.yaml examples/document_v2.yaml
+yamly diff examples/document_v1.yaml examples/document_v2.yaml
 
 # Force generic YAML mode (any YAML file)
-yaml-diffs diff config_v1.yaml config_v2.yaml --mode general
+yamly diff config_v1.yaml config_v2.yaml --mode general
 
 # Generic diff with identity rules (match containers by name)
-yaml-diffs diff old.yaml new.yaml --mode general --identity-rule "containers:name"
+yamly diff old.yaml new.yaml --mode general --identity-rule "containers:name"
 
 # Conditional identity rule (books by catalog_id when type=book)
-yaml-diffs diff old.yaml new.yaml --identity-rule "inventory:catalog_id:type=book"
+yamly diff old.yaml new.yaml --identity-rule "inventory:catalog_id:type=book"
 
 # Force legal document mode
-yaml-diffs diff old.yaml new.yaml --mode legal_document
+yamly diff old.yaml new.yaml --mode legal_document
 
 # Diff with text output
-yaml-diffs diff old.yaml new.yaml --format text
+yamly diff old.yaml new.yaml --format text
 
 # Save diff to file
-yaml-diffs diff old.yaml new.yaml --output diff.json
+yamly diff old.yaml new.yaml --output diff.json
 ```
 
 ### REST API
@@ -229,7 +229,7 @@ This will start:
 **Manual Start (Alternative):**
 ```bash
 # Start API server only
-uvicorn src.yaml_diffs.api_server.main:app --reload --port 8000
+uvicorn src.yamly.api_server.main:app --reload --port 8000
 
 # Validate a document
 curl -X POST http://localhost:8000/api/v1/validate \
@@ -258,34 +258,37 @@ curl http://localhost:8000/health
 ```
 
 **Production API:**
-The API is deployed at: **https://yaml-diffs.up.railway.app**
+The production API URL is configured via the `YAMLY_API_URL` environment variable. Set this in your `.env` file or environment:
 
 ```bash
+# Set API URL in .env file
+YAMLY_API_URL=https://api-yamly.thepitz.studio
+
 # Health check
-curl https://yaml-diffs.up.railway.app/health
+curl $YAMLY_API_URL/health
 
 # Validate a document
-curl -X POST https://yaml-diffs.up.railway.app/api/v1/validate \
+curl -X POST $YAMLY_API_URL/api/v1/validate \
   -H "Content-Type: application/json" \
   -d '{"yaml": "document:\n  id: \"test\"\n  ..."}'
 ```
 
 The API also provides interactive documentation:
 - **Local**: http://localhost:8000/docs (Swagger UI) and http://localhost:8000/redoc (ReDoc)
-- **Production**: https://yaml-diffs.up.railway.app/docs and https://yaml-diffs.up.railway.app/redoc
+- **Production**: `$YAMLY_API_URL/docs` and `$YAMLY_API_URL/redoc` (use your configured API URL)
 
 ### MCP Server
 
-The MCP (Model Context Protocol) server exposes the REST API endpoints as MCP tools, enabling AI assistants to interact with the yaml-diffs service.
+The MCP (Model Context Protocol) server exposes the REST API endpoints as MCP tools, enabling AI assistants to interact with the yamly service.
 
 **Quick Start:**
 
 ```bash
 # Run MCP server (connects to local API by default)
-yaml-diffs mcp-server
+yamly mcp-server
 
 # Or with custom configuration
-yaml-diffs mcp-server --api-url http://api.example.com:8000 --api-key your-key
+yamly mcp-server --api-url http://api.example.com:8000 --api-key your-key
 ```
 
 **Available Tools:**
@@ -294,9 +297,9 @@ yaml-diffs mcp-server --api-url http://api.example.com:8000 --api-key your-key
 - `health_check`: Check API health status
 
 **Configuration:**
-- `YAML_DIFFS_API_URL`: API base URL (default: `http://localhost:8000`, or from `.env` file)
-- `YAML_DIFFS_API_KEY`: Optional API key for authentication (can be set in `.env` file)
-- `YAML_DIFFS_API_TIMEOUT`: Request timeout in seconds (default: `30`, can be set in `.env` file)
+- `YAMLY_API_URL`: API base URL (default: `http://localhost:8000`, or from `.env` file)
+- `YAMLY_API_KEY`: Optional API key for authentication (can be set in `.env` file)
+- `YAMLY_API_TIMEOUT`: Request timeout in seconds (default: `30`, can be set in `.env` file)
 
 These can be configured via environment variables or in a `.env` file (see [Environment Configuration](#environment-configuration)).
 
@@ -421,10 +424,10 @@ See the [Examples Guide](docs/user/examples.md) and [Examples README](examples/R
 
 ## Project Status
 
-This project is in active development. See [GitHub Issues](https://github.com/noamoss/yaml_diffs/issues) for current tasks and progress.
+This project is in active development. See [GitHub Issues](https://github.com/noamoss/yamly/issues) for current tasks and progress.
 
 ## Getting Help
 
 - **Documentation**: [Documentation Index](docs/README.md)
-- **Issues**: [GitHub Issues](https://github.com/noamoss/yaml_diffs/issues)
+- **Issues**: [GitHub Issues](https://github.com/noamoss/yamly/issues)
 - **Project Board**: [GitHub Project Board](https://github.com/users/noamoss/projects/4)

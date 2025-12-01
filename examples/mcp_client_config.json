@@ -1,10 +1,10 @@
 {
   "mcpServers": {
-    "yaml-diffs": {
-      "command": "yaml-diffs-mcp-server",
+    "yamly": {
+      "command": "yamly-mcp-server",
       "args": [],
       "env": {
-        "YAML_DIFFS_API_URL": "http://localhost:8000"
+        "YAMLY_API_URL": "http://localhost:8000"
       }
     }
   }

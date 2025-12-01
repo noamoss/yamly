@@ -137,4 +137,4 @@ dmypy.json
 
 # Development server PID files
 .dev-servers.pid
-/tmp/yaml-diffs-*.log
+/tmp/yamly-*.log

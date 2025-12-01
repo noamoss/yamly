@@ -1,1 +1,1 @@
-"""Test suite for yaml-diffs package."""
+"""Test suite for yamly package."""

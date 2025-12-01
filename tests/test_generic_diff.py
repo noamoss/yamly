@@ -1,7 +1,7 @@
 """Tests for generic YAML diffing functionality."""
 
-from yaml_diffs.generic_diff import diff_yaml_generic
-from yaml_diffs.generic_diff_types import (
+from yamly.generic_diff import diff_yaml_generic
+from yamly.generic_diff_types import (
     DiffOptions,
     GenericChangeType,
     IdentityRule,
@@ -400,7 +400,7 @@ class TestLineNumberExtraction:
 
     def test_line_numbers_populated(self):
         """Test that line numbers are populated after enrichment."""
-        from yaml_diffs.generic_diff import enrich_generic_diff_with_line_numbers
+        from yamly.generic_diff import enrich_generic_diff_with_line_numbers
 
         old_yaml = """app:
   name: MyApp
@@ -440,7 +440,7 @@ database:
 
     def test_line_numbers_for_added_key(self):
         """Test line numbers for added keys."""
-        from yaml_diffs.generic_diff import enrich_generic_diff_with_line_numbers
+        from yamly.generic_diff import enrich_generic_diff_with_line_numbers
 
         old_yaml = """app:
   name: MyApp

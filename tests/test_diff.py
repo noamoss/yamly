@@ -4,9 +4,9 @@ import uuid
 
 import pytest
 
-from yaml_diffs.diff import diff_documents
-from yaml_diffs.diff_types import ChangeType, DiffResult, DocumentDiff
-from yaml_diffs.models import Document, Section, Source, Version
+from yamly.diff import diff_documents
+from yamly.diff_types import ChangeType, DiffResult, DocumentDiff
+from yamly.models import Document, Section, Source, Version
 
 
 @pytest.fixture
@@ -599,7 +599,7 @@ class TestDiffContentSimilarity:
 
     def test_content_similarity_calculation(self):
         """Test similarity scoring function."""
-        from yaml_diffs.diff import _calculate_content_similarity
+        from yamly.diff import _calculate_content_similarity
 
         # Identical content
         assert _calculate_content_similarity("hello world", "hello world") == 1.0
@@ -804,7 +804,7 @@ class TestDiffIntegration:
 
     def test_diff_example_documents(self):
         """Test diff two versions of example document."""
-        from yaml_diffs.loader import load_document
+        from yamly.loader import load_document
 
         doc1 = load_document("examples/document_v1.yaml")
         doc2 = load_document("examples/document_v2.yaml")

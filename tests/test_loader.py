@@ -6,9 +6,9 @@ from pathlib import Path
 import pytest
 import yaml
 
-from yaml_diffs.exceptions import PydanticValidationError, YAMLLoadError
-from yaml_diffs.loader import load_document, load_yaml, load_yaml_file
-from yaml_diffs.models import Document
+from yamly.exceptions import PydanticValidationError, YAMLLoadError
+from yamly.loader import load_document, load_yaml, load_yaml_file
+from yamly.models import Document
 
 
 # Test fixtures

@@ -1,10 +1,10 @@
 # Diffing Algorithms
 
-This document provides detailed explanations of the diffing algorithms used in yaml-diffs, including workflow diagrams and comprehensive descriptions of how each change type is detected.
+This document provides detailed explanations of the diffing algorithms used in yamly, including workflow diagrams and comprehensive descriptions of how each change type is detected.
 
 ## Overview
 
-yaml-diffs supports two distinct diffing modes, each optimized for different use cases:
+yamly supports two distinct diffing modes, each optimized for different use cases:
 
 - **Generic YAML Diff Mode**: For any YAML file (configs, Kubernetes manifests, etc.) using path-based tracking and smart array matching
 - **Legal Document Diff Mode**: For schema-validated Hebrew legal documents using marker-based section matching
@@ -210,7 +210,7 @@ The generic diff mode detects the following change types:
 ### Implementation
 
 The generic diff algorithm is implemented in:
-- **Main function**: `diff_yaml_generic()` in `src/yaml_diffs/generic_diff.py`
+- **Main function**: `diff_yaml_generic()` in `src/yamly/generic_diff.py`
 - **Phase 1**: `diff_node()` and `diff_sequence()` functions
 - **Phase 2**: `detect_renames()` function
 - **Phase 3**: `detect_moves()` function
@@ -367,7 +367,7 @@ The legal document diff mode detects the following change types:
 ### Implementation
 
 The legal document diff algorithm is implemented in:
-- **Main function**: `diff_documents()` in `src/yaml_diffs/diff.py`
+- **Main function**: `diff_documents()` in `src/yamly/diff.py`
 - **Marker validation**: `_validate_unique_markers()` function
 - **Marker map building**: `_build_marker_map()` function
 - **Movement detection**: `_find_moved_sections()` function

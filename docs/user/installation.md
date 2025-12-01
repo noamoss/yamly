@@ -1,6 +1,6 @@
 # Installation Guide
 
-This guide covers all methods for installing the yaml-diffs package, from PyPI, source, or for development.
+This guide covers all methods for installing the yamly package, from PyPI, source, or for development.
 
 ## Prerequisites
 
@@ -15,13 +15,13 @@ This guide covers all methods for installing the yaml-diffs package, from PyPI, 
 Once the package is published to PyPI, you can install it using pip:
 
 ```bash
-pip install yaml-diffs
+pip install yamly
 ```
 
 Or using uv (faster):
 
 ```bash
-uv pip install yaml-diffs
+uv pip install yamly
 ```
 
 ### Install from Source
@@ -30,8 +30,8 @@ If you want to install from the latest source code:
 
 ```bash
 # Clone the repository
-git clone https://github.com/noamoss/yaml_diffs.git
-cd yaml_diffs
+git clone https://github.com/noamoss/yamly.git
+cd yamly
 
 # Install the package
 pip install .
@@ -49,8 +49,8 @@ For development work, install in editable mode with development dependencies:
 
 ```bash
 # Clone the repository
-git clone https://github.com/noamoss/yaml_diffs.git
-cd yaml_diffs
+git clone https://github.com/noamoss/yamly.git
+cd yamly
 
 # Create virtual environment (recommended)
 python -m venv .venv
@@ -64,8 +64,8 @@ Or using uv:
 
 ```bash
 # Clone the repository
-git clone https://github.com/noamoss/yaml_diffs.git
-cd yaml_diffs
+git clone https://github.com/noamoss/yamly.git
+cd yamly
 
 # Create virtual environment and install
 uv venv
@@ -82,12 +82,12 @@ After installation, verify that the package is installed correctly:
 Check that the package can be imported:
 
 ```bash
-python -c "import yaml_diffs; print(f'yaml-diffs version: {yaml_diffs.__version__}')"
+python -c "import yamly; print(f'yamly version: {yamly.__version__}')"
 ```
 
 Expected output:
 ```
-yaml-diffs version: 0.1.0
+yamly version: 0.1.0
 ```
 
 ### 2. Verify CLI Installation
@@ -95,12 +95,12 @@ yaml-diffs version: 0.1.0
 Check that the CLI command is available:
 
 ```bash
-yaml-diffs --version
+yamly --version
 ```
 
 Expected output:
 ```
-yaml-diffs, version 0.1.0
+yamly, version 0.1.0
 ```
 
 ### 3. Test CLI Functionality
@@ -120,7 +120,7 @@ document:
 EOF
 
 # Validate it
-yaml-diffs validate test_doc.yaml
+yamly validate test_doc.yaml
 ```
 
 If validation passes, you should see no errors.
@@ -131,7 +131,7 @@ Verify that all main components can be imported:
 
 ```python
 python -c "
-from yaml_diffs import (
+from yamly import (
     load_document,
     validate_document,
     diff_documents,
@@ -151,7 +151,7 @@ Check that the schema file is accessible:
 
 ```python
 python -c "
-from yaml_diffs.schema import load_schema
+from yamly.schema import load_schema
 schema = load_schema()
 assert schema is not None
 assert 'version' in schema or 'info' in schema
@@ -171,8 +171,8 @@ pip install build
 python -m build
 
 # This creates:
-# - dist/yaml_diffs-*.whl (wheel distribution)
-# - dist/yaml_diffs-*.tar.gz (source distribution)
+# - dist/yamly-*.whl (wheel distribution)
+# - dist/yamly-*.tar.gz (source distribution)
 ```
 
 ### Install from Built Package
@@ -180,7 +180,7 @@ python -m build
 After building, you can install from the built wheel:
 
 ```bash
-pip install dist/yaml_diffs-*.whl
+pip install dist/yamly-*.whl
 ```
 
 Or test installation in a clean environment:
@@ -191,22 +191,22 @@ python -m venv test_env
 source test_env/bin/activate  # On Windows: test_env\Scripts\activate
 
 # Install the built package
-pip install dist/yaml_diffs-*.whl
+pip install dist/yamly-*.whl
 
 # Test it
-yaml-diffs --version
-python -c "import yaml_diffs; print(yaml_diffs.__version__)"
+yamly --version
+python -c "import yamly; print(yamly.__version__)"
 ```
 
 ## Troubleshooting
 
 ### CLI Command Not Found
 
-If `yaml-diffs` command is not found after installation:
+If `yamly` command is not found after installation:
 
 1. **Check installation location:**
    ```bash
-   pip show yaml-diffs
+   pip show yamly
    ```
 
 2. **Verify Python scripts directory is in PATH:**
@@ -217,8 +217,8 @@ If `yaml-diffs` command is not found after installation:
 
 3. **Reinstall the package:**
    ```bash
-   pip uninstall yaml-diffs
-   pip install yaml-diffs
+   pip uninstall yamly
+   pip install yamly
    ```
 
 ### Import Errors
@@ -232,14 +232,14 @@ If you get import errors:
 
 2. **Check if package is installed:**
    ```bash
-   pip list | grep yaml-diffs
+   pip list | grep yamly
    ```
 
 3. **Reinstall in a clean environment:**
    ```bash
    python -m venv clean_env
    source clean_env/bin/activate
-   pip install yaml-diffs
+   pip install yamly
    ```
 
 ### Schema File Not Found
@@ -251,12 +251,12 @@ If you get errors about missing schema files:
 
 2. **Check package contents:**
    ```bash
-   pip show -f yaml-diffs | grep schema
+   pip show -f yamly | grep schema
    ```
 
 3. **Reinstall from source:**
    ```bash
-   pip uninstall yaml-diffs
+   pip uninstall yamly
    pip install .
    ```
 
@@ -266,17 +266,17 @@ If the version doesn't match expectations:
 
 1. **Check installed version:**
    ```bash
-   pip show yaml-diffs
+   pip show yamly
    ```
 
 2. **Check version in code:**
    ```python
-   python -c "import yaml_diffs; print(yaml_diffs.__version__)"
+   python -c "import yamly; print(yamly.__version__)"
    ```
 
 3. **Reinstall latest version:**
    ```bash
-   pip install --upgrade yaml-diffs
+   pip install --upgrade yamly
    ```
 
 ## Uninstallation
@@ -284,7 +284,7 @@ If the version doesn't match expectations:
 To uninstall the package:
 
 ```bash
-pip uninstall yaml-diffs
+pip uninstall yamly
 ```
 
 ## Next Steps
@@ -298,6 +298,6 @@ After successful installation:
 
 ## Additional Resources
 
-- **GitHub Repository**: https://github.com/noamoss/yaml_diffs
-- **Issue Tracker**: https://github.com/noamoss/yaml_diffs/issues
-- **Documentation**: https://github.com/noamoss/yaml_diffs/tree/main/docs
+- **GitHub Repository**: https://github.com/noamoss/yamly
+- **Issue Tracker**: https://github.com/noamoss/yamly/issues
+- **Documentation**: https://github.com/noamoss/yamly/tree/main/docs

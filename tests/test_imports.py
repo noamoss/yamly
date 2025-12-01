@@ -10,14 +10,14 @@ def test_python_version():
 
 def test_package_import():
     """Verify the package can be imported."""
-    import yaml_diffs
+    import yamly
 
-    assert yaml_diffs is not None
+    assert yamly is not None
 
 
 def test_package_version():
     """Verify package version is accessible."""
-    from yaml_diffs import __version__
+    from yamly import __version__
 
     assert __version__ is not None
     assert isinstance(__version__, str)

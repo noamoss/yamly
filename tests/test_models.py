@@ -6,7 +6,7 @@ import pytest
 import yaml
 from pydantic import ValidationError
 
-from yaml_diffs.models import Document, Section, Source, Version
+from yamly.models import Document, Section, Source, Version
 
 
 # Test fixtures
@@ -332,7 +332,7 @@ class TestDocumentCreation:
         """Test Document schema requires sections field (Pydantic allows default, but schema validation requires it)."""
         # Note: Pydantic allows Document() because sections has default_factory=list
         # But schema validation should require sections to be present
-        from yaml_diffs.validator import validate_against_openspec
+        from yamly.validator import validate_against_openspec
 
         # Missing sections in schema validation
         data_without_sections = {"document": {}}

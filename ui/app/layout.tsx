@@ -15,7 +15,7 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "yaml-diffs – The Pitz Studio",
+  title: "yamly – The Pitz Studio",
   description: "Compare and review changes in YAML documents – Part of The Pitz Studio suite",
   icons: {
     icon: "/favicon.svg",

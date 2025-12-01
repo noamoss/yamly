@@ -1,6 +1,6 @@
-# MCP Server for yaml-diffs
+# MCP Server for yamly
 
-The yaml-diffs MCP (Model Context Protocol) server exposes the REST API endpoints as MCP tools, enabling AI assistants to interact with the yaml-diffs service via the MCP protocol.
+The yamly MCP (Model Context Protocol) server exposes the REST API endpoints as MCP tools, enabling AI assistants to interact with the yamly service via the MCP protocol.
 
 ## Overview
 
@@ -8,21 +8,21 @@ The MCP server provides three tools that wrap the REST API endpoints:
 
 - **`validate_document`**: Validate a YAML document against the OpenSpec schema and Pydantic models
 - **`diff_documents`**: Compare two YAML documents and return detected changes
-- **`health_check`**: Check the health status of the yaml-diffs API
+- **`health_check`**: Check the health status of the yamly API
 
 ## Installation
 
-The MCP server is included with the yaml-diffs package. Install it using:
+The MCP server is included with the yamly package. Install it using:
 
 ```bash
-pip install yaml-diffs
+pip install yamly
 ```
 
 Or install from source:
 
 ```bash
-git clone https://github.com/noamoss/yaml_diffs.git
-cd yaml_diffs
+git clone https://github.com/noamoss/yamly.git
+cd yamly
 pip install -e .
 ```
 
@@ -32,16 +32,16 @@ The MCP server can be configured via environment variables or command-line optio
 
 ### Environment Variables
 
-- **`YAML_DIFFS_API_URL`**: Base URL for the yaml-diffs API (default: `http://localhost:8000`)
-- **`YAML_DIFFS_API_KEY`**: Optional API key for authentication (default: `None`)
-- **`YAML_DIFFS_API_TIMEOUT`**: Request timeout in seconds (default: `30`)
+- **`YAMLY_API_URL`**: Base URL for the yamly API (default: `http://localhost:8000`)
+- **`YAMLY_API_KEY`**: Optional API key for authentication (default: `None`)
+- **`YAMLY_API_TIMEOUT`**: Request timeout in seconds (default: `30`)
 
 ### Command-Line Options
 
 When running the server via CLI, you can override configuration:
 
 ```bash
-yaml-diffs mcp-server --api-url http://api.example.com:8000 --api-key your-key --timeout 60
+yamly mcp-server --api-url http://api.example.com:8000 --api-key your-key --timeout 60
 ```
 
 ## Running the Server
@@ -51,7 +51,7 @@ yaml-diffs mcp-server --api-url http://api.example.com:8000 --api-key your-key -
 The simplest way to run the MCP server is using the CLI command:
 
 ```bash
-yaml-diffs mcp-server
+yamly mcp-server
 ```
 
 This starts the server with stdio transport (standard MCP protocol).
@@ -61,13 +61,13 @@ This starts the server with stdio transport (standard MCP protocol).
 You can also run the server directly as a Python module:
 
 ```bash
-python -m yaml_diffs.mcp_server.server
+python -m yamly.mcp_server.server
 ```
 
 ### Programmatic Usage
 
 ```python
-from yaml_diffs.mcp_server.server import run_server
+from yamly.mcp_server.server import run_server
 import asyncio
 
 asyncio.run(run_server())
@@ -82,11 +82,11 @@ Add the following to your Claude Desktop configuration file (typically `~/Librar
 ```json
 {
   "mcpServers": {
-    "yaml-diffs": {
-      "command": "yaml-diffs-mcp-server",
+    "yamly": {
+      "command": "yamly-mcp-server",
       "args": [],
       "env": {
-        "YAML_DIFFS_API_URL": "http://localhost:8000"
+        "YAMLY_API_URL": "http://localhost:8000"
       }
     }
   }
@@ -98,12 +98,12 @@ For a remote API instance:
 ```json
 {
   "mcpServers": {
-    "yaml-diffs": {
-      "command": "yaml-diffs-mcp-server",
+    "yamly": {
+      "command": "yamly-mcp-server",
       "args": [],
       "env": {
-        "YAML_DIFFS_API_URL": "https://api.example.com",
-        "YAML_DIFFS_API_KEY": "your-api-key-here"
+        "YAMLY_API_URL": "http://localhost:8000",
+        "YAMLY_API_KEY": "your-api-key-here"
       }
     }
   }
@@ -183,7 +183,7 @@ Compares two YAML documents and returns detected changes.
 
 ### health_check
 
-Checks the health status of the yaml-diffs API.
+Checks the health status of the yamly API.
 
 **Input:**
 ```json
@@ -221,12 +221,12 @@ Common error scenarios:
 ### Server Won't Start
 
 1. **Check Python version**: The MCP server requires Python 3.10 or higher
-2. **Check dependencies**: Ensure all dependencies are installed: `pip install yaml-diffs`
-3. **Check API availability**: Ensure the yaml-diffs API is running and accessible
+2. **Check dependencies**: Ensure all dependencies are installed: `pip install yamly`
+3. **Check API availability**: Ensure the yamly API is running and accessible
 
 ### Connection Issues
 
-1. **Verify API URL**: Check that `YAML_DIFFS_API_URL` points to a running API instance
+1. **Verify API URL**: Check that `YAMLY_API_URL` points to a running API instance
 2. **Check network connectivity**: Ensure the API endpoint is reachable
 3. **Verify authentication**: If using API key authentication, ensure the key is correct
 
@@ -246,10 +246,10 @@ pytest tests/test_mcp_server.py tests/test_mcp_tools.py -v
 
 ### Code Structure
 
-- `src/yaml_diffs/mcp_server/config.py`: Configuration management
-- `src/yaml_diffs/mcp_server/client.py`: HTTP client for API communication
-- `src/yaml_diffs/mcp_server/tools.py`: Tool definitions and handlers
-- `src/yaml_diffs/mcp_server/server.py`: Main server implementation
+- `src/yamly/mcp_server/config.py`: Configuration management
+- `src/yamly/mcp_server/client.py`: HTTP client for API communication
+- `src/yamly/mcp_server/tools.py`: Tool definitions and handlers
+- `src/yamly/mcp_server/server.py`: Main server implementation
 
 ## Related Documentation
 

@@ -11,8 +11,8 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import httpx
 import pytest
 
-from yaml_diffs.mcp_server.client import APIClient
-from yaml_diffs.mcp_server.config import MCPServerConfig
+from yamly.mcp_server.client import APIClient
+from yamly.mcp_server.config import MCPServerConfig
 
 
 class TestMCPServerConfig:
@@ -41,9 +41,9 @@ class TestMCPServerConfig:
         with patch.dict(
             os.environ,
             {
-                "YAML_DIFFS_API_URL": "http://env.example.com:8000",
-                "YAML_DIFFS_API_KEY": "env-key",
-                "YAML_DIFFS_API_TIMEOUT": "45",
+                "YAMLY_API_URL": "http://env.example.com:8000",
+                "YAMLY_API_KEY": "env-key",
+                "YAMLY_API_TIMEOUT": "45",
             },
         ):
             config = MCPServerConfig()
@@ -56,8 +56,8 @@ class TestMCPServerConfig:
         with patch.dict(
             os.environ,
             {
-                "YAML_DIFFS_API_URL": "http://env.example.com:8000",
-                "YAML_DIFFS_API_KEY": "env-key",
+                "YAMLY_API_URL": "http://env.example.com:8000",
+                "YAMLY_API_KEY": "env-key",
             },
         ):
             config = MCPServerConfig(
@@ -69,7 +69,7 @@ class TestMCPServerConfig:
 
     def test_config_invalid_timeout(self) -> None:
         """Test configuration with invalid timeout value."""
-        with patch.dict(os.environ, {"YAML_DIFFS_API_TIMEOUT": "invalid"}):
+        with patch.dict(os.environ, {"YAMLY_API_TIMEOUT": "invalid"}):
             config = MCPServerConfig()
             assert config.timeout == 30  # Should use default
 
@@ -80,7 +80,7 @@ class TestMCPServerConfig:
 
     def test_config_timeout_zero_with_env(self) -> None:
         """Test that timeout=0 parameter overrides environment variable."""
-        with patch.dict(os.environ, {"YAML_DIFFS_API_TIMEOUT": "45"}):
+        with patch.dict(os.environ, {"YAMLY_API_TIMEOUT": "45"}):
             config = MCPServerConfig(timeout=0)
             assert config.timeout == 0  # Should use parameter, not env var
 
@@ -159,7 +159,7 @@ class TestAPIClient:
         assert headers["Authorization"] == "Bearer test-key"
         await client.close()
 
-    @patch("yaml_diffs.mcp_server.client.httpx.AsyncClient")
+    @patch("yamly.mcp_server.client.httpx.AsyncClient")
     @pytest.mark.asyncio
     async def test_validate_document_success(self, mock_client_class: MagicMock) -> None:
         """Test successful document validation."""
@@ -183,7 +183,7 @@ class TestAPIClient:
         )
         await client.close()
 
-    @patch("yaml_diffs.mcp_server.client.httpx.AsyncClient")
+    @patch("yamly.mcp_server.client.httpx.AsyncClient")
     @pytest.mark.asyncio
     async def test_validate_document_error(self, mock_client_class: MagicMock) -> None:
         """Test document validation with API error."""
@@ -206,7 +206,7 @@ class TestAPIClient:
 
         await client.close()
 
-    @patch("yaml_diffs.mcp_server.client.httpx.AsyncClient")
+    @patch("yamly.mcp_server.client.httpx.AsyncClient")
     @pytest.mark.asyncio
     async def test_diff_documents_success(self, mock_client_class: MagicMock) -> None:
         """Test successful document diffing."""
@@ -230,7 +230,7 @@ class TestAPIClient:
         )
         await client.close()
 
-    @patch("yaml_diffs.mcp_server.client.httpx.AsyncClient")
+    @patch("yamly.mcp_server.client.httpx.AsyncClient")
     @pytest.mark.asyncio
     async def test_health_check_success(self, mock_client_class: MagicMock) -> None:
         """Test successful health check."""
@@ -260,7 +260,7 @@ class TestAPIClient:
         # Client should be closed after context exit
         assert client._client.is_closed
 
-    @patch("yaml_diffs.mcp_server.client.httpx.AsyncClient")
+    @patch("yamly.mcp_server.client.httpx.AsyncClient")
     @pytest.mark.asyncio
     async def test_client_timeout_zero_converted_to_none(
         self, mock_client_class: MagicMock
@@ -278,7 +278,7 @@ class TestAPIClient:
         assert call_kwargs["timeout"] is None
         await client.close()
 
-    @patch("yaml_diffs.mcp_server.client.httpx.AsyncClient")
+    @patch("yamly.mcp_server.client.httpx.AsyncClient")
     @pytest.mark.asyncio
     async def test_client_timeout_positive_preserved(self, mock_client_class: MagicMock) -> None:
         """Test that positive timeout values are preserved."""

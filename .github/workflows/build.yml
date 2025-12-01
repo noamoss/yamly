@@ -46,32 +46,32 @@ jobs:
         timeout-minutes: 10
         run: |
           # Install wheel (pip automatically installs dependencies from wheel metadata)
-          pip install dist/yaml_diffs-*.whl
+          pip install dist/yamly-*.whl
           # Verify dependencies are installed (grep may not find all, that's OK)
           echo "Installed packages:"
           pip list | grep -E "(click|pydantic|pyyaml|fastapi|jsonschema|httpx|mcp|uvicorn)" || echo "Note: Some dependencies may not be listed above"
           # Test basic import
-          python -c "import yaml_diffs; print('✅ Package installed successfully')"
-          python -c "from yaml_diffs import __version__; print(f'✅ Package version: {__version__}')"
-          python -c "import yaml_diffs; assert hasattr(yaml_diffs, '__version__'), 'Package missing __version__ attribute'"
+          python -c "import yamly; print('✅ Package installed successfully')"
+          python -c "from yamly import __version__; print(f'✅ Package version: {__version__}')"
+          python -c "import yamly; assert hasattr(yamly, '__version__'), 'Package missing __version__ attribute'"
 
       - name: Test CLI commands
         timeout-minutes: 5
         run: |
           # Test CLI version command
-          yaml-diffs --version
+          yamly --version
           # Test CLI help command
-          yaml-diffs --help
+          yamly --help
 
       - name: Test library imports
         timeout-minutes: 5
         run: |
-          python -c "from yaml_diffs import (load_document, validate_document, diff_documents, format_diff, Document, Section, __version__); print('All main imports successful!'); print(f'Version: {__version__}')"
+          python -c "from yamly import (load_document, validate_document, diff_documents, format_diff, Document, Section, __version__); print('All main imports successful!'); print(f'Version: {__version__}')"
 
       - name: Test schema file access
         timeout-minutes: 5
         run: |
-          python -c "from yaml_diffs.schema import load_schema; schema = load_schema(); assert schema is not None; assert 'version' in schema or 'info' in schema; print('Schema file accessible and loadable!')"
+          python -c "from yamly.schema import load_schema; schema = load_schema(); assert schema is not None; assert 'version' in schema or 'info' in schema; print('Schema file accessible and loadable!')"
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v5

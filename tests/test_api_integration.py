@@ -7,9 +7,9 @@ from pathlib import Path
 
 import pytest
 
-from yaml_diffs.api import diff_and_format, diff_files, load_and_validate
-from yaml_diffs.loader import load_document
-from yaml_diffs.models import Document
+from yamly.api import diff_and_format, diff_files, load_and_validate
+from yamly.loader import load_document
+from yamly.models import Document
 
 
 @pytest.mark.integration
@@ -27,7 +27,7 @@ class TestAPIConsistency:
         doc1 = load_and_validate(minimal_file)
 
         # Load using direct functions
-        from yaml_diffs.validator import validate_document
+        from yamly.validator import validate_document
 
         doc2 = validate_document(minimal_file)
 
@@ -48,7 +48,7 @@ class TestAPIConsistency:
         diff1 = diff_files(v1_file, v2_file)
 
         # Diff using direct functions
-        from yaml_diffs.api import diff_documents
+        from yamly.api import diff_documents
 
         doc1 = load_document(v1_file)
         doc2 = load_document(v2_file)
@@ -73,7 +73,7 @@ class TestAPIConsistency:
         json_output = diff_and_format(v1_file, v2_file, output_format="json")
 
         # Format using direct functions
-        from yaml_diffs.api import diff_documents, format_diff
+        from yamly.api import diff_documents, format_diff
 
         doc1 = load_document(v1_file)
         doc2 = load_document(v2_file)
@@ -114,7 +114,7 @@ class TestCompleteWorkflows:
         assert isinstance(doc2, Document)
 
         # Step 2: Validate (already done by load_document, but explicit)
-        from yaml_diffs.validator import validate_document
+        from yamly.validator import validate_document
 
         validated_doc1 = validate_document(v1_file)
         validated_doc2 = validate_document(v2_file)
@@ -123,7 +123,7 @@ class TestCompleteWorkflows:
         assert validated_doc2.id == doc2.id
 
         # Step 3: Diff
-        from yaml_diffs.api import diff_documents
+        from yamly.api import diff_documents
 
         diff = diff_documents(doc1, doc2)
 
@@ -132,7 +132,7 @@ class TestCompleteWorkflows:
         assert len(diff.changes) >= 0
 
         # Step 4: Format
-        from yaml_diffs.api import format_diff
+        from yamly.api import format_diff
 
         json_output = format_diff(diff, output_format="json")
         text_output = format_diff(diff, output_format="text")
@@ -175,7 +175,7 @@ class TestErrorHandlingAcrossLayers:
         )
 
         # All should raise validation errors
-        from yaml_diffs.exceptions import (
+        from yamly.exceptions import (
             OpenSpecValidationError,
             PydanticValidationError,
             YAMLLoadError,
@@ -189,7 +189,7 @@ class TestErrorHandlingAcrossLayers:
 
     def test_nonexistent_file_error_handling(self):
         """Test that nonexistent files produce consistent errors."""
-        from yaml_diffs.exceptions import YAMLLoadError
+        from yamly.exceptions import YAMLLoadError
 
         # All should raise YAMLLoadError
         with pytest.raises(YAMLLoadError):

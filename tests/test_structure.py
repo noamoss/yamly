@@ -8,7 +8,7 @@ def test_project_directories_exist():
     base_dir = Path(__file__).parent.parent
 
     required_dirs = [
-        base_dir / "src" / "yaml_diffs",
+        base_dir / "src" / "yamly",
         base_dir / "tests",
         base_dir / "docs",
         base_dir / "examples",
@@ -24,8 +24,8 @@ def test_package_files_exist():
     base_dir = Path(__file__).parent.parent
 
     required_files = [
-        base_dir / "src" / "yaml_diffs" / "__init__.py",
-        base_dir / "src" / "yaml_diffs" / "__version__.py",
+        base_dir / "src" / "yamly" / "__init__.py",
+        base_dir / "src" / "yamly" / "__version__.py",
         base_dir / "tests" / "__init__.py",
     ]
 

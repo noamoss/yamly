@@ -1,6 +1,6 @@
 # Railway Deployment Guide
 
-This guide provides step-by-step instructions for deploying the yaml-diffs REST API service to Railway.
+This guide provides step-by-step instructions for deploying the yamly REST API service to Railway.
 
 ## Table of Contents
 
@@ -33,7 +33,7 @@ Before deploying to Railway, ensure you have:
 2. Click **"New Project"**
 3. Select **"Deploy from GitHub repo"**
 4. Authorize Railway to access your GitHub account (if not already done)
-5. Select the `yaml_diffs` repository
+5. Select the `yamly` repository
 6. Railway will automatically detect it as a Python project
 
 ### Step 2: Configure Environment Variables
@@ -50,7 +50,7 @@ Before deploying to Railway, ensure you have:
    - `CORS_ALLOW_CREDENTIALS`: Defaults to `true`
    - `CORS_ALLOW_METHODS`: Defaults to `*`
    - `CORS_ALLOW_HEADERS`: Defaults to `*`
-   - `APP_NAME`: Defaults to `yaml-diffs API`
+   - `APP_NAME`: Defaults to `yamly API`
    - `APP_VERSION`: Defaults to `0.1.0`
 
    **Note**: Railway automatically sets `PORT` - do not override it.
@@ -62,17 +62,19 @@ Before deploying to Railway, ensure you have:
 Railway will automatically:
 1. Detect the Python project from `pyproject.toml`
 2. Install the package using the build configuration from `railway.json`
-3. Run the start command: `uvicorn yaml_diffs.api_server.main:app --host 0.0.0.0 --port $PORT`
-   - Note: Uses the installed package name `yaml_diffs` (not `src.yaml_diffs`) since Railway installs the package
+3. Run the start command: `uvicorn yamly.api_server.main:app --host 0.0.0.0 --port $PORT`
+   - Note: Uses the installed package name `yamly` (not `src.yamly`) since Railway installs the package
 4. Monitor the `/health` endpoint for health checks
 
 ### Step 4: Verify Deployment
 
 1. Wait for the deployment to complete (check the **Deployments** tab)
-2. Railway will provide a public URL (e.g., `https://yaml-diffs.up.railway.app`)
+2. Railway will provide a public URL (configure via `RAILWAY_DOMAIN` environment variable)
 3. Test the health endpoint:
    ```bash
-   curl https://yaml-diffs.up.railway.app/health
+   # Load environment variable from .env
+   source .env  # or export YAMLY_API_URL=https://api-yamly.thepitz.studio
+   curl $YAMLY_API_URL/health
    ```
    Expected response:
    ```json
@@ -84,12 +86,12 @@ Railway will automatically:
 4. Test the API endpoints:
    ```bash
    # Validate endpoint
-   curl -X POST https://yaml-diffs.up.railway.app/api/v1/validate \
+   curl -X POST $YAMLY_API_URL/api/v1/validate \
      -H "Content-Type: application/json" \
      -d '{"yaml": "document:\n  id: \"test\"\n  title: \"Test\"\n  type: \"law\"\n  language: \"hebrew\"\n  version:\n    number: \"2024-01-01\"\n  source:\n    url: \"https://example.com\"\n    fetched_at: \"2024-01-01T00:00:00Z\"\n  sections: []"}'
    ```
 
-**Production API URL**: The deployed API is available at **https://yaml-diffs.up.railway.app**
+**Production API URL**: Configure the production API URL via the `YAMLY_API_URL` environment variable in your `.env` file
 
 You can also use the verification script:
 ```bash
@@ -97,7 +99,8 @@ You can also use the verification script:
 ./scripts/verify_railway_deployment.sh
 
 # Or specify the URL directly
-./scripts/verify_railway_deployment.sh https://yaml-diffs.up.railway.app
+# Uses YAMLY_API_URL from .env file
+./scripts/verify_railway_deployment.sh
 ```
 
 ## Environment Configuration
@@ -111,7 +114,7 @@ For local development, use a `.env` file based on `.env.example`:
 cp .env.example .env
 
 # Edit .env with your local settings
-# The .env.example includes the production API URL (https://yaml-diffs.up.railway.app)
+# The .env.example includes example production API URL configuration
 # by default for API client scripts
 ```
 
@@ -134,7 +137,7 @@ cp .env.example .env
 | `CORS_ALLOW_CREDENTIALS` | `true` | Allow credentials in CORS requests |
 | `CORS_ALLOW_METHODS` | `*` | Comma-separated list of allowed HTTP methods |
 | `CORS_ALLOW_HEADERS` | `*` | Comma-separated list of allowed headers |
-| `APP_NAME` | `yaml-diffs API` | Application name |
+| `APP_NAME` | `yamly API` | Application name |
 | `APP_VERSION` | `0.1.0` | Application version |
 
 ### Production Security Settings
@@ -210,7 +213,8 @@ If health checks are failing:
 1. **Check Logs**: View logs in Railway dashboard to see errors
 2. **Verify Endpoint**: Test `/health` endpoint manually:
    ```bash
-   curl https://yaml-diffs.up.railway.app/health
+   # Use environment variable
+   curl $YAMLY_API_URL/health
    ```
 3. **Check Port Binding**: Ensure the service binds to `0.0.0.0` and uses `$PORT`
 4. **Check Startup Time**: Increase `healthcheckTimeout` if service takes longer to start
@@ -340,10 +344,10 @@ jobs:
 1. **Test Locally with Railway Environment**:
    ```bash
    # For local testing (from project root, package not installed)
-   PORT=8000 uvicorn src.yaml_diffs.api_server.main:app --host 0.0.0.0 --port $PORT
+   PORT=8000 uvicorn src.yamly.api_server.main:app --host 0.0.0.0 --port $PORT
 
    # For production-like testing (with package installed)
-   PORT=8000 uvicorn yaml_diffs.api_server.main:app --host 0.0.0.0 --port $PORT
+   PORT=8000 uvicorn yamly.api_server.main:app --host 0.0.0.0 --port $PORT
    ```
 
 2. **Check Service Status**:
@@ -430,4 +434,4 @@ If you encounter issues not covered in this guide:
 1. Check [Railway Documentation](https://docs.railway.app)
 2. Review service logs in Railway dashboard
 3. Test locally with Railway environment variables
-4. Open an issue on [GitHub](https://github.com/noamoss/yaml_diffs/issues)
+4. Open an issue on [GitHub](https://github.com/noamoss/yamly/issues)

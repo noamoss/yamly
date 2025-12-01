@@ -7,7 +7,7 @@ from pathlib import Path
 import pytest
 from click.testing import CliRunner
 
-from yaml_diffs.cli.main import cli, main
+from yamly.cli.main import cli, main
 
 
 @pytest.fixture
@@ -110,7 +110,7 @@ class TestCLIHelp:
         """Test that help command displays correctly."""
         result = runner.invoke(cli, ["--help"])
         assert result.exit_code == 0
-        assert "yaml-diffs" in result.output
+        assert "yamly" in result.output
         assert "validate" in result.output
         assert "diff" in result.output
 
@@ -118,7 +118,7 @@ class TestCLIHelp:
         """Test that version command displays correctly."""
         result = runner.invoke(cli, ["--version"])
         assert result.exit_code == 0
-        assert "yaml-diffs" in result.output
+        assert "yamly" in result.output
         assert "version" in result.output.lower() or "0.1.0" in result.output
 
     def test_validate_help(self, runner: CliRunner) -> None:

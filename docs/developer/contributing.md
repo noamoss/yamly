@@ -1,6 +1,6 @@
 # Contributing
 
-Thank you for your interest in contributing to yaml-diffs! This guide will help you get started.
+Thank you for your interest in contributing to yamly! This guide will help you get started.
 
 ## Development Setup
 
@@ -14,8 +14,8 @@ Thank you for your interest in contributing to yaml-diffs! This guide will help 
 
 ```bash
 # Clone the repository
-git clone https://github.com/noamoss/yaml_diffs.git
-cd yaml_diffs
+git clone https://github.com/noamoss/yamly.git
+cd yamly
 
 # Create virtual environment
 uv venv
@@ -62,7 +62,7 @@ git checkout -b feature/your-feature-name
 pytest
 
 # Run with coverage
-pytest --cov=src/yaml_diffs --cov-report=html
+pytest --cov=src/yamly --cov-report=html
 
 # Run specific test file
 pytest tests/test_your_feature.py
@@ -206,7 +206,7 @@ pytest -v
 pytest tests/test_models.py::test_create_section
 
 # Run with coverage
-pytest --cov=src/yaml_diffs --cov-report=term-missing
+pytest --cov=src/yamly --cov-report=term-missing
 
 # Run only fast tests
 pytest -m "not slow"
@@ -308,7 +308,7 @@ If you're an AI coding agent working on this project, see [AGENTS.md](../../AGEN
 
 ### Adding a New Formatter
 
-1. Create formatter in `src/yaml_diffs/formatters/`
+1. Create formatter in `src/yamly/formatters/`
 2. Implement formatter interface
 3. Register in `__init__.py`
 4. Add to `format_diff()` function
@@ -317,7 +317,7 @@ If you're an AI coding agent working on this project, see [AGENTS.md](../../AGEN
 
 ## Questions?
 
-- **Issues**: [GitHub Issues](https://github.com/noamoss/yaml_diffs/issues)
+- **Issues**: [GitHub Issues](https://github.com/noamoss/yamly/issues)
 - **Documentation**: [Documentation Index](../README.md)
 - **AI Agents**: [AGENTS.md](../../AGENTS.md)
 

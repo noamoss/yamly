@@ -1,15 +1,15 @@
 # API Reference
 
-This document provides a comprehensive reference for the yaml-diffs Python library API.
+This document provides a comprehensive reference for the yamly Python library API.
 
 ## Overview
 
-The yaml-diffs library provides a clean, intuitive interface for working with Hebrew legal documents in YAML format. The API supports loading, validating, and diffing documents with full support for Hebrew content and nested document structures.
+The yamly library provides a clean, intuitive interface for working with Hebrew legal documents in YAML format. The API supports loading, validating, and diffing documents with full support for Hebrew content and nested document structures.
 
 ## Quick Start
 
 ```python
-from yaml_diffs import api
+from yamly import api
 
 # Load and validate a document
 doc = api.load_and_validate("examples/minimal_document.yaml")
@@ -39,7 +39,7 @@ Load a YAML file and return a `Document` instance.
 
 **Example:**
 ```python
-from yaml_diffs import load_document
+from yamly import load_document
 
 # Load from file path
 doc = load_document("examples/minimal_document.yaml")
@@ -66,7 +66,7 @@ Load and validate a YAML file against both OpenSpec schema and Pydantic models.
 
 **Example:**
 ```python
-from yaml_diffs import validate_document
+from yamly import validate_document
 
 doc = validate_document("examples/minimal_document.yaml")
 assert doc.id == "test-123"
@@ -88,7 +88,7 @@ Compare two Document versions and detect changes.
 
 **Example:**
 ```python
-from yaml_diffs import load_document, diff_documents
+from yamly import load_document, diff_documents
 
 old_doc = load_document("examples/document_v1.yaml")
 new_doc = load_document("examples/document_v2.yaml")
@@ -117,7 +117,7 @@ Format a DocumentDiff using the specified formatter.
 
 **Example:**
 ```python
-from yaml_diffs import diff_documents, format_diff, ChangeType
+from yamly import diff_documents, format_diff, ChangeType
 
 diff = diff_documents(old_doc, new_doc)
 
@@ -154,7 +154,7 @@ Load and validate a document in one call. This is equivalent to calling `validat
 
 **Example:**
 ```python
-from yaml_diffs import load_and_validate
+from yamly import load_and_validate
 
 doc = load_and_validate("examples/minimal_document.yaml")
 ```
@@ -177,7 +177,7 @@ Load and diff two document files. This combines `load_document()` and `diff_docu
 
 **Example:**
 ```python
-from yaml_diffs import diff_files
+from yamly import diff_files
 
 diff = diff_files("examples/document_v1.yaml", "examples/document_v2.yaml")
 print(f"Changes: {len(diff.changes)}")
@@ -205,7 +205,7 @@ Load, diff, and format two documents in one call. This combines `diff_files()` a
 
 **Example:**
 ```python
-from yaml_diffs import diff_and_format, ChangeType
+from yamly import diff_and_format, ChangeType
 
 # Get JSON diff
 json_diff = diff_and_format("old.yaml", "new.yaml", output_format="json")
@@ -224,7 +224,7 @@ text_diff = diff_and_format(
 ### 1. Load and Inspect a Document
 
 ```python
-from yaml_diffs import load_document
+from yamly import load_document
 
 doc = load_document("examples/minimal_document.yaml")
 print(f"Document ID: {doc.id}")
@@ -235,7 +235,7 @@ print(f"Number of sections: {len(doc.sections)}")
 ### 2. Validate a Document
 
 ```python
-from yaml_diffs import validate_document, ValidationError
+from yamly import validate_document, ValidationError
 
 try:
     doc = validate_document("document.yaml")
@@ -247,7 +247,7 @@ except ValidationError as e:
 ### 3. Compare Two Document Versions
 
 ```python
-from yaml_diffs import diff_files
+from yamly import diff_files
 
 diff = diff_files("document_v1.yaml", "document_v2.yaml")
 print(f"Added sections: {diff.added_count}")
@@ -261,7 +261,7 @@ for change in diff.changes:
 ### 4. Get Formatted Diff Output
 
 ```python
-from yaml_diffs import diff_and_format
+from yamly import diff_and_format
 
 # Get JSON diff
 json_output = diff_and_format("old.yaml", "new.yaml", output_format="json")
@@ -275,7 +275,7 @@ with open("diff.json", "w") as f:
 ### 5. Complete Workflow
 
 ```python
-from yaml_diffs import load_and_validate, diff_documents, format_diff
+from yamly import load_and_validate, diff_documents, format_diff
 
 # Load and validate both documents
 old_doc = load_and_validate("document_v1.yaml")
@@ -303,7 +303,7 @@ The API uses custom exceptions for clear error handling:
 Raised when a YAML file cannot be loaded or parsed.
 
 ```python
-from yaml_diffs import load_document, YAMLLoadError
+from yamly import load_document, YAMLLoadError
 
 try:
     doc = load_document("nonexistent.yaml")
@@ -322,7 +322,7 @@ Base exception for all validation errors.
 Raised when validation against OpenSpec schema fails.
 
 ```python
-from yaml_diffs import validate_document, OpenSpecValidationError
+from yamly import validate_document, OpenSpecValidationError
 
 try:
     doc = validate_document("invalid_schema.yaml")
@@ -337,7 +337,7 @@ except OpenSpecValidationError as e:
 Raised when validation against Pydantic models fails.
 
 ```python
-from yaml_diffs import load_document, PydanticValidationError
+from yamly import load_document, PydanticValidationError
 
 try:
     doc = load_document("invalid_data.yaml")
@@ -435,7 +435,7 @@ The API also exports additional utility functions:
 ### Recommended: Import from main module
 
 ```python
-from yaml_diffs import (
+from yamly import (
     load_document,
     validate_document,
     diff_documents,
@@ -447,7 +447,7 @@ from yaml_diffs import (
 ### Alternative: Import from api module
 
 ```python
-from yaml_diffs.api import (
+from yamly.api import (
     load_document,
     validate_document,
     diff_documents,
@@ -459,9 +459,9 @@ from yaml_diffs.api import (
 ### Backward Compatible: Direct imports still work
 
 ```python
-from yaml_diffs.loader import load_document
-from yaml_diffs.validator import validate_document
-from yaml_diffs.diff import diff_documents
+from yamly.loader import load_document
+from yamly.validator import validate_document
+from yamly.diff import diff_documents
 ```
 
 ## See Also

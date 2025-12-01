@@ -36,10 +36,10 @@ This guide explains how to add or update environment variables in different envi
 3. **Add or modify variables:**
    ```bash
    # Example: Update API URL
-   YAML_DIFFS_API_URL=http://localhost:8000
+   YAMLY_API_URL=http://localhost:8000
 
    # Example: Set custom timeout
-   YAML_DIFFS_API_TIMEOUT=60
+   YAMLY_API_TIMEOUT=60
 
    # Example: Configure CORS for local frontend
    CORS_ORIGINS=http://localhost:3000,http://localhost:5173
@@ -51,7 +51,7 @@ This guide explains how to add or update environment variables in different envi
    ```bash
    # If running API server, restart it
    # Ctrl+C to stop, then restart:
-   uvicorn src.yaml_diffs.api_server.main:app --reload --port 8000
+   uvicorn src.yamly.api_server.main:app --reload --port 8000
    ```
 
 ### Important Notes
@@ -69,7 +69,7 @@ This guide explains how to add or update environment variables in different envi
 
 1. **Go to Railway Dashboard:**
    - Visit [railway.app](https://railway.app)
-   - Select your project: `yaml_diffs`
+   - Select your project: `yamly`
    - Click on your service
 
 2. **Navigate to Variables:**
@@ -166,7 +166,7 @@ The `RAILWAY_DOMAIN` secret is required for the deployment workflow to verify Ra
 2. Select your project → Your service
 3. Find the domain in one of these places:
    - **Settings** → **Domains** tab
-   - Service URL in the dashboard (e.g., `yaml-diffs.up.railway.app`)
+   - Service URL in the dashboard (set via `RAILWAY_DOMAIN` environment variable)
 
 **Step 2: Add the Secret**
 
@@ -174,14 +174,14 @@ The `RAILWAY_DOMAIN` secret is required for the deployment workflow to verify Ra
 2. Click **"New repository secret"**
 3. Enter:
    - **Name**: `RAILWAY_DOMAIN`
-   - **Value**: Your Railway domain (e.g., `yaml-diffs.up.railway.app`)
+   - **Value**: Your Railway domain (set via `RAILWAY_DOMAIN` environment variable)
 4. Click **"Add secret"**
 
 **Important Format Requirements**:
 
-- ✅ **Correct**: `yaml-diffs.up.railway.app` (domain only, no protocol)
-- ❌ **Incorrect**: `https://yaml-diffs.up.railway.app` (includes protocol - will cause issues)
-- ❌ **Incorrect**: `yaml-diffs.up.railway.app/` (trailing slash - will cause issues)
+- ✅ **Correct**: `api-yamly.thepitz.studio` (domain only, no protocol) - set via `RAILWAY_DOMAIN`
+- ❌ **Incorrect**: `https://api-yamly.thepitz.studio` (includes protocol - will cause issues)
+- ❌ **Incorrect**: `api-yamly.thepitz.studio/` (trailing slash - will cause issues)
 
 The workflow constructs the full URL automatically: `https://${{ secrets.RAILWAY_DOMAIN }}/health`
 
@@ -243,7 +243,7 @@ For more detailed setup instructions, see [CI/CD Documentation - Setting Up RAIL
    - Go to **Settings** → **Environment Variables**
    - Click **"Add New"**
    - Enter name: `NEXT_PUBLIC_API_URL`
-   - Enter value: `https://yaml-diffs.up.railway.app`
+   - Enter value: Your production API URL (configure via `NEXT_PUBLIC_API_URL` environment variable)
    - Select environments (Production, Preview, Development)
    - Click **"Save"**
 
@@ -280,15 +280,15 @@ For more detailed setup instructions, see [CI/CD Documentation - Setting Up RAIL
 
 1. **For current session:**
    ```bash
-   export YAML_DIFFS_API_URL="https://yaml-diffs.up.railway.app"
-   export YAML_DIFFS_API_TIMEOUT=60
+   export YAMLY_API_URL="https://api-yamly.thepitz.studio"  # Set your production API URL
+   export YAMLY_API_TIMEOUT=60
    ```
 
 2. **Persistent (bash/zsh):**
    ```bash
    # Add to ~/.bashrc or ~/.zshrc
-   echo 'export YAML_DIFFS_API_URL="https://yaml-diffs.up.railway.app"' >> ~/.zshrc
-   echo 'export YAML_DIFFS_API_TIMEOUT=60' >> ~/.zshrc
+   echo 'export YAMLY_API_URL="https://api-yamly.thepitz.studio"' >> ~/.zshrc  # Set your production API URL
+   echo 'export YAMLY_API_TIMEOUT=60' >> ~/.zshrc
 
    # Reload shell
    source ~/.zshrc
@@ -298,7 +298,7 @@ For more detailed setup instructions, see [CI/CD Documentation - Setting Up RAIL
    ```bash
    # Add to /etc/environment (requires sudo)
    sudo nano /etc/environment
-   # Add: YAML_DIFFS_API_URL="https://yaml-diffs.up.railway.app"
+   # Add: YAMLY_API_URL="https://api-yamly.thepitz.studio"  # Set your production API URL
    ```
 
 ### Windows
@@ -312,15 +312,15 @@ For more detailed setup instructions, see [CI/CD Documentation - Setting Up RAIL
 2. **Via PowerShell:**
    ```powershell
    # User-level
-   [System.Environment]::SetEnvironmentVariable("YAML_DIFFS_API_URL", "https://yaml-diffs.up.railway.app", "User")
+   [System.Environment]::SetEnvironmentVariable("YAMLY_API_URL", "https://api-yamly.thepitz.studio", "User")  # Set your production API URL
 
    # System-level (requires admin)
-   [System.Environment]::SetEnvironmentVariable("YAML_DIFFS_API_URL", "https://yaml-diffs.up.railway.app", "Machine")
+   [System.Environment]::SetEnvironmentVariable("YAMLY_API_URL", "https://api-yamly.thepitz.studio", "Machine")  # Set your production API URL
    ```
 
 3. **Via Command Prompt:**
    ```cmd
-   setx YAML_DIFFS_API_URL "https://yaml-diffs.up.railway.app"
+   setx YAMLY_API_URL "https://api-yamly.thepitz.studio"  # Set your production API URL
    ```
 
 ### Important Notes
@@ -345,10 +345,10 @@ When multiple sources define the same variable, the order of precedence is:
 Example:
 ```bash
 # System variable
-export YAML_DIFFS_API_URL="https://system.example.com"
+export YAMLY_API_URL="https://system.example.com"
 
 # .env file
-YAML_DIFFS_API_URL=https://env.example.com
+YAMLY_API_URL=https://env.example.com
 
 # Command-line (wins!)
 python script.py --api-url https://cli.example.com
@@ -367,16 +367,16 @@ python script.py --api-url https://cli.example.com
 | `LOG_LEVEL` | `INFO` | Logging level: DEBUG, INFO, WARNING, ERROR, CRITICAL |
 | `CORS_ORIGINS` | `""` | Comma-separated list of allowed CORS origins |
 | `CORS_ALLOW_CREDENTIALS` | `true` | Allow credentials in CORS requests |
-| `APP_NAME` | `yaml-diffs API` | Application name |
+| `APP_NAME` | `yamly API` | Application name |
 | `APP_VERSION` | `0.1.0` | Application version |
 
 ### API Client Variables
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `YAML_DIFFS_API_URL` | `http://localhost:8000` | Base URL for the API |
-| `YAML_DIFFS_API_KEY` | `""` | Optional API key for authentication |
-| `YAML_DIFFS_API_TIMEOUT` | `30` | Request timeout in seconds |
+| `YAMLY_API_URL` | `http://localhost:8000` | Base URL for the API |
+| `YAMLY_API_KEY` | `""` | Optional API key for authentication |
+| `YAMLY_API_TIMEOUT` | `30` | Request timeout in seconds |
 
 ### UI Variables
 
@@ -397,8 +397,8 @@ python script.py --api-url https://cli.example.com
 2. **Check file syntax:**
    ```bash
    # No spaces around =
-   CORRECT: YAML_DIFFS_API_URL=https://example.com
-   WRONG:   YAML_DIFFS_API_URL = https://example.com
+   CORRECT: YAMLY_API_URL=https://example.com
+   WRONG:   YAMLY_API_URL = https://example.com
 
    # No quotes needed (unless value has spaces)
    CORRECT: CORS_ORIGINS=http://localhost:3000,http://localhost:5173

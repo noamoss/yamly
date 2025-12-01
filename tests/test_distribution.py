@@ -46,7 +46,7 @@ def built_package() -> Generator[tuple[Path, Path], None, None]:
     dist_dir = PROJECT_ROOT / "dist"
     build_dir = PROJECT_ROOT / "build"
     if dist_dir.exists():
-        for file in dist_dir.glob("yaml_diffs-*"):
+        for file in dist_dir.glob("yamly-*"):
             file.unlink()
     if build_dir.exists():
         shutil.rmtree(build_dir)
@@ -104,7 +104,7 @@ def test_package_metadata_wheel(built_package: tuple[Path, Path]) -> None:
         metadata_content = wheel.read(metadata_file).decode("utf-8")
 
         # Check required metadata fields
-        assert "Name: yaml-diffs" in metadata_content
+        assert "Name: yamly" in metadata_content
         assert "Version: 0.1.0" in metadata_content
         assert "Author-email: Noam Oss <noam@thepitz.studio>" in metadata_content
         assert "License: MIT" in metadata_content
@@ -127,7 +127,7 @@ def test_package_metadata_sdist(built_package: tuple[Path, Path]) -> None:
         pkg_info_content = pkg_info.read().decode("utf-8")
 
         # Check required metadata fields
-        assert "Name: yaml-diffs" in pkg_info_content
+        assert "Name: yamly" in pkg_info_content
         assert "Version: 0.1.0" in pkg_info_content
         assert "Author-email: Noam Oss <noam@thepitz.studio>" in pkg_info_content
         assert "License: MIT" in pkg_info_content
@@ -233,10 +233,10 @@ def test_cli_works_after_install(built_package: tuple[Path, Path], tmp_path: Pat
     # Determine paths based on OS
     if sys.platform == "win32":
         pip_path = venv_path / "Scripts" / "pip"
-        cli_path = venv_path / "Scripts" / "yaml-diffs"
+        cli_path = venv_path / "Scripts" / "yamly"
     else:
         pip_path = venv_path / "bin" / "pip"
-        cli_path = venv_path / "bin" / "yaml-diffs"
+        cli_path = venv_path / "bin" / "yamly"
 
     # Install the package
     subprocess.run(
@@ -254,7 +254,7 @@ def test_cli_works_after_install(built_package: tuple[Path, Path], tmp_path: Pat
     )
 
     assert result.returncode == 0, f"CLI version command failed: {result.stderr}"
-    assert "yaml-diffs" in result.stdout or "yaml-diffs" in result.stderr
+    assert "yamly" in result.stdout or "yamly" in result.stderr
     assert "0.1.0" in result.stdout or "0.1.0" in result.stderr
 
 
@@ -287,8 +287,8 @@ def test_imports_work_after_install(built_package: tuple[Path, Path], tmp_path: 
 
     # Test imports
     import_test = """
-import yaml_diffs
-from yaml_diffs import (
+import yamly
+from yamly import (
     load_document,
     validate_document,
     diff_documents,
@@ -341,7 +341,7 @@ def test_schema_accessible_after_install(built_package: tuple[Path, Path], tmp_p
 
     # Test schema file access
     schema_test = """
-from yaml_diffs.schema import load_schema
+from yamly.schema import load_schema
 
 # Check that schema can be loaded
 schema = load_schema()

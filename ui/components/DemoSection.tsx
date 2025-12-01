@@ -246,10 +246,10 @@ export default function DemoSection({
         {/* Service Explanation - Always visible, compact */}
         <div className="mb-4">
           <h2 className="text-xl font-semibold text-gray-900 mb-2">
-            What is yaml-diffs?
+            What is yamly?
           </h2>
           <p className="text-gray-700 text-sm leading-relaxed">
-            <strong>ymal-diffs</strong> reads YAML as structured data rather than plain text. It highlights meaningful changes and filters out noise, making it easier to review config updates, infrastructure changes, and YAML produced or rewritten by LLM-powered tools.
+            <strong>yamly</strong> reads YAML as structured data rather than plain text. It highlights meaningful changes and filters out noise, making it easier to review config updates, infrastructure changes, and YAML produced or rewritten by LLM-powered tools.
           </p>
         </div>
 

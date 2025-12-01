@@ -11,8 +11,8 @@ from pathlib import Path
 import pytest
 import yaml
 
-from yaml_diffs.api import diff_documents, load_and_validate, validate_document
-from yaml_diffs.models import Document, Section, Source, Version
+from yamly.api import diff_documents, load_and_validate, validate_document
+from yamly.models import Document, Section, Source, Version
 
 
 def generate_large_section(
