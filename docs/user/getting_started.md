@@ -47,7 +47,7 @@ uv sync --extra dev
 The simplest way to use yamly is through the Python library:
 
 ```python
-from yaml_diffs import load_document, diff_documents, format_diff
+from yamly import load_document, diff_documents, format_diff
 
 # Load a document
 doc = load_document("document.yaml")
@@ -145,7 +145,7 @@ yamly mcp-server --api-url http://api.example.com:8000
 ### 1. Load and Validate a Document
 
 ```python
-from yaml_diffs import validate_document, ValidationError
+from yamly import validate_document, ValidationError
 
 try:
     doc = validate_document("document.yaml")
@@ -157,7 +157,7 @@ except ValidationError as e:
 ### 2. Compare Document Versions
 
 ```python
-from yaml_diffs import diff_files
+from yamly import diff_files
 
 diff = diff_files("document_v1.yaml", "document_v2.yaml")
 print(f"Added: {diff.added_count}")
@@ -169,7 +169,7 @@ print(f"Moved: {diff.moved_count}")
 ### 3. Get Formatted Diff Output
 
 ```python
-from yaml_diffs import diff_and_format, ChangeType
+from yamly import diff_and_format, ChangeType
 
 # Get JSON diff
 json_diff = diff_and_format("old.yaml", "new.yaml", output_format="json")
@@ -186,7 +186,7 @@ filtered_diff = diff_and_format(
 ### 4. Complete Workflow
 
 ```python
-from yaml_diffs import load_and_validate, diff_documents, format_diff
+from yamly import load_and_validate, diff_documents, format_diff
 
 # Load and validate both documents
 old_doc = load_and_validate("document_v1.yaml")
@@ -211,7 +211,7 @@ with open("diff.json", "w") as f:
 When receiving a new legal document in YAML format:
 
 ```python
-from yaml_diffs import validate_document
+from yamly import validate_document
 
 doc = validate_document("new_document.yaml")
 # Document is valid, proceed with processing
@@ -222,7 +222,7 @@ doc = validate_document("new_document.yaml")
 Compare versions of a document over time:
 
 ```python
-from yaml_diffs import diff_files, ChangeType
+from yamly import diff_files, ChangeType
 
 # Compare current version with previous
 diff = diff_files("document_2024-01.yaml", "document_2024-02.yaml")
@@ -240,7 +240,7 @@ for change in diff.changes:
 Create formatted reports of document changes:
 
 ```python
-from yaml_diffs import diff_and_format
+from yamly import diff_and_format
 
 # Generate JSON report
 json_report = diff_and_format("old.yaml", "new.yaml", output_format="json")

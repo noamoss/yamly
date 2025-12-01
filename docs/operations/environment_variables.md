@@ -69,7 +69,7 @@ This guide explains how to add or update environment variables in different envi
 
 1. **Go to Railway Dashboard:**
    - Visit [railway.app](https://railway.app)
-   - Select your project: `yaml_diffs`
+   - Select your project: `yamly`
    - Click on your service
 
 2. **Navigate to Variables:**

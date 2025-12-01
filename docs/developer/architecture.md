@@ -1,10 +1,10 @@
 # Architecture
 
-This document describes the system architecture of yaml-diffs, including component relationships, design decisions, and extension points.
+This document describes the system architecture of yamly, including component relationships, design decisions, and extension points.
 
 ## Overview
 
-yaml-diffs is a powerful YAML diffing service that supports both **generic YAML files** and **Hebrew legal documents**. The system provides:
+yamly is a powerful YAML diffing service that supports both **generic YAML files** and **Hebrew legal documents**. The system provides:
 
 - **Generic Mode**: Diff any YAML file (configs, K8s manifests, etc.) with path-based change tracking
 - **Legal Document Mode**: Schema-validated diffing for Hebrew legal documents with marker-based section matching
@@ -41,8 +41,8 @@ The system is organized into four main layers:
 
 The interface layer provides multiple ways to interact with the system:
 
-- **CLI Tool** (`yaml-diffs` command) - Command-line interface for quick operations
-- **Library API** (`yaml_diffs` package) - Python library for programmatic use
+- **CLI Tool** (`yamly` command) - Command-line interface for quick operations
+- **Library API** (`yamly` package) - Python library for programmatic use
 - **REST API** (FastAPI server) - HTTP endpoints for remote access
 - **MCP Server** - Model Context Protocol server for AI assistants
 
@@ -295,7 +295,7 @@ Validated Document
 ### Adding a New Interface
 
 1. Create interface module (e.g., `src/yamly/graphql_server/`)
-2. Use the library API (`yaml_diffs.api`) for core functionality
+2. Use the library API (`yamly.api`) for core functionality
 3. Add interface-specific logic
 4. Document in appropriate documentation section
 

@@ -84,7 +84,7 @@ The `.env.example` file includes:
 ```
 yamly/
 ├── src/
-│   └── yaml_diffs/          # Main package
+│   └── yamly/               # Main package
 │       ├── __init__.py
 │       ├── api.py           # Main library API
 │       ├── loader.py        # YAML loading utilities
@@ -156,7 +156,7 @@ mypy src/
 python -m build
 
 # Install from built package
-uv pip install dist/yaml_diffs-*.whl
+uv pip install dist/yamly-*.whl
 ```
 
 ## Quick Start
@@ -164,7 +164,7 @@ uv pip install dist/yaml_diffs-*.whl
 ### Python Library
 
 ```python
-from yaml_diffs import load_document, diff_documents, format_diff
+from yamly import load_document, diff_documents, format_diff
 
 # Load a document
 doc = load_document("examples/minimal_document.yaml")

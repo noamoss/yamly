@@ -23,7 +23,7 @@ The `examples/` directory contains several example documents demonstrating diffe
 yamly validate examples/minimal_document.yaml
 
 # Using Python
-from yaml_diffs import validate_document
+from yamly import validate_document
 doc = validate_document("examples/minimal_document.yaml")
 print(f"Valid document: {doc.title}")
 ```
@@ -35,7 +35,7 @@ print(f"Valid document: {doc.title}")
 yamly diff examples/document_v1.yaml examples/document_v2.yaml
 
 # Using Python
-from yaml_diffs import diff_files
+from yamly import diff_files
 diff = diff_files("examples/document_v1.yaml", "examples/document_v2.yaml")
 print(f"Changes detected: {len(diff.changes)}")
 ```
@@ -43,7 +43,7 @@ print(f"Changes detected: {len(diff.changes)}")
 ### Load and Inspect Examples
 
 ```python
-from yaml_diffs import load_document
+from yamly import load_document
 
 # Load minimal example
 minimal = load_document("examples/minimal_document.yaml")
@@ -108,7 +108,7 @@ sections:
 Use `document_v1.yaml` and `document_v2.yaml` to test diffing:
 
 ```python
-from yaml_diffs import diff_files, ChangeType
+from yamly import diff_files, ChangeType
 
 diff = diff_files("examples/document_v1.yaml", "examples/document_v2.yaml")
 
@@ -174,7 +174,7 @@ document:
 ### Workflow 1: Create a New Document
 
 ```python
-from yaml_diffs import validate_document, ValidationError
+from yamly import validate_document, ValidationError
 from pathlib import Path
 
 # Create document from template
@@ -193,7 +193,7 @@ except ValidationError as e:
 ### Workflow 2: Compare Document Versions
 
 ```python
-from yaml_diffs import diff_and_format
+from yamly import diff_and_format
 
 # Compare versions
 diff_json = diff_and_format(
@@ -211,7 +211,7 @@ with open("diff_report.json", "w") as f:
 
 ```python
 from pathlib import Path
-from yaml_diffs import load_document
+from yamly import load_document
 
 # Process all YAML files in a directory
 examples_dir = Path("examples")

@@ -1,10 +1,10 @@
 # Diffing Algorithms
 
-This document provides detailed explanations of the diffing algorithms used in yaml-diffs, including workflow diagrams and comprehensive descriptions of how each change type is detected.
+This document provides detailed explanations of the diffing algorithms used in yamly, including workflow diagrams and comprehensive descriptions of how each change type is detected.
 
 ## Overview
 
-yaml-diffs supports two distinct diffing modes, each optimized for different use cases:
+yamly supports two distinct diffing modes, each optimized for different use cases:
 
 - **Generic YAML Diff Mode**: For any YAML file (configs, Kubernetes manifests, etc.) using path-based tracking and smart array matching
 - **Legal Document Diff Mode**: For schema-validated Hebrew legal documents using marker-based section matching

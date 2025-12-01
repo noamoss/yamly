@@ -1,10 +1,10 @@
 # Schema Reference
 
-This document provides a comprehensive reference for the OpenSpec schema used by yaml-diffs. The schema defines the structure for Hebrew legal and regulatory documents in YAML format.
+This document provides a comprehensive reference for the OpenSpec schema used by yamly. The schema defines the structure for Hebrew legal and regulatory documents in YAML format.
 
 ## Overview
 
-The yaml-diffs schema is defined using OpenSpec (JSON Schema Draft 2020-12) and supports:
+The yamly schema is defined using OpenSpec (JSON Schema Draft 2020-12) and supports:
 
 - **Recursive sections** with unlimited nesting depth
 - **Flexible structural markers** (e.g., "1", "א", "(a)", "Chapter I")

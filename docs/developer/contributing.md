@@ -1,6 +1,6 @@
 # Contributing
 
-Thank you for your interest in contributing to yaml-diffs! This guide will help you get started.
+Thank you for your interest in contributing to yamly! This guide will help you get started.
 
 ## Development Setup
 

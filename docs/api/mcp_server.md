@@ -61,13 +61,13 @@ This starts the server with stdio transport (standard MCP protocol).
 You can also run the server directly as a Python module:
 
 ```bash
-python -m yaml_diffs.mcp_server.server
+python -m yamly.mcp_server.server
 ```
 
 ### Programmatic Usage
 
 ```python
-from yaml_diffs.mcp_server.server import run_server
+from yamly.mcp_server.server import run_server
 import asyncio
 
 asyncio.run(run_server())
@@ -82,7 +82,7 @@ Add the following to your Claude Desktop configuration file (typically `~/Librar
 ```json
 {
   "mcpServers": {
-    "yaml-diffs": {
+    "yamly": {
       "command": "yamly-mcp-server",
       "args": [],
       "env": {
@@ -98,7 +98,7 @@ For a remote API instance:
 ```json
 {
   "mcpServers": {
-    "yaml-diffs": {
+    "yamly": {
       "command": "yamly-mcp-server",
       "args": [],
       "env": {

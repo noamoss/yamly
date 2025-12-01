@@ -106,7 +106,7 @@ The `RAILWAY_DOMAIN` secret is required for the deployment workflow to verify th
 **Step 1: Find Your Railway Domain**
 
 1. Go to [Railway Dashboard](https://railway.app/dashboard)
-2. Select your project (e.g., `yaml_diffs`)
+2. Select your project (e.g., `yamly`)
 3. Click on your service
 4. Find your domain in one of these places:
    - **Settings** → **Domains** tab (if you have a custom domain)
@@ -271,7 +271,7 @@ uv run mypy src/
 ### Workflow Fails on Build
 
 1. **Test build locally**: `python -m build`
-2. **Test installation**: `pip install dist/yaml_diffs-*.whl`
+2. **Test installation**: `pip install dist/yamly-*.whl`
 3. **Check pyproject.toml**: Ensure build configuration is correct
 
 ### Deployment Fails

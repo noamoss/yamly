@@ -82,7 +82,7 @@ After installation, verify that the package is installed correctly:
 Check that the package can be imported:
 
 ```bash
-python -c "import yaml_diffs; print(f'yamly version: {yaml_diffs.__version__}')"
+python -c "import yamly; print(f'yamly version: {yamly.__version__}')"
 ```
 
 Expected output:
@@ -131,7 +131,7 @@ Verify that all main components can be imported:
 
 ```python
 python -c "
-from yaml_diffs import (
+from yamly import (
     load_document,
     validate_document,
     diff_documents,
@@ -151,7 +151,7 @@ Check that the schema file is accessible:
 
 ```python
 python -c "
-from yaml_diffs.schema import load_schema
+from yamly.schema import load_schema
 schema = load_schema()
 assert schema is not None
 assert 'version' in schema or 'info' in schema
@@ -171,8 +171,8 @@ pip install build
 python -m build
 
 # This creates:
-# - dist/yaml_diffs-*.whl (wheel distribution)
-# - dist/yaml_diffs-*.tar.gz (source distribution)
+# - dist/yamly-*.whl (wheel distribution)
+# - dist/yamly-*.tar.gz (source distribution)
 ```
 
 ### Install from Built Package
@@ -180,7 +180,7 @@ python -m build
 After building, you can install from the built wheel:
 
 ```bash
-pip install dist/yaml_diffs-*.whl
+pip install dist/yamly-*.whl
 ```
 
 Or test installation in a clean environment:
@@ -191,11 +191,11 @@ python -m venv test_env
 source test_env/bin/activate  # On Windows: test_env\Scripts\activate
 
 # Install the built package
-pip install dist/yaml_diffs-*.whl
+pip install dist/yamly-*.whl
 
 # Test it
 yamly --version
-python -c "import yaml_diffs; print(yaml_diffs.__version__)"
+python -c "import yamly; print(yamly.__version__)"
 ```
 
 ## Troubleshooting
@@ -271,7 +271,7 @@ If the version doesn't match expectations:
 
 2. **Check version in code:**
    ```python
-   python -c "import yaml_diffs; print(yaml_diffs.__version__)"
+   python -c "import yamly; print(yamly.__version__)"
    ```
 
 3. **Reinstall latest version:**

@@ -77,7 +77,7 @@ PORT=8000  # Railway sets this automatically
 ```
 yamly/
 ├── src/
-│   └── yaml_diffs/
+│   └── yamly/
 │       ├── __init__.py
 │       ├── api.py              # Main library API
 │       ├── loader.py           # YAML loading utilities
@@ -196,7 +196,7 @@ act -j lint        # Test the lint workflow
 python -m build
 
 # Install from built package
-uv pip install dist/yaml_diffs-*.whl
+uv pip install dist/yamly-*.whl
 ```
 
 ### CLI Usage
@@ -601,7 +601,7 @@ Before committing documentation changes:
 1. **Test code examples:**
    ```bash
    # Verify Python examples are valid
-   python -c "from yaml_diffs import ..."
+   python -c "from yamly import ..."
 
    # Verify YAML examples validate
    yamly validate examples/your_example.yaml
