@@ -262,7 +262,6 @@ The production API URL is configured via the `YAML_DIFFS_API_URL` environment va
 
 ```bash
 # Set API URL in .env file
-# Set in .env file
 YAML_DIFFS_API_URL=https://api-yamly.thepitz.studio
 
 # Health check

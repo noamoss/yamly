@@ -372,7 +372,7 @@ def mcp_server_command(api_url: str | None, api_key: str | None, timeout: int | 
     """Run the MCP (Model Context Protocol) server for yamly API.
 
     This command starts an MCP server that exposes the REST API endpoints
-    as MCP tools, enabling AI assistants to interact with the yaml-diffs
+    as MCP tools, enabling AI assistants to interact with the yamly
     service via the MCP protocol.
 
     The server uses stdio transport (standard MCP protocol) and provides

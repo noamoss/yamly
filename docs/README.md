@@ -1,6 +1,6 @@
 # Documentation Index
 
-Welcome to the yaml-diffs documentation! yaml-diffs is a powerful YAML diffing service that supports both **generic YAML files** (configs, Kubernetes manifests, etc.) and **Hebrew legal documents** with schema validation.
+Welcome to the yamly documentation! yamly is a powerful YAML diffing service that supports both **generic YAML files** (configs, Kubernetes manifests, etc.) and **Hebrew legal documents** with schema validation.
 
 This directory contains comprehensive documentation organized by audience and purpose.
 

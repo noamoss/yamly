@@ -59,7 +59,7 @@ export default function HelpModal({
 
           {/* Content */}
           <div className="space-y-6 text-gray-700">
-            {/* What is yaml-diffs */}
+            {/* What is yamly */}
             <section>
               <h3 className="text-lg font-semibold text-gray-900 mb-2">
                 What is yamly?
