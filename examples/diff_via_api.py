@@ -111,7 +111,7 @@ if __name__ == "__main__":
         print("Examples:")
         print(f"  {sys.argv[0]} examples/document_v1.yaml examples/document_v2.yaml")
         print("    (uses YAML_DIFFS_API_URL from .env or environment)")
-        print(f"  {sys.argv[0]} examples/document_v1.yaml examples/document_v2.yaml")
+        print(f"  {sys.argv[0]} <API_URL> examples/document_v1.yaml examples/document_v2.yaml")
         print("    (uses provided API URL)")
         print("")
         print("Environment Variables:")

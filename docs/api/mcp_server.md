@@ -1,4 +1,4 @@
-# MCP Server for yaml-diffs
+# MCP Server for yamly
 
 The yamly MCP (Model Context Protocol) server exposes the REST API endpoints as MCP tools, enabling AI assistants to interact with the yamly service via the MCP protocol.
 
