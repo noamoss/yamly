@@ -326,7 +326,7 @@ export default function ChangeCard({ change, index, oldYaml, newYaml }: ChangeCa
       oldSectionYaml === newSectionYaml);
 
   return (
-    <div className={`border rounded-lg ${styles.bg} ${isExpanded ? "" : "overflow-hidden"}`}>
+    <div className={`border rounded-lg ${styles.bg} ${isExpanded ? "" : "overflow-hidden"}`} data-testid="change-card">
       <div
         className="px-3 sm:px-4 py-3 cursor-pointer hover:bg-opacity-80 transition-colors"
         onClick={() => setIsExpanded(!isExpanded)}
@@ -342,11 +342,42 @@ export default function ChangeCard({ change, index, oldYaml, newYaml }: ChangeCa
             <span className="text-sm font-mono text-gray-700">
               Marker: {change.marker}
             </span>
-            {hasPathChange && (
-              <span className="text-xs text-gray-600 hidden sm:inline">
-                {formatMarkerPath(change.old_marker_path)} →{" "}
-                {formatMarkerPath(change.new_marker_path)}
-              </span>
+            {hasPathChange && change.change_type === ChangeType.SECTION_MOVED && (
+              <div
+                className="flex items-center gap-2 text-xs text-gray-700 bg-purple-50 px-2 py-1 rounded border border-purple-200"
+                data-testid="movement-indicator"
+                role="status"
+                aria-label={`Section moved from ${formatMarkerPath(change.old_marker_path)} to ${formatMarkerPath(change.new_marker_path)}`}
+              >
+                <span className="text-purple-700 font-semibold">from:</span>
+                <span className="font-mono text-purple-800 bg-purple-100 px-1.5 py-0.5 rounded">
+                  {formatMarkerPath(change.old_marker_path)}
+                </span>
+                <svg
+                  className="w-4 h-4 text-purple-600 flex-shrink-0"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth={2.5}
+                  viewBox="0 0 24 24"
+                  aria-hidden="true"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M13 7l5 5m0 0l-5 5m5-5H6"
+                  />
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M11 7l5 5m0 0l-5 5m5-5H4"
+                    style={{ transform: 'translateX(2px)' }}
+                  />
+                </svg>
+                <span className="text-purple-700 font-semibold">to:</span>
+                <span className="font-mono text-purple-800 bg-purple-100 px-1.5 py-0.5 rounded">
+                  {formatMarkerPath(change.new_marker_path)}
+                </span>
+              </div>
             )}
           </div>
           <div className="flex items-center gap-2">

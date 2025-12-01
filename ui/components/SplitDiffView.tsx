@@ -6,6 +6,7 @@ import { EditorState, Extension, Range, RangeSet } from "@codemirror/state";
 import { syntaxHighlighting, defaultHighlightStyle } from "@codemirror/language";
 import { yaml } from "@codemirror/lang-yaml";
 import { DocumentDiff, DiffResult, ChangeType, GenericDiff, GenericDiffResult, GenericChangeType } from "@/lib/types";
+import { formatMarkerPath, computeCharDiff, DiffChunk } from "@/lib/diff-utils";
 import { useDiscussionsStore } from "@/stores/discussions";
 import InlineDiscussion from "./InlineDiscussion";
 
@@ -228,7 +229,93 @@ export default function SplitDiffView({ oldYaml, newYaml, diff }: SplitDiffViewP
     return { oldHighlightLines: oldLines, newHighlightLines: newLines };
   }, [diff.changes]);
 
-  // Create decorations for old editor (using API semantic changes)
+  // Compute character-level diffs for changed lines
+  const [charDiffs, setCharDiffs] = useState<Map<string, DiffChunk[]>>(new Map());
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const computeDiffs = async () => {
+      const diffs = new Map<string, DiffChunk[]>();
+      const oldLines = oldYaml.split('\n');
+      const newLines = newYaml.split('\n');
+
+      // Find matching old/new line pairs for character-level diff
+      for (const change of diff.changes) {
+        if (cancelled) break;
+
+        const isUnchanged =
+          ('change_type' in change && change.change_type === ChangeType.UNCHANGED) ||
+          ('change_type' in change && change.change_type === GenericChangeType.UNCHANGED);
+        if (isUnchanged) continue;
+
+        const oldLineNum = change.old_line_number;
+        const newLineNum = change.new_line_number;
+
+        if (oldLineNum && newLineNum) {
+          // Both old and new lines exist - compute character diff
+          const oldLineText = oldLines[oldLineNum - 1] || '';
+          const newLineText = newLines[newLineNum - 1] || '';
+
+          if (oldLineText !== newLineText) {
+            try {
+              const allChunks = await computeCharDiff(oldLineText, newLineText);
+
+              if (cancelled) break;
+
+              // For old side: show removed and unchanged chunks
+              const oldChunks: DiffChunk[] = [];
+              for (const chunk of allChunks) {
+                if (chunk.type === 'removed' || chunk.type === 'unchanged') {
+                  oldChunks.push(chunk);
+                }
+              }
+              if (oldChunks.length > 0) {
+                diffs.set(`old:${oldLineNum}`, oldChunks);
+              }
+
+              // For new side: show added and unchanged chunks
+              const newChunks: DiffChunk[] = [];
+              for (const chunk of allChunks) {
+                if (chunk.type === 'added' || chunk.type === 'unchanged') {
+                  newChunks.push(chunk);
+                }
+              }
+              if (newChunks.length > 0) {
+                diffs.set(`new:${newLineNum}`, newChunks);
+              }
+            } catch (error) {
+              console.error('Error computing char diff:', error);
+            }
+          }
+        } else if (oldLineNum) {
+          // Only old line - mark entire line as removed
+          const oldLineText = oldLines[oldLineNum - 1] || '';
+          if (oldLineText) {
+            diffs.set(`old:${oldLineNum}`, [{ text: oldLineText, type: 'removed' }]);
+          }
+        } else if (newLineNum) {
+          // Only new line - mark entire line as added
+          const newLineText = newLines[newLineNum - 1] || '';
+          if (newLineText) {
+            diffs.set(`new:${newLineNum}`, [{ text: newLineText, type: 'added' }]);
+          }
+        }
+      }
+
+      if (!cancelled) {
+        setCharDiffs(diffs);
+      }
+    };
+
+    computeDiffs();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [oldYaml, newYaml, diff.changes]);
+
+  // Create decorations for old editor (using API semantic changes + character-level diffs)
   const createOldDecorations = useCallback((state: EditorState) => {
     const decorations: Range<Decoration>[] = [];
 
@@ -237,21 +324,62 @@ export default function SplitDiffView({ oldYaml, newYaml, diff }: SplitDiffViewP
         const line = state.doc.line(lineNum);
         if (!line) continue;
 
-        const deco = Decoration.line({
+        // Line-level decoration
+        const lineDeco = Decoration.line({
           class: "cm-line-modified",
           attributes: {
             "data-line-number": lineNum.toString(),
             "data-side": "old",
           },
         });
-        decorations.push(deco.range(line.from));
+        decorations.push(lineDeco.range(line.from));
+
+        // Character-level decorations
+        const diffKey = `old:${lineNum}`;
+        const chunks = charDiffs.get(diffKey);
+        if (chunks) {
+          // Validate chunk lengths match line content
+          const totalChunkLength = chunks.reduce((sum, chunk) => {
+            if (chunk.type === 'removed' || chunk.type === 'unchanged') {
+              return sum + chunk.text.length;
+            }
+            return sum;
+          }, 0);
+          const lineLength = line.to - line.from;
+
+          // Only apply decorations if chunk lengths match (within 1 char tolerance for edge cases)
+          if (Math.abs(totalChunkLength - lineLength) <= 1) {
+            let offset = 0;
+            for (const chunk of chunks) {
+              if (chunk.type === 'removed' && chunk.text.length > 0) {
+                const from = Math.min(line.to, line.from + offset);
+                const to = Math.min(line.to, from + chunk.text.length);
+                if (to > from && from >= line.from && to <= line.to) {
+                  const charDeco = Decoration.mark({
+                    class: "cm-char-removed",
+                    attributes: {
+                      "data-char-diff": "removed",
+                    },
+                  });
+                  decorations.push(charDeco.range(from, to));
+                }
+              }
+              // Only increment offset for chunks that appear in the old line
+              if (chunk.type === 'removed' || chunk.type === 'unchanged') {
+                offset += chunk.text.length;
+                // Prevent offset from exceeding line length
+                offset = Math.min(offset, lineLength);
+              }
+            }
+          }
+        }
       }
     }
 
     return Decoration.set(decorations, true);
-  }, [oldHighlightLines]);
+  }, [oldHighlightLines, charDiffs]);
 
-  // Create decorations for new editor (using API semantic changes)
+  // Create decorations for new editor (using API semantic changes + character-level diffs)
   const createNewDecorations = useCallback((state: EditorState) => {
     const decorations: Range<Decoration>[] = [];
 
@@ -260,19 +388,60 @@ export default function SplitDiffView({ oldYaml, newYaml, diff }: SplitDiffViewP
         const line = state.doc.line(lineNum);
         if (!line) continue;
 
-        const deco = Decoration.line({
+        // Line-level decoration
+        const lineDeco = Decoration.line({
           class: "cm-line-modified",
           attributes: {
             "data-line-number": lineNum.toString(),
             "data-side": "new",
           },
         });
-        decorations.push(deco.range(line.from));
+        decorations.push(lineDeco.range(line.from));
+
+        // Character-level decorations
+        const diffKey = `new:${lineNum}`;
+        const chunks = charDiffs.get(diffKey);
+        if (chunks) {
+          // Validate chunk lengths match line content
+          const totalChunkLength = chunks.reduce((sum, chunk) => {
+            if (chunk.type === 'added' || chunk.type === 'unchanged') {
+              return sum + chunk.text.length;
+            }
+            return sum;
+          }, 0);
+          const lineLength = line.to - line.from;
+
+          // Only apply decorations if chunk lengths match (within 1 char tolerance for edge cases)
+          if (Math.abs(totalChunkLength - lineLength) <= 1) {
+            let offset = 0;
+            for (const chunk of chunks) {
+              if (chunk.type === 'added' && chunk.text.length > 0) {
+                const from = Math.min(line.to, line.from + offset);
+                const to = Math.min(line.to, from + chunk.text.length);
+                if (to > from && from >= line.from && to <= line.to) {
+                  const charDeco = Decoration.mark({
+                    class: "cm-char-added",
+                    attributes: {
+                      "data-char-diff": "added",
+                    },
+                  });
+                  decorations.push(charDeco.range(from, to));
+                }
+              }
+              // Only increment offset for chunks that appear in the new line
+              if (chunk.type === 'added' || chunk.type === 'unchanged') {
+                offset += chunk.text.length;
+                // Prevent offset from exceeding line length
+                offset = Math.min(offset, lineLength);
+              }
+            }
+          }
+        }
       }
     }
 
     return Decoration.set(decorations, true);
-  }, [newHighlightLines]);
+  }, [newHighlightLines, charDiffs]);
 
   // Setup old editor
   useEffect(() => {
@@ -560,7 +729,7 @@ export default function SplitDiffView({ oldYaml, newYaml, diff }: SplitDiffViewP
     });
 
   return (
-    <div className="w-full">
+    <div className="w-full" data-testid="split-diff-view">
       {/* Header */}
       <div className="border-b border-gray-200 bg-gray-50 flex">
         <div className="flex-1 border-r border-gray-200 px-4 py-2">
@@ -702,31 +871,50 @@ export default function SplitDiffView({ oldYaml, newYaml, diff }: SplitDiffViewP
                       }}
                     >
                       <div className="w-full flex items-center justify-between p-3 border-b border-gray-200">
-                        <div className="flex items-center gap-2 flex-1 min-w-0">
-                          {lineNumber ? (
-                            <>
+                        <div className="flex flex-col gap-2 flex-1 min-w-0">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            {lineNumber ? (
+                              <>
+                                <span className="text-xs font-semibold text-gray-700">
+                                  Line {lineNumber}
+                                </span>
+                                <span className="text-xs text-gray-500">
+                                  ({side === "new" ? "New" : "Old"} version)
+                                </span>
+                              </>
+                            ) : (
                               <span className="text-xs font-semibold text-gray-700">
-                                Line {lineNumber}
+                                Change (no line mapping)
                               </span>
-                              <span className="text-xs text-gray-500">
-                                ({side === "new" ? "New" : "Old"} version)
+                            )}
+                            {!isDocumentDiffResult(change) && 'change_type' in change && (
+                              <span className="text-xs px-1.5 py-0.5 bg-blue-100 text-blue-700 rounded">
+                                {change.change_type.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')}
                               </span>
-                            </>
-                          ) : (
-                            <span className="text-xs font-semibold text-gray-700">
-                              Change (no line mapping)
-                            </span>
-                          )}
-                          {!isDocumentDiffResult(change) && 'change_type' in change && (
-                            <span className="text-xs px-1.5 py-0.5 bg-blue-100 text-blue-700 rounded">
-                              {change.change_type.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')}
-                            </span>
-                          )}
-                          {isDocumentDiffResult(change) && discussion && discussion.comments.length > 0 && (
-                            <span className="text-xs text-blue-600">
-                              {discussion.comments.length} comment{discussion.comments.length !== 1 ? "s" : ""}
-                            </span>
-                          )}
+                            )}
+                            {isDocumentDiffResult(change) && change.change_type && (
+                              <span className={`text-xs px-1.5 py-0.5 rounded border ${
+                                change.change_type === ChangeType.SECTION_MOVED
+                                  ? 'bg-purple-100 text-purple-800 border-purple-300'
+                                  : change.change_type === ChangeType.SECTION_ADDED
+                                  ? 'bg-green-100 text-green-800 border-green-300'
+                                  : change.change_type === ChangeType.SECTION_REMOVED
+                                  ? 'bg-red-100 text-red-800 border-red-300'
+                                  : change.change_type === ChangeType.CONTENT_CHANGED
+                                  ? 'bg-yellow-100 text-yellow-800 border-yellow-300'
+                                  : change.change_type === ChangeType.TITLE_CHANGED
+                                  ? 'bg-blue-100 text-blue-800 border-blue-300'
+                                  : 'bg-gray-100 text-gray-800 border-gray-300'
+                              }`}>
+                                {change.change_type.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')}
+                              </span>
+                            )}
+                            {isDocumentDiffResult(change) && discussion && discussion.comments.length > 0 && (
+                              <span className="text-xs text-blue-600">
+                                {discussion.comments.length} comment{discussion.comments.length !== 1 ? "s" : ""}
+                              </span>
+                            )}
+                          </div>
                         </div>
                         <svg
                           className={`w-4 h-4 text-gray-400 transition-transform flex-shrink-0 ${
