@@ -12,7 +12,7 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-from yaml_diffs.models import Document, DocumentType, Section, Source, Version
+from yaml_diffs.models import Document, Section, Source, Version
 
 if TYPE_CHECKING:
     from collections.abc import Generator
@@ -179,7 +179,7 @@ def minimal_document(sample_id: str) -> Document:
     return Document(
         id="law-1234",
         title="חוק הדוגמה",
-        type=DocumentType.LAW,
+        type="law",
         version=Version(number="1.0"),
         source=Source(url="https://example.com/law", fetched_at="2025-01-20T09:50:00Z"),
     )
@@ -194,7 +194,7 @@ def full_document(sample_id: str, hebrew_text: str) -> Document:
     return Document(
         id="law-5678",
         title="חוק מלא",
-        type=DocumentType.LAW,
+        type="law",
         language="hebrew",
         version=Version(number="2.0", description="גרסה שנייה"),
         source=Source(
@@ -246,7 +246,7 @@ def complex_document(sample_id: str) -> Document:
     return Document(
         id="reg-complex-001",
         title="תקנה מורכבת",
-        type=DocumentType.REGULATION,
+        type="regulation",
         language="hebrew",
         version=Version(number="1.0"),
         source=Source(
@@ -278,7 +278,7 @@ def document_with_hebrew_content() -> Document:
     return Document(
         id="hebrew-doc-001",
         title="מסמך בעברית",
-        type=DocumentType.LAW,
+        type="law",
         language="hebrew",
         version=Version(number="1.0"),
         source=Source(
@@ -309,7 +309,7 @@ def document_pair_for_diff() -> tuple[Document, Document]:
     old_doc = Document(
         id="doc-001",
         title="מסמך ישן",
-        type=DocumentType.LAW,
+        type="law",
         version=Version(number="1.0"),
         source=Source(
             url="https://example.com/doc",
@@ -328,7 +328,7 @@ def document_pair_for_diff() -> tuple[Document, Document]:
     new_doc = Document(
         id="doc-001",
         title="מסמך חדש",
-        type=DocumentType.LAW,
+        type="law",
         version=Version(number="2.0"),
         source=Source(
             url="https://example.com/doc",

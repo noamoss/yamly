@@ -43,7 +43,8 @@ def diff_documents_endpoint(request: DiffRequest) -> UnifiedDiffResponse:
         GenericDiff (general mode) containing all detected changes.
 
     Raises:
-        HTTPException: If document loading or diffing fails (handled by exception handlers in main.py).
+        HTTPException: If document loading or diffing fails
+            (handled by exception handlers in main.py).
 
     Examples:
         >>> POST /api/v1/diff

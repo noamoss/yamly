@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+from pathlib import Path
 from uuid import uuid4
 
 import pytest
@@ -840,6 +841,50 @@ class TestFormatDiffConvenience:
         # YAML formatter should ignore text-specific kwargs
         output = format_diff(diff, output_format="yaml", show_context=True)
         assert "old" in output  # Should work without error
+
+    def test_formatters_handle_missing_metadata(self, tmp_path: Path) -> None:
+        """Test formatters handle documents with missing metadata gracefully."""
+        # Create minimal documents without metadata
+        old_file = tmp_path / "old_minimal.yaml"
+        new_file = tmp_path / "new_minimal.yaml"
+        old_file.write_text(
+            """document:
+  sections:
+    - marker: "1"
+      content: "Old content"
+      sections: []
+""",
+            encoding="utf-8",
+        )
+        new_file.write_text(
+            """document:
+  sections:
+    - marker: "1"
+      content: "New content"
+      sections: []
+""",
+            encoding="utf-8",
+        )
+
+        old_doc = load_document(old_file)
+        new_doc = load_document(new_file)
+        diff = diff_documents(old_doc, new_doc)
+
+        # Test all formatters handle missing metadata
+        json_formatter = JsonFormatter()
+        json_output = json_formatter.format(diff)
+        json_data = json.loads(json_output)
+        assert "changes" in json_data
+
+        text_formatter = TextFormatter()
+        text_output = text_formatter.format(diff)
+        assert len(text_output) > 0
+        # Should not crash on missing metadata
+
+        yaml_formatter = YamlFormatter()
+        yaml_output = yaml_formatter.format(diff)
+        yaml_data = yaml.safe_load(yaml_output)
+        assert "changes" in yaml_data
 
     def test_text_formatter_displays_empty_string_titles(self):
         """Test that text formatter displays title changes involving empty strings."""

@@ -164,9 +164,9 @@ def test_validate_complex_document_has_deep_nesting(complex_document):
 
 
 # Unit tests: Required fields validation
-def test_reject_missing_document_id(validator):
-    """Test that missing document id field fails validation."""
-    invalid_doc = {
+def test_accept_document_without_id(validator):
+    """Test that missing document id field is accepted (id is now optional)."""
+    valid_doc = {
         "document": {
             "title": "Test",
             "type": "law",
@@ -176,15 +176,15 @@ def test_reject_missing_document_id(validator):
             "sections": [],
         }
     }
-    errors = list(validator.iter_errors(invalid_doc))
-    assert len(errors) > 0
+    errors = list(validator.iter_errors(valid_doc))
+    # Should not have errors about missing id
     error_messages = [e.message for e in errors]
-    assert any("id" in msg.lower() for msg in error_messages)
+    assert not any("id" in msg.lower() and "required" in msg.lower() for msg in error_messages)
 
 
-def test_reject_missing_document_title(validator):
-    """Test that missing document title field fails validation."""
-    invalid_doc = {
+def test_accept_document_without_title(validator):
+    """Test that missing document title field is accepted (title is now optional)."""
+    valid_doc = {
         "document": {
             "id": "test-1",
             "type": "law",
@@ -194,10 +194,10 @@ def test_reject_missing_document_title(validator):
             "sections": [],
         }
     }
-    errors = list(validator.iter_errors(invalid_doc))
-    assert len(errors) > 0
+    errors = list(validator.iter_errors(valid_doc))
+    # Should not have errors about missing title
     error_messages = [e.message for e in errors]
-    assert any("title" in msg.lower() for msg in error_messages)
+    assert not any("title" in msg.lower() and "required" in msg.lower() for msg in error_messages)
 
 
 def test_reject_missing_document_sections(validator):
@@ -395,15 +395,20 @@ def test_validate_example_hebrew_legal_document(validator, minimal_document):
     """Integration test: Validate example Hebrew legal document."""
     # Verify UTF-8 encoding is preserved
     doc_str = json.dumps(minimal_document, ensure_ascii=False)
-    assert "חוק" in doc_str or "הגדרות" in doc_str
+    assert "חוק" in doc_str or "מוסד" in doc_str
 
     # Validate document
     errors = list(validator.iter_errors(minimal_document))
     assert len(errors) == 0, f"Validation errors: {[e.message for e in errors]}"
 
-    # Verify Hebrew characters are present
-    title = minimal_document["document"]["title"]
-    assert any(ord(c) > 127 for c in title), "Title should contain non-ASCII characters (Hebrew)"
+    # Verify Hebrew characters are present (in content, since title is now optional)
+    # Check sections content for Hebrew
+    sections = minimal_document["document"].get("sections", [])
+    if sections:
+        content = sections[0].get("content", "")
+        assert any(ord(c) > 127 for c in content), (
+            "Content should contain non-ASCII characters (Hebrew)"
+        )
 
 
 def test_schema_version_is_accessible():
@@ -431,23 +436,24 @@ def test_schema_validates_language_constraint(validator):
     assert any("hebrew" in msg.lower() or "const" in msg.lower() for msg in error_messages)
 
 
-def test_schema_validates_document_type_enum(validator):
-    """Test that document type must be one of the allowed values."""
-    invalid_doc = {
+def test_schema_accepts_custom_document_type(validator):
+    """Test that document type accepts any string value (free text)."""
+    # Type is now free text, so any string should be valid
+    valid_doc = {
         "document": {
             "id": "test-1",
             "title": "Test",
-            "type": "invalid_type",  # Invalid: not in enum
+            "type": "custom_type",  # Custom type should be accepted
             "language": "hebrew",
             "version": {"number": "1.0"},
             "source": {"url": "https://example.com", "fetched_at": "2025-01-01T00:00:00Z"},
             "sections": [],
         }
     }
-    errors = list(validator.iter_errors(invalid_doc))
-    assert len(errors) > 0
-    error_messages = [e.message for e in errors]
-    assert any("type" in msg.lower() or "enum" in msg.lower() for msg in error_messages)
+    errors = list(validator.iter_errors(valid_doc))
+    assert len(errors) == 0, (
+        f"Expected no errors for custom type, got: {[e.message for e in errors]}"
+    )
 
 
 def test_schema_validates_url_format(validator):

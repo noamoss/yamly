@@ -381,6 +381,48 @@ class TestCLIIntegration:
         assert "Error" in result.output
         assert len(result.output) > 0
 
+    def test_diff_command_minimal_documents(self, runner: CliRunner, tmp_path: Path) -> None:
+        """Test diff command with minimal documents (no metadata)."""
+        old_file = tmp_path / "old_minimal.yaml"
+        new_file = tmp_path / "new_minimal.yaml"
+        old_file.write_text(
+            """document:
+  sections:
+    - marker: "1"
+      content: "Old content"
+      sections: []
+""",
+            encoding="utf-8",
+        )
+        new_file.write_text(
+            """document:
+  sections:
+    - marker: "1"
+      content: "New content"
+      sections: []
+""",
+            encoding="utf-8",
+        )
+
+        result = runner.invoke(cli, ["diff", str(old_file), str(new_file)])
+        assert result.exit_code == 0
+        # Should produce diff output
+        assert len(result.output) > 0
+
+    def test_validate_command_minimal_document(self, runner: CliRunner, tmp_path: Path) -> None:
+        """Test validate command with minimal document (no metadata)."""
+        minimal_file = tmp_path / "minimal.yaml"
+        minimal_file.write_text(
+            """document:
+  sections: []
+""",
+            encoding="utf-8",
+        )
+
+        result = runner.invoke(cli, ["validate", str(minimal_file)])
+        assert result.exit_code == 0
+        assert "is valid" in result.output
+
 
 class TestCLIMainEntry:
     """Test the main entry point."""

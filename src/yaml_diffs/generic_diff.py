@@ -271,7 +271,24 @@ def diff_sequence(
                 item_path = f"{path}[{old_idx}]"
                 nested_changes = diff_node(old_item, new_item, item_path, parent_key, options, ctx)
 
-                if nested_changes or best_similarity < 1.0:
+                # Check if item is a complex type (dict/list) vs scalar
+                is_complex_item = isinstance(old_item, (dict, list))
+
+                if nested_changes:
+                    if is_complex_item:
+                        # For complex items (dict/list), add ITEM_CHANGED as container marker
+                        changes.append(
+                            GenericDiffResult(
+                                change_type=GenericChangeType.ITEM_CHANGED,
+                                path=item_path,
+                                old_value=old_item,
+                                new_value=new_item,
+                            )
+                        )
+                    # Always extend with the actual nested changes
+                    changes.extend(nested_changes)
+                elif best_similarity < 1.0:
+                    # Fuzzy match with no nested changes - mark as changed
                     changes.append(
                         GenericDiffResult(
                             change_type=GenericChangeType.ITEM_CHANGED,
@@ -280,7 +297,6 @@ def diff_sequence(
                             new_value=new_item,
                         )
                     )
-                    changes.extend(nested_changes)
                 else:
                     changes.append(
                         GenericDiffResult(
@@ -447,15 +463,9 @@ def diff_node(
                     new_value=new,
                 )
             )
-        else:
-            changes.append(
-                GenericDiffResult(
-                    change_type=GenericChangeType.UNCHANGED,
-                    path=path,
-                    old_value=old,
-                    new_value=new,
-                )
-            )
+        # If scalars are equal, return empty list (no changes)
+        # This is important because callers check `if nested_changes:` to determine
+        # if the parent item should be marked as ITEM_CHANGED
 
     return changes
 

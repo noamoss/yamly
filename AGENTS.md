@@ -17,7 +17,7 @@ The project supports unlimited nesting, flexible structural markers, Hebrew cont
 
 ### Key Architecture Points
 
-- **Dual Mode Operation**: 
+- **Dual Mode Operation**:
   - **Generic Mode**: Diff any YAML file with path-based change tracking and smart array matching
   - **Legal Document Mode**: Schema-validated diffing for Hebrew legal documents with marker-based section matching
 - **Smart Array Matching**: Auto-detects identity fields (`id`, `name`, `key`) or use custom identity rules
@@ -453,12 +453,15 @@ For arbitrary YAML without predefined schemas:
   2. **Rename Detection**: Match removed+added keys with similar values
   3. **Move Detection**: Match remaining items globally by identity/content
 
+For detailed workflow diagrams and algorithm explanations, see [Diffing Algorithms Documentation](docs/developer/diffing_algorithms.md).
+
 ### Legal Document Schema
 
+- **Optional Metadata**: Document metadata fields (id, title, type, language, version, source) are optional but recommended. The core diffing functionality only requires the `sections` array.
 - **Optional IDs**: Section IDs are optional and will be auto-generated as UUIDs if not provided. IDs are used for tracking but not for matching sections across versions.
 - **Markers Required**: All sections must have a marker (required field). Markers are the primary identifiers for diffing.
 - **Recursive Structure**: Sections can contain nested sections to unlimited depth
-- **Optional Fields**: `title` and `id` are optional; `marker` and `content` are required (content defaults to empty string)
+- **Optional Fields**: Section `title` and `id` are optional; `marker` and `content` are required (content defaults to empty string)
 - **Content Field**: Contains only text for this section level (not children)
 
 ### Legal Document Diffing Logic
@@ -477,6 +480,8 @@ For arbitrary YAML without predefined schemas:
 - **Content Similarity**: Uses content similarity scoring (≥0.95 threshold) to detect moved sections. Only sections with non-empty content are matched.
 - **Multiple Changes**: A single section can have multiple change types (e.g., SECTION_MOVED + CONTENT_CHANGED as separate entries)
 - **Nested Handling**: Handle deeply nested structures correctly (5+ levels)
+
+For detailed workflow diagrams and algorithm explanations, see [Diffing Algorithms Documentation](docs/developer/diffing_algorithms.md).
 
 ### API Design
 

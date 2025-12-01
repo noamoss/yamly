@@ -56,6 +56,7 @@ export default function Home() {
       identityRules: IdentityRule[];
     }) => diffDocuments(oldYaml, newYaml, mode, identityRules),
     onSuccess: (data: UnifiedDiffResponse) => {
+      // #region agent log
       // Update mode based on what was actually used
       setDiffMode(data.mode);
       // Set the appropriate diff
@@ -132,6 +133,9 @@ export default function Home() {
   };
 
   const handleLoadExample = (oldYaml: string, newYaml: string, mode: "general" | "legal_document") => {
+    // Clear previous diff when loading new example
+    setDiff(null);
+    setViewMode("editor");
     setOldYaml(oldYaml);
     setNewYaml(newYaml);
     setDiffMode(mode);

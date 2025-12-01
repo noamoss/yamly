@@ -12,7 +12,7 @@ import pytest
 import yaml
 
 from yaml_diffs.api import diff_documents, load_and_validate, validate_document
-from yaml_diffs.models import Document, DocumentType, Section, Source, Version
+from yaml_diffs.models import Document, Section, Source, Version
 
 
 def generate_large_section(
@@ -82,7 +82,7 @@ def generate_large_document(
     return Document(
         id="perf-test-doc",
         title="מסמך בדיקת ביצועים",
-        type=DocumentType.LAW,
+        type="law",
         language="hebrew",
         version=Version(number="1.0"),
         source=Source(url="https://example.com/perf", fetched_at="2025-01-20T09:50:00Z"),
@@ -295,7 +295,7 @@ class TestLargeContentBlocks:
         doc = Document(
             id="large-content-doc",
             title="מסמך עם תוכן גדול",
-            type=DocumentType.LAW,
+            type="law",
             version=Version(number="1.0"),
             source=Source(url="https://example.com/large", fetched_at="2025-01-20T09:50:00Z"),
             sections=sections,
@@ -331,7 +331,7 @@ class TestLargeContentBlocks:
         old_doc = Document(
             id="doc-001",
             title="מסמך ישן",
-            type=DocumentType.LAW,
+            type="law",
             version=Version(number="1.0"),
             source=Source(url="https://example.com/doc", fetched_at="2025-01-20T09:50:00Z"),
             sections=[
@@ -342,7 +342,7 @@ class TestLargeContentBlocks:
         new_doc = Document(
             id="doc-001",
             title="מסמך חדש",
-            type=DocumentType.LAW,
+            type="law",
             version=Version(number="2.0"),
             source=Source(url="https://example.com/doc", fetched_at="2025-01-21T09:50:00Z"),
             sections=[

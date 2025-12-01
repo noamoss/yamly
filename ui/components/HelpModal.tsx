@@ -65,11 +65,7 @@ export default function HelpModal({
                 What is yaml-diffs?
               </h3>
               <p className="text-sm leading-relaxed">
-                yaml-diffs is a tool for comparing YAML document versions. It's
-                designed for Hebrew legal documents but works with any
-                structured YAML data. The tool shows detailed changes with
-                context, making it easy to track modifications, additions,
-                deletions, and structural changes.
+                yaml-diffs reads YAML as structured data rather than plain text. It highlights meaningful changes and filters out noise, making it easier to review config updates, infrastructure changes, and YAML produced or rewritten by LLM-powered tools.
               </p>
             </section>
 

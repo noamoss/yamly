@@ -1,36 +1,43 @@
 # Template for creating new legal documents in YAML format
 # Copy this file and replace placeholder values with your document information
 #
-# Required fields are marked with comments
-# Optional fields are shown with example values or left empty
+# Only 'sections' is required. All metadata fields are optional but recommended.
+# The core diffing functionality only requires the sections array.
 
 document:
-  # Required: Stable document identifier
+  # Optional (Recommended): Stable document identifier
+  # Enables stable document identification across systems and versions
   # Recommended formats: UUID or canonical ID (e.g., "law-1234")
   id: "your-document-id"
 
-  # Required: Document title in Hebrew
+  # Optional (Recommended): Document title for human readability
+  # Improves human readability and document organization
   title: "כותרת המסמך"
 
-  # Required: Document type
-  # Must be one of: law, regulation, directive, circular, policy, other
+  # Optional (Recommended): Document type classification
+  # Enables document categorization and filtering
+  # Accepts any string value (free text). Common examples: law, regulation, directive, circular, policy, other
   type: "law"
 
-  # Required: Document language (must be "hebrew")
+  # Optional (Recommended): Document language specification
+  # Specifies document language for proper rendering and processing
+  # Must be "hebrew" if provided
   language: "hebrew"
 
-  # Required: Version information
+  # Optional (Recommended): Version information
+  # Tracks document version history. Essential for version control
   version:
-    # Required: Version identifier or date (e.g., "2024-01-01" or "v1.0")
+    # Optional: Version identifier for tracking document versions
     number: "2024-01-01"
     # Optional: Version description
     description: "גרסה ראשונית"
 
-  # Required: Source information
+  # Optional (Recommended): Source information
+  # Provides provenance and attribution. Important for legal compliance
   source:
-    # Required: Original source URL (must be valid URI)
+    # Optional: Source URL for provenance and attribution
     url: "https://example.gov.il/your-document"
-    # Required: ISO 8601 timestamp when document was fetched
+    # Optional: Timestamp when document was retrieved
     fetched_at: "2025-01-20T09:50:00Z"
 
   # Required: Array of sections (can be empty array: [])

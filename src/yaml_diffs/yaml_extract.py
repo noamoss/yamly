@@ -54,68 +54,87 @@ def find_section_line_number(
 
             # Process sections
             if sections_indent >= 0 and indent > sections_indent:
-                # Look for marker field
+                # Look for marker field - handle both "marker:" and "- marker:" formats
+                marker_line = None
                 if trimmed.startswith("marker:"):
-                    # Extract marker value - handle both quoted and unquoted
-                    marker_part = trimmed[7:].strip()  # "marker:" is 7 chars
+                    # Marker on its own line: "  marker: value"
+                    marker_line = trimmed
+                elif trimmed.startswith("-") and "marker:" in trimmed:
+                    # Marker on same line as "-": "- marker: value"
+                    marker_line = trimmed
 
-                    if marker_part:
-                        # Remove quotes if present
-                        marker = marker_part
-                        if (marker.startswith('"') and marker.endswith('"')) or (
-                            marker.startswith("'") and marker.endswith("'")
-                        ):
-                            marker = marker[1:-1]
-                            # Handle escaped quotes
-                            if marker_part[0] == '"':
-                                marker = (
-                                    marker.replace('\\"', '"')
-                                    .replace("\\n", "\n")
-                                    .replace("\\\\", "\\")
-                                )
-                            elif marker_part[0] == "'":
-                                marker = marker.replace("''", "'")
+                if marker_line:
+                    # Extract marker value - find "marker:" in the line
+                    marker_idx = marker_line.find("marker:")
+                    if marker_idx >= 0:
+                        marker_part = marker_line[marker_idx + 7 :].strip()  # "marker:" is 7 chars
 
-                        # Pop stack until we find the right parent level
-                        while section_stack and indent <= section_stack[-1][1]:
-                            section_stack.pop()
-                            if current_path:
-                                current_path.pop()
+                        if marker_part:
+                            # Remove quotes if present
+                            marker = marker_part
+                            if (marker.startswith('"') and marker.endswith('"')) or (
+                                marker.startswith("'") and marker.endswith("'")
+                            ):
+                                marker = marker[1:-1]
+                                # Handle escaped quotes
+                                if marker_part[0] == '"':
+                                    marker = (
+                                        marker.replace('\\"', '"')
+                                        .replace("\\n", "\n")
+                                        .replace("\\\\", "\\")
+                                    )
+                                elif marker_part[0] == "'":
+                                    marker = marker.replace("''", "'")
 
-                        # Add this section to the path
-                        section_stack.append((marker, indent, i + 1))
-                        current_path.append(marker)
+                            # Pop stack until we find the right parent level
+                            while section_stack and indent <= section_stack[-1][1]:
+                                section_stack.pop()
+                                if current_path:
+                                    current_path.pop()
 
-                        # Check if this matches our target path
-                        if len(current_path) == len(marker_path):
-                            matches = True
-                            for j, target_marker in enumerate(marker_path):
-                                current_marker = current_path[j]
-                                if current_marker != target_marker:
-                                    matches = False
-                                    break
+                            # Add this section to the path
+                            section_stack.append((marker, indent, i + 1))
+                            current_path.append(marker)
 
-                            if matches:
-                                # Found it! Look backwards for the section start (the "-" line)
-                                max_lookback = max(0, i - 20)
-                                for k in range(i, max_lookback - 1, -1):
-                                    prev_line = lines[k]
-                                    prev_trimmed = prev_line.strip()
+                            # Check if this matches our target path
+                            if len(current_path) == len(marker_path):
+                                matches = True
+                                for j, target_marker in enumerate(marker_path):
+                                    current_marker = current_path[j]
+                                    if current_marker != target_marker:
+                                        matches = False
+                                        break
 
-                                    if prev_trimmed.startswith("-"):
-                                        prev_indent = len(prev_line) - len(prev_line.lstrip())
-                                        # The "-" line should be less indented than the marker line
-                                        if prev_indent < indent and prev_indent >= sections_indent:
-                                            return k + 1  # 1-indexed
+                                if matches:
+                                    # Found it! If the line starts with "-", return this line
+                                    # Otherwise, look backwards for the section start
+                                    if trimmed.startswith("-"):
+                                        # Marker is on the same line as the "-", return this line
+                                        return i + 1  # 1-indexed
 
-                                    if prev_trimmed and not prev_trimmed.startswith("#"):
-                                        prev_indent = len(prev_line) - len(prev_line.lstrip())
-                                        if k < i and prev_indent < indent - 2:
-                                            break
+                                    # Otherwise, look backwards for the section start (the "-" line)
+                                    max_lookback = max(0, i - 20)
+                                    for k in range(i, max_lookback - 1, -1):
+                                        prev_line = lines[k]
+                                        prev_trimmed = prev_line.strip()
 
-                                # Fallback: return the marker line
-                                return i + 1
+                                        if prev_trimmed.startswith("-"):
+                                            prev_indent = len(prev_line) - len(prev_line.lstrip())
+                                            # The "-" line should be less indented than the marker line
+                                            if (
+                                                prev_indent < indent
+                                                and prev_indent >= sections_indent
+                                            ):
+                                                return k + 1  # 1-indexed
 
+                                        if prev_trimmed and not prev_trimmed.startswith("#"):
+                                            prev_indent = len(prev_line) - len(prev_line.lstrip())
+                                            if k < i and prev_indent < indent - 2:
+                                                break
+
+                                    # Fallback: return the marker line
+                                    result = i + 1
+                                    return result
     except Exception:
         # If anything goes wrong, return None
         return None
@@ -438,6 +457,9 @@ def find_path_line_number(yaml_text: str, path: str) -> int | None:
         path_stack: list[tuple[str, int, int]] = []  # (key, indent, line_number)
         array_index_stack: list[tuple[int, int, int]] = []  # (index, indent, line_number)
         current_indent = -1
+        expecting_array: tuple[int, int] | None = (
+            None  # (target_index, array_indent) when we're expecting an array
+        )
 
         for line_num, line in enumerate(lines, start=1):
             trimmed = line.strip()
@@ -449,13 +471,31 @@ def find_path_line_number(yaml_text: str, path: str) -> int | None:
             indent = len(line) - len(line.lstrip())
 
             # Check if we've moved to a less indented level (popped out of a structure)
-            if current_indent >= 0 and indent <= current_indent:
+            if current_indent >= 0 and indent < current_indent:
                 # Pop path stack until we're at the right level
-                while path_stack and path_stack[-1][1] >= indent:
+                while path_stack and path_stack[-1][1] > indent:
                     path_stack.pop()
-                # Pop array index stack
-                while array_index_stack and array_index_stack[-1][1] >= indent:
+                # Pop array index stack - but preserve the array we're currently tracking
+                # Don't pop if we're still expecting this array and we're at its indent level
+                while array_index_stack and array_index_stack[-1][1] > indent:
+                    # Check if this is the array we're tracking and we're at its indent level
+                    if (
+                        expecting_array
+                        and array_index_stack[-1][1] == expecting_array[1]
+                        and indent == expecting_array[1]
+                    ):
+                        # We're still in the array we're tracking - don't pop it
+                        break
                     array_index_stack.pop()
+                # Also check if we're at the same indent as the array we're tracking
+                if array_index_stack and array_index_stack[-1][1] == indent:
+                    # If we're still tracking this array, don't pop it
+                    if not (expecting_array and array_index_stack[-1][1] == expecting_array[1]):
+                        array_index_stack.pop()
+                # Reset expecting_array if we've moved to a shallower indent (left the array section)
+                # Only clear if indent is significantly less than expected (at least 2 spaces less)
+                if expecting_array and indent < expecting_array[1] - 1:
+                    expecting_array = None
 
             current_indent = indent
 
@@ -463,92 +503,353 @@ def find_path_line_number(yaml_text: str, path: str) -> int | None:
             if trimmed.startswith("-"):
                 # This is an array item
                 item_indent = indent
-                # Check if we're in an array we're tracking
-                if array_index_stack:
-                    # Increment the current array index
-                    last_array = array_index_stack[-1]
-                    new_index = last_array[0] + 1
-                    array_index_stack[-1] = (new_index, last_array[1], line_num)
-                else:
-                    # Check if this array matches our first segment
-                    if segments and segments[0].startswith("["):
-                        # We're looking for a specific array index
-                        try:
-                            target_index = int(segments[0][1:-1])
-                            if target_index == 0:
-                                array_index_stack.append((0, item_indent, line_num))
-                        except ValueError:
-                            pass
-                    elif len(segments) > 1 and segments[1].startswith("["):
-                        # The array is the previous segment
-                        if path_stack and path_stack[-1][0] == segments[0]:
-                            try:
-                                target_index = int(segments[1][1:-1])
-                                if target_index == 0:
+                if expecting_array and item_indent >= expecting_array[1]:
+                    # We're expecting an array and found an item - start tracking
+                    # Check if this is the target index (or we're starting at 0)
+                    if expecting_array[0] == 0:
+                        # Check if we already have an array at this indent level
+                        if array_index_stack and item_indent == array_index_stack[-1][1]:
+                            # Same indent level - increment the existing array index
+                            last_array = array_index_stack[-1]
+                            array_index_stack[-1] = (last_array[0] + 1, last_array[1], line_num)
+                            # Check if path ends with this array index (e.g., "containers[0]")
+                            if len(path_stack) + len(array_index_stack) == len(segments):
+                                # Verify the path matches exactly
+                                path_matches = True
+                                path_stack_idx = 0
+                                array_stack_idx = 0
+
+                                for _seg_idx, segment in enumerate(segments):
+                                    if segment.startswith("["):
+                                        # This is an array index - match against array_index_stack
+                                        if array_stack_idx >= len(array_index_stack):
+                                            path_matches = False
+                                            break
+                                        try:
+                                            target_index = int(segment[1:-1])
+                                            arr_index, _, _ = array_index_stack[array_stack_idx]
+                                            if arr_index != target_index:
+                                                path_matches = False
+                                                break
+                                            array_stack_idx += 1
+                                        except (ValueError, IndexError):
+                                            path_matches = False
+                                            break
+                                    else:
+                                        # This is a path key - match against path_stack
+                                        if path_stack_idx >= len(path_stack):
+                                            path_matches = False
+                                            break
+                                        path_key, _, _ = path_stack[path_stack_idx]
+                                        if path_key != segment:
+                                            path_matches = False
+                                            break
+                                        path_stack_idx += 1
+
+                                # Ensure we've matched all items from both stacks
+                                if (
+                                    path_matches
+                                    and path_stack_idx == len(path_stack)
+                                    and array_stack_idx == len(array_index_stack)
+                                ):
+                                    # Path ends with array index - return line number of array item marker
+                                    return line_num
+                        else:
+                            # New array (either first array or nested array at deeper indent)
+                            array_index_stack.append((0, item_indent, line_num))
+                        expecting_array = None
+
+                        # Check if path ends with this array index (e.g., "containers[0]")
+                        if len(path_stack) + len(array_index_stack) == len(segments):
+                            # Verify the path matches exactly
+                            path_matches = True
+                            path_stack_idx = 0
+                            array_stack_idx = 0
+
+                            for _seg_idx, segment in enumerate(segments):
+                                if segment.startswith("["):
+                                    # This is an array index - match against array_index_stack
+                                    if array_stack_idx >= len(array_index_stack):
+                                        path_matches = False
+                                        break
+                                    try:
+                                        target_index = int(segment[1:-1])
+                                        arr_index, _, _ = array_index_stack[array_stack_idx]
+                                        if arr_index != target_index:
+                                            path_matches = False
+                                            break
+                                        array_stack_idx += 1
+                                    except (ValueError, IndexError):
+                                        path_matches = False
+                                        break
+                                else:
+                                    # This is a path key - match against path_stack
+                                    if path_stack_idx >= len(path_stack):
+                                        path_matches = False
+                                        break
+                                    path_key, _, _ = path_stack[path_stack_idx]
+                                    if path_key != segment:
+                                        path_matches = False
+                                        break
+                                    path_stack_idx += 1
+
+                            # Ensure we've matched all items from both stacks
+                            if (
+                                path_matches
+                                and path_stack_idx == len(path_stack)
+                                and array_stack_idx == len(array_index_stack)
+                            ):
+                                # Path ends with array index - return line number of array item marker
+                                return line_num
+                    else:
+                        # We need to track until we reach the target index
+                        if not array_index_stack:
+                            array_index_stack.append((0, item_indent, line_num))
+                        else:
+                            last_array = array_index_stack[-1]
+                            if item_indent == last_array[1]:
+                                new_index = last_array[0] + 1
+                                array_index_stack[-1] = (new_index, last_array[1], line_num)
+                                if new_index == expecting_array[0]:
+                                    expecting_array = None
+                                    # Check if path ends with this array index (e.g., "containers[1]")
+                                    if len(path_stack) + len(array_index_stack) == len(segments):
+                                        # Verify the path matches exactly
+                                        path_matches = True
+                                        path_stack_idx = 0
+                                        array_stack_idx = 0
+
+                                        for _seg_idx, segment in enumerate(segments):
+                                            if segment.startswith("["):
+                                                # This is an array index - match against array_index_stack
+                                                if array_stack_idx >= len(array_index_stack):
+                                                    path_matches = False
+                                                    break
+                                                try:
+                                                    target_index = int(segment[1:-1])
+                                                    arr_index, _, _ = array_index_stack[
+                                                        array_stack_idx
+                                                    ]
+                                                    if arr_index != target_index:
+                                                        path_matches = False
+                                                        break
+                                                    array_stack_idx += 1
+                                                except (ValueError, IndexError):
+                                                    path_matches = False
+                                                    break
+                                            else:
+                                                # This is a path key - match against path_stack
+                                                if path_stack_idx >= len(path_stack):
+                                                    path_matches = False
+                                                    break
+                                                path_key, _, _ = path_stack[path_stack_idx]
+                                                if path_key != segment:
+                                                    path_matches = False
+                                                    break
+                                                path_stack_idx += 1
+
+                                        # Ensure we've matched all items from both stacks
+                                        if (
+                                            path_matches
+                                            and path_stack_idx == len(path_stack)
+                                            and array_stack_idx == len(array_index_stack)
+                                        ):
+                                            # Path ends with array index - return line number of array item marker
+                                            return line_num
+                            elif item_indent > last_array[1]:
+                                # Nested array at deeper indent
+                                # Only start tracking if we're expecting an array at EXACTLY this indent
+                                # (e.g., for paths like containers[0].ports[1])
+                                # Don't track if we're still looking for the parent array at a different indent
+                                if expecting_array and item_indent == expecting_array[1]:
+                                    # We're expecting an array at exactly this indent - start tracking
                                     array_index_stack.append((0, item_indent, line_num))
-                            except ValueError:
-                                pass
+                                # else: ignore - this is nested content at the wrong indent level
+                elif array_index_stack:
+                    # We're already tracking an array - increment the index if same indent
+                    last_array = array_index_stack[-1]
+                    if item_indent == last_array[1]:
+                        # Same indent level - increment index
+                        new_index = last_array[0] + 1
+                        array_index_stack[-1] = (new_index, last_array[1], line_num)
+
+                        # Check if path ends with this array index (e.g., "containers[0]")
+                        if len(path_stack) + len(array_index_stack) == len(segments):
+                            # Verify the path matches exactly
+                            path_matches = True
+                            path_stack_idx = 0
+                            array_stack_idx = 0
+
+                            for _seg_idx, segment in enumerate(segments):
+                                if segment.startswith("["):
+                                    # This is an array index - match against array_index_stack
+                                    if array_stack_idx >= len(array_index_stack):
+                                        path_matches = False
+                                        break
+                                    try:
+                                        target_index = int(segment[1:-1])
+                                        arr_index, _, _ = array_index_stack[array_stack_idx]
+                                        if arr_index != target_index:
+                                            path_matches = False
+                                            break
+                                        array_stack_idx += 1
+                                    except (ValueError, IndexError):
+                                        path_matches = False
+                                        break
+                                else:
+                                    # This is a path key - match against path_stack
+                                    if path_stack_idx >= len(path_stack):
+                                        path_matches = False
+                                        break
+                                    path_key, _, _ = path_stack[path_stack_idx]
+                                    if path_key != segment:
+                                        path_matches = False
+                                        break
+                                    path_stack_idx += 1
+
+                            # Ensure we've matched all items from both stacks
+                            if (
+                                path_matches
+                                and path_stack_idx == len(path_stack)
+                                and array_stack_idx == len(array_index_stack)
+                            ):
+                                # Path ends with array index - return line number of array item marker
+                                return line_num
+                    # If item_indent > last_array[1], it's a nested array we're not tracking, ignore it
 
             # Check for key-value pair (contains ":")
             if ":" in trimmed:
                 key_part = trimmed.split(":")[0].strip()
+                # If the key is on the same line as an array item marker, strip the "- " prefix
+                if key_part.startswith("- "):
+                    key_part = key_part[2:].strip()
                 key_indent = indent
 
-                # Check if this key matches our current target segment
-                target_segment_idx = len(path_stack)
-                if array_index_stack:
-                    # We're inside an array, so we need to check the segment after the array index
-                    target_segment_idx = len(path_stack) + len(array_index_stack)
+                # Determine which segment we should be looking for
+                target_segment_idx = len(path_stack) + len(array_index_stack)
 
                 if target_segment_idx < len(segments):
                     target_segment = segments[target_segment_idx]
 
-                    # Check if it's an array index segment
-                    if target_segment.startswith("["):
-                        # This should have been handled above
-                        pass
-                    elif key_part == target_segment:
+                    # Check if the next segment after this one is an array index
+                    next_is_array = target_segment_idx + 1 < len(segments) and segments[
+                        target_segment_idx + 1
+                    ].startswith("[")
+
+                    if key_part == target_segment:
+                        # Before matching this key, verify all array indices in the path up to this point
+                        # are correctly matched. This prevents matching keys inside the wrong array item.
+                        array_indices_ok = True
+                        if array_index_stack:
+                            arr_stack_idx = 0
+                            for seg_idx in range(target_segment_idx):
+                                seg = segments[seg_idx]
+                                if seg.startswith("["):
+                                    if arr_stack_idx >= len(array_index_stack):
+                                        array_indices_ok = False
+                                        break
+                                    try:
+                                        expected_idx = int(seg[1:-1])
+                                        actual_idx, _, _ = array_index_stack[arr_stack_idx]
+                                        if actual_idx != expected_idx:
+                                            array_indices_ok = False
+                                            break
+                                        arr_stack_idx += 1
+                                    except (ValueError, IndexError):
+                                        array_indices_ok = False
+                                        break
+
+                        if not array_indices_ok:
+                            # We're in the wrong array item - don't match this key, continue searching
+                            # Don't clear expecting_array - we need to keep tracking to reach the correct index
+                            continue
+
                         # Found matching key
                         path_stack.append((key_part, key_indent, line_num))
 
-                        # Check if we've matched all segments
-                        if len(path_stack) + len(array_index_stack) == len(segments):
-                            # Verify the path matches exactly
-                            path_matches = True
-                            seg_idx = 0
-                            for path_key, _, _ in path_stack:
-                                if seg_idx >= len(segments):
-                                    path_matches = False
-                                    break
-                                if segments[seg_idx].startswith("["):
-                                    # Skip array index segments when checking path_stack
-                                    seg_idx += 1
-                                if seg_idx >= len(segments):
-                                    path_matches = False
-                                    break
-                                if path_key != segments[seg_idx]:
-                                    path_matches = False
-                                    break
-                                seg_idx += 1
+                        # If the next segment is an array index, prepare to track it
+                        if next_is_array:
+                            try:
+                                target_index = int(segments[target_segment_idx + 1][1:-1])
+                                expecting_array = (
+                                    target_index,
+                                    key_indent + 2,
+                                )  # Array items are indented more
+                            except ValueError:
+                                expecting_array = None
+                        else:
+                            expecting_array = None
 
-                            # Check array indices
-                            for arr_index, _, _ in array_index_stack:
-                                while seg_idx < len(segments) and not segments[seg_idx].startswith(
-                                    "["
-                                ):
-                                    seg_idx += 1
-                                if seg_idx >= len(segments):
-                                    path_matches = False
-                                    break
-                                try:
-                                    target_index = int(segments[seg_idx][1:-1])
-                                    if arr_index != target_index:
+                        # Before checking the path match, verify that all array indices in the path
+                        # match the indices we've tracked. If any array index doesn't match,
+                        # we're in the wrong array item and should continue searching.
+                        array_indices_match = True
+                        if array_index_stack:
+                            array_stack_idx = 0
+                            for seg in segments[: target_segment_idx + 1]:
+                                if seg.startswith("["):
+                                    if array_stack_idx >= len(array_index_stack):
+                                        array_indices_match = False
+                                        break
+                                    try:
+                                        expected_idx = int(seg[1:-1])
+                                        actual_idx, _, _ = array_index_stack[array_stack_idx]
+                                        if actual_idx != expected_idx:
+                                            array_indices_match = False
+                                            break
+                                        array_stack_idx += 1
+                                    except (ValueError, IndexError):
+                                        array_indices_match = False
+                                        break
+
+                        # Check if we've matched all segments (no array index remaining)
+                        # But skip this check if we're still tracking to a target array index
+                        # (we need to reach the target index before matching nested keys)
+                        # Also skip if array indices don't match (we're in the wrong array item)
+                        if (
+                            not expecting_array
+                            and array_indices_match
+                            and len(path_stack) + len(array_index_stack) == len(segments)
+                        ):
+                            # Verify the path matches exactly by walking through segments in order
+                            # and matching against both path_stack and array_index_stack
+                            path_matches = True
+                            path_stack_idx = 0
+                            array_stack_idx = 0
+
+                            for _seg_idx, segment in enumerate(segments):
+                                if segment.startswith("["):
+                                    # This is an array index - match against array_index_stack
+                                    if array_stack_idx >= len(array_index_stack):
                                         path_matches = False
                                         break
-                                except (ValueError, IndexError):
+                                    try:
+                                        target_index = int(segment[1:-1])
+                                        arr_index, _, _ = array_index_stack[array_stack_idx]
+                                        if arr_index != target_index:
+                                            path_matches = False
+                                            break
+                                        array_stack_idx += 1
+                                    except (ValueError, IndexError):
+                                        path_matches = False
+                                        break
+                                else:
+                                    # This is a path key - match against path_stack
+                                    if path_stack_idx >= len(path_stack):
+                                        path_matches = False
+                                        break
+                                    path_key, _, _ = path_stack[path_stack_idx]
+                                    if path_key != segment:
+                                        path_matches = False
+                                        break
+                                    path_stack_idx += 1
+
+                            # Ensure we've matched all items from both stacks
+                            if path_matches:
+                                if path_stack_idx != len(path_stack) or array_stack_idx != len(
+                                    array_index_stack
+                                ):
                                     path_matches = False
-                                    break
-                                seg_idx += 1
 
                             if path_matches:
                                 return line_num
@@ -556,5 +857,25 @@ def find_path_line_number(yaml_text: str, path: str) -> int | None:
     except Exception:
         # If anything goes wrong, return None
         return None
+    # FALLBACK: If path ends with an array index and wasn't found,
+    # try finding the parent key's line number (useful for inline arrays)
+    if "segments" in locals() and segments and segments[-1].startswith("["):
+        # Remove the last array index segment and try again
+        parent_segments = segments[:-1]
+        if parent_segments:
+            # Reconstruct parent path
+            parent_path_parts = []
+            for seg in parent_segments:
+                if seg.startswith("["):
+                    parent_path_parts.append(seg)
+                else:
+                    if parent_path_parts and not parent_path_parts[-1].startswith("["):
+                        parent_path_parts.append(".")
+                    parent_path_parts.append(seg)
+            parent_path = "".join(parent_path_parts)
+            # Recursively try to find parent path
+            fallback_result = find_path_line_number(yaml_text, parent_path)
+            if fallback_result:
+                return fallback_result
 
     return None

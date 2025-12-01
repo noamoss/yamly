@@ -17,6 +17,28 @@ function getCurrentOrigin(): string {
 }
 
 /**
+ * Fetch the OpenSpec schema from the API
+ */
+export async function fetchSchema(): Promise<string> {
+  const response = await fetch(`${API_URL}/api/v1/schema`, {
+    method: "GET",
+    mode: "cors",
+    headers: {
+      "Accept": "application/x-yaml, text/yaml, text/plain",
+    },
+  });
+
+  if (!response.ok) {
+    throw new ApiError(
+      `Failed to fetch schema: ${response.status} ${response.statusText}`,
+      response.status
+    );
+  }
+
+  return await response.text();
+}
+
+/**
  * Test API connectivity (for debugging)
  */
 export async function testApiConnection(): Promise<{ success: boolean; message: string }> {

@@ -174,20 +174,13 @@ Formatted Output
 
 ### Generic Diff Algorithm (3-Phase)
 
-```
-Phase 1: Recursive Local Diff
-    - Compare nodes at same paths
-    - Detect: VALUE_CHANGED, KEY_ADDED/REMOVED, ITEM_ADDED/REMOVED
-    - Collect unmatched items for global matching
-    ↓
-Phase 2: Rename Detection
-    - Match removed+added keys with similar values at same parent
-    - Convert to KEY_RENAMED
-    ↓
-Phase 3: Global Move Detection
-    - Match remaining removed vs added globally by identity/content
-    - Convert to KEY_MOVED / ITEM_MOVED
-```
+The generic diff algorithm works in three phases:
+
+1. **Recursive Local Diff**: Compare nodes at same paths, detect VALUE_CHANGED, KEY_ADDED/REMOVED, ITEM_ADDED/REMOVED, and collect unmatched items for global matching
+2. **Rename Detection**: Match removed+added keys with similar values at same parent, convert to KEY_RENAMED
+3. **Global Move Detection**: Match remaining removed vs added globally by identity/content, convert to KEY_MOVED / ITEM_MOVED
+
+For detailed algorithm documentation with workflow diagrams, see [Diffing Algorithms](diffing_algorithms.md).
 
 ### Validation Flow
 

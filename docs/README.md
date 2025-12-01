@@ -25,6 +25,7 @@ The documentation is organized into four main categories:
 ### For Developers
 
 - **[Architecture](developer/architecture.md)** - System architecture and design decisions
+- **[Diffing Algorithms](developer/diffing_algorithms.md)** - Detailed explanation of diffing algorithms with workflow diagrams
 - **[Contributing](developer/contributing.md)** - How to contribute to the project
 - **[API Reference](developer/api_reference.md)** - Complete Python library API reference
 - **[AGENTS.md](../AGENTS.md)** - Development guide for AI coding agents

@@ -168,8 +168,8 @@ class TestErrorHandlingAcrossLayers:
         invalid_file = tmp_path / "invalid.yaml"
         invalid_file.write_text(
             """document:
-  id: "test"
-  # Missing required fields
+  id: 123  # Should be string, not number
+  sections: []
 """,
             encoding="utf-8",
         )
