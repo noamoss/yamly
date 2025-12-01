@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import MermaidDiagram from "./MermaidDiagram";
 
 interface MarkdownViewerProps {
   docPath: string;
@@ -137,7 +138,31 @@ export default function MarkdownViewer({
           </button>
         </div>
       )}
-      <ReactMarkdown remarkPlugins={[remarkGfm]}>{content}</ReactMarkdown>
+      <ReactMarkdown
+        remarkPlugins={[remarkGfm]}
+        components={{
+          code(props: any) {
+            const { node, inline, className, children, ...rest } = props;
+            const match = /language-(\w+)/.exec(className || "");
+            const language = match ? match[1] : "";
+            const codeString = String(children).replace(/\n$/, "");
+
+            // Render Mermaid diagrams for non-inline mermaid code blocks
+            if (language === "mermaid" && !inline) {
+              return <MermaidDiagram code={codeString} />;
+            }
+
+            // Default code rendering (inline or non-mermaid blocks)
+            return (
+              <code className={className} {...rest}>
+                {children}
+              </code>
+            );
+          },
+        }}
+      >
+        {content}
+      </ReactMarkdown>
     </div>
   );
 }
