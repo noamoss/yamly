@@ -6,12 +6,14 @@ interface DocumentationModalProps {
   isOpen: boolean;
   docPath: string | null;
   onClose: () => void;
+  onDocClick?: (docPath: string) => void;
 }
 
 export default function DocumentationModal({
   isOpen,
   docPath,
   onClose,
+  onDocClick,
 }: DocumentationModalProps) {
   if (!isOpen || !docPath) return null;
 
@@ -55,7 +57,7 @@ export default function DocumentationModal({
           </button>
         </div>
         <div className="overflow-y-auto flex-1">
-          <MarkdownViewer docPath={docPath} onClose={onClose} />
+          <MarkdownViewer docPath={docPath} onClose={onClose} onDocClick={onDocClick} />
         </div>
       </div>
     </div>

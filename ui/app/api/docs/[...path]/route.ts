@@ -22,11 +22,26 @@ export async function GET(
 
     // Map documentation paths to actual file locations
     const docPathMap: Record<string, string> = {
+      // API documentation
       "api/api_server": "docs/api/api_server.md",
       "api/mcp_server": "docs/api/mcp_server.md",
+      // Developer documentation
       "developer/api_reference": "docs/developer/api_reference.md",
+      "developer/architecture": "docs/developer/architecture.md",
+      "developer/contributing": "docs/developer/contributing.md",
       "developer/diffing_algorithms": "docs/developer/diffing_algorithms.md",
+      // Operations documentation
+      "operations/ci_cd": "docs/operations/ci_cd.md",
+      "operations/deployment": "docs/operations/deployment.md",
+      "operations/environment_variables": "docs/operations/environment_variables.md",
+      // User documentation
+      "user/examples": "docs/user/examples.md",
       "user/getting_started": "docs/user/getting_started.md",
+      "user/installation": "docs/user/installation.md",
+      "user/schema_reference": "docs/user/schema_reference.md",
+      // Root documentation
+      "README": "docs/README.md",
+      "AGENTS": "AGENTS.md",
     };
 
     const actualPath = docPathMap[filePath];
