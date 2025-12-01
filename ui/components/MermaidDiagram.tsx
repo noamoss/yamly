@@ -42,6 +42,8 @@ export default function MermaidDiagram({ code }: MermaidDiagramProps) {
   const [expandedZoom, setExpandedZoom] = useState(0.5); // Default zoom for expanded view (50%)
   const diagramRef = useRef<HTMLDivElement>(null);
   const expandedRef = useRef<HTMLDivElement>(null);
+  const expandButtonRef = useRef<HTMLButtonElement>(null);
+  const previousFocusRef = useRef<HTMLElement | null>(null);
   const idRef = useRef<string>(
     `mermaid-${Date.now()}-${++idCounter}`
   );
@@ -80,9 +82,19 @@ export default function MermaidDiagram({ code }: MermaidDiagramProps) {
     };
   }, [code]);
 
-  // Handle keyboard accessibility for modal
+  // Handle keyboard accessibility and focus management for modal
   useEffect(() => {
-    if (!isExpanded) return;
+    if (!isExpanded) {
+      // Return focus to expand button when modal closes
+      if (previousFocusRef.current) {
+        previousFocusRef.current.focus();
+        previousFocusRef.current = null;
+      }
+      return;
+    }
+
+    // Store previous focus element
+    previousFocusRef.current = document.activeElement as HTMLElement;
 
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
@@ -90,8 +102,51 @@ export default function MermaidDiagram({ code }: MermaidDiagramProps) {
       }
     };
 
+    // Focus trap: keep focus within modal
+    const handleTab = (e: KeyboardEvent) => {
+      if (e.key !== "Tab") return;
+
+      const modal = expandedRef.current?.closest(".bg-white");
+      if (!modal) return;
+
+      const focusableElements = modal.querySelectorAll<HTMLElement>(
+        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+      );
+
+      if (focusableElements.length === 0) return;
+
+      const firstElement = focusableElements[0];
+      const lastElement = focusableElements[focusableElements.length - 1];
+
+      if (e.shiftKey) {
+        // Shift + Tab
+        if (document.activeElement === firstElement) {
+          e.preventDefault();
+          lastElement.focus();
+        }
+      } else {
+        // Tab
+        if (document.activeElement === lastElement) {
+          e.preventDefault();
+          firstElement.focus();
+        }
+      }
+    };
+
     document.addEventListener("keydown", handleEscape);
-    return () => document.removeEventListener("keydown", handleEscape);
+    document.addEventListener("keydown", handleTab);
+
+    // Focus first interactive element in modal
+    setTimeout(() => {
+      const modal = expandedRef.current?.closest(".bg-white");
+      const firstButton = modal?.querySelector<HTMLElement>("button");
+      firstButton?.focus();
+    }, 0);
+
+    return () => {
+      document.removeEventListener("keydown", handleEscape);
+      document.removeEventListener("keydown", handleTab);
+    };
   }, [isExpanded]);
 
   // Handle zoom controls for inline view
@@ -148,6 +203,7 @@ export default function MermaidDiagram({ code }: MermaidDiagramProps) {
             +
           </button>
           <button
+            ref={expandButtonRef}
             onClick={() => setIsExpanded(true)}
             className="px-2 py-1 bg-gray-800 text-white border border-gray-700 rounded text-xs hover:bg-gray-700 shadow-lg font-medium"
             title="Expand to full screen"

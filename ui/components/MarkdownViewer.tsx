@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import ReactMarkdown, { Components } from "react-markdown";
 import remarkGfm from "remark-gfm";
+import type { Element } from "hast";
 import MermaidDiagram from "./MermaidDiagram";
 
 interface MarkdownViewerProps {
@@ -11,7 +12,7 @@ interface MarkdownViewerProps {
 }
 
 interface CodeProps {
-  node?: any;
+  node?: Element; // ReactMarkdown's internal AST node from hast - not used in this component
   inline?: boolean;
   className?: string;
   children?: React.ReactNode;
