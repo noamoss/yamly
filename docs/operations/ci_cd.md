@@ -29,7 +29,7 @@ The project uses GitHub Actions to automate testing, linting, building, and depl
 4. Run pytest with coverage
 5. Upload coverage reports (Python 3.11 only)
 
-**View Results**: [Tests Workflow](https://github.com/noamoss/yaml_diffs/actions/workflows/test.yml)
+**View Results**: [Tests Workflow](https://github.com/noamoss/yamly/actions/workflows/test.yml)
 
 ### Lint Workflow (`.github/workflows/lint.yml`)
 
@@ -54,7 +54,7 @@ The project uses GitHub Actions to automate testing, linting, building, and depl
 6. Install project dependencies
 7. Run mypy type checking
 
-**View Results**: [Lint Workflow](https://github.com/noamoss/yaml_diffs/actions/workflows/lint.yml)
+**View Results**: [Lint Workflow](https://github.com/noamoss/yamly/actions/workflows/lint.yml)
 
 ### Build Workflow (`.github/workflows/build.yml`)
 
@@ -79,7 +79,7 @@ The project uses GitHub Actions to automate testing, linting, building, and depl
 5. Test package installation
 6. Upload artifacts (if push to main)
 
-**View Results**: [Build Workflow](https://github.com/noamoss/yaml_diffs/actions/workflows/build.yml)
+**View Results**: [Build Workflow](https://github.com/noamoss/yamly/actions/workflows/build.yml)
 
 ### Deploy Workflow (`.github/workflows/deploy.yml`)
 
@@ -110,7 +110,7 @@ The `RAILWAY_DOMAIN` secret is required for the deployment workflow to verify th
 3. Click on your service
 4. Find your domain in one of these places:
    - **Settings** → **Domains** tab (if you have a custom domain)
-   - The service URL shown in the dashboard header (e.g., `yaml-diffs.up.railway.app`)
+   - The service URL shown in the dashboard header (configure via `RAILWAY_DOMAIN` environment variable)
    - The public URL displayed in the service overview
 
 **Step 2: Note the Domain Format**
@@ -119,8 +119,8 @@ The domain format is typically: `[service-name].up.railway.app`
 
 **Important**: Use only the domain name, **without** the protocol (`https://`).
 
-- ✅ **Correct**: `yaml-diffs.up.railway.app`
-- ❌ **Incorrect**: `https://yaml-diffs.up.railway.app` (includes protocol - will cause issues)
+- ✅ **Correct**: `api-yamly.thepitz.studio` (domain only, set via `RAILWAY_DOMAIN`)
+- ❌ **Incorrect**: `https://api-yamly.thepitz.studio` (includes protocol - will cause issues)
 
 **Step 3: Add Secret to GitHub**
 
@@ -129,7 +129,7 @@ The domain format is typically: `[service-name].up.railway.app`
 3. Click **"New repository secret"**
 4. Enter the following:
    - **Name**: `RAILWAY_DOMAIN`
-   - **Value**: Your Railway domain (e.g., `yaml-diffs.up.railway.app`)
+   - **Value**: Your Railway domain (set via `RAILWAY_DOMAIN` environment variable)
 5. Click **"Add secret"**
 
 **Step 4: Verify the Secret**
@@ -152,7 +152,7 @@ After adding the secret, the next deployment workflow run should be able to acce
 2. Wait for Railway auto-deployment (via git integration)
 3. Verify deployment health check with retry logic
 
-**View Results**: [Deploy Workflow](https://github.com/noamoss/yaml_diffs/actions/workflows/deploy.yml)
+**View Results**: [Deploy Workflow](https://github.com/noamoss/yamly/actions/workflows/deploy.yml)
 
 **Note**: This workflow is optional and can be disabled if manual deployment is preferred.
 
@@ -210,9 +210,9 @@ act -W .github/workflows/test.yml
 Status badges are displayed in the README to show the current status of each workflow:
 
 ```markdown
-[![Tests](https://github.com/noamoss/yaml_diffs/actions/workflows/test.yml/badge.svg)](https://github.com/noamoss/yaml_diffs/actions/workflows/test.yml)
-[![Lint](https://github.com/noamoss/yaml_diffs/actions/workflows/lint.yml/badge.svg)](https://github.com/noamoss/yaml_diffs/actions/workflows/lint.yml)
-[![Build](https://github.com/noamoss/yaml_diffs/actions/workflows/build.yml/badge.svg)](https://github.com/noamoss/yaml_diffs/actions/workflows/build.yml)
+[![Tests](https://github.com/noamoss/yamly/actions/workflows/test.yml/badge.svg)](https://github.com/noamoss/yamly/actions/workflows/test.yml)
+[![Lint](https://github.com/noamoss/yamly/actions/workflows/lint.yml/badge.svg)](https://github.com/noamoss/yamly/actions/workflows/lint.yml)
+[![Build](https://github.com/noamoss/yamly/actions/workflows/build.yml/badge.svg)](https://github.com/noamoss/yamly/actions/workflows/build.yml)
 ```
 
 ## Pre-commit and CI/CD Consistency
@@ -286,7 +286,7 @@ uv run mypy src/
 5. **Check health endpoint**: Verify `/health` endpoint is available and responding
    - Test manually: `curl https://[your-railway-domain]/health`
    - Should return: `{"status":"healthy","version":"0.1.0"}`
-6. **Check domain format**: Ensure `RAILWAY_DOMAIN` secret contains only the domain (e.g., `yaml-diffs.up.railway.app`), not the full URL
+6. **Check domain format**: Ensure `RAILWAY_DOMAIN` secret contains only the domain (set via `RAILWAY_DOMAIN` environment variable), not the full URL
 
 ### Coverage Not Uploading
 

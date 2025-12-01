@@ -1,4 +1,4 @@
-"""REST API server for yaml-diffs service.
+"""REST API server for yamly service.
 
 This package provides a FastAPI-based REST API for document validation and diffing.
 The API is designed for Railway deployment with proper environment configuration,

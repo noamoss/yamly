@@ -29,7 +29,7 @@ npm install
 cp .env.example .env.local
 ```
 
-3. Update `NEXT_PUBLIC_API_URL` in `.env.local` with your Railway API URL
+3. Update `NEXT_PUBLIC_API_URL` in `.env.local` with your API URL (defaults to `http://localhost:8000` for local development)
 
 4. Run development server:
 ```bash
@@ -64,11 +64,13 @@ CORS_ORIGINS=http://localhost:3000
 ```
 
 **For Production (Vercel):**
-After deploying to Vercel, add your Vercel domain to the Railway API's `CORS_ORIGINS` environment variable:
+After deploying to Vercel, add your Vercel domain to the Railway API's `CORS_ORIGINS` environment variable. Configure this in Railway dashboard or via `.env` file:
 
 ```
-CORS_ORIGINS=http://localhost:3000,https://your-vercel-app.vercel.app
+CORS_ORIGINS=http://localhost:3000,https://yamly.thepitz.studio
 ```
+
+**Note**: Replace `https://yamly.thepitz.studio` with your actual production UI domain (configured via `NEXT_PUBLIC_API_URL` in Vercel).
 
 **Note:** You can add multiple origins separated by commas. Make sure to include both localhost for development and your Vercel domain for production.
 

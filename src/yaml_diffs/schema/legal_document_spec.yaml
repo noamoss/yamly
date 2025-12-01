@@ -7,7 +7,7 @@
 
 version: "1.0.0"
 $schema: "https://json-schema.org/draft/2020-12/schema"
-$id: "https://github.com/noamoss/yaml_diffs/schema/legal_document_spec.yaml"
+$id: "https://github.com/noamoss/yamly/schema/legal_document_spec.yaml"
 
 title: "Legal Document Schema"
 description: |

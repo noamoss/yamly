@@ -40,7 +40,7 @@ The project supports unlimited nesting, flexible structural markers, Hebrew cont
 
 ```bash
 # Clone the repository
-git clone https://github.com/noamoss/yaml_diffs.git
+git clone https://github.com/noamoss/yamly.git
 cd yaml_diffs
 
 # Create virtual environment and install dependencies

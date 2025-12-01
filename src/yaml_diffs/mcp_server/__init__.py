@@ -1,8 +1,8 @@
-"""MCP server for yaml-diffs API endpoints.
+"""MCP server for yamly API endpoints.
 
 This package provides an MCP (Model Context Protocol) server that exposes
 the REST API endpoints as MCP tools, enabling AI assistants to interact
-with the yaml-diffs service via the MCP protocol.
+with the yamly service via the MCP protocol.
 """
 
 from yaml_diffs.mcp_server.config import MCPServerConfig

@@ -29,7 +29,7 @@ pip install yaml-diffs
 
 ```bash
 # Clone the repository
-git clone https://github.com/noamoss/yaml_diffs.git
+git clone https://github.com/noamoss/yamly.git
 cd yaml_diffs
 
 # Create virtual environment
@@ -266,5 +266,5 @@ with open("change_report.txt", "w") as f:
 ## Getting Help
 
 - **Documentation**: See the [Documentation Index](../README.md)
-- **Issues**: [GitHub Issues](https://github.com/noamoss/yaml_diffs/issues)
+- **Issues**: [GitHub Issues](https://github.com/noamoss/yamly/issues)
 - **Project Board**: [GitHub Project Board](https://github.com/users/noamoss/projects/4)

@@ -369,7 +369,7 @@ def diff_command(
     help="Override request timeout in seconds (default: 30 or YAML_DIFFS_API_TIMEOUT env var)",
 )
 def mcp_server_command(api_url: str | None, api_key: str | None, timeout: int | None) -> None:
-    """Run the MCP (Model Context Protocol) server for yaml-diffs API.
+    """Run the MCP (Model Context Protocol) server for yamly API.
 
     This command starts an MCP server that exposes the REST API endpoints
     as MCP tools, enabling AI assistants to interact with the yaml-diffs

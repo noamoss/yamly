@@ -66,7 +66,7 @@ def get_tool_definitions() -> list[types.Tool]:
         types.Tool(
             name="health_check",
             description=(
-                "Check the health status of the yaml-diffs API. "
+                "Check the health status of the yamly API. "
                 "Returns a simple health status response with version information."
             ),
             inputSchema={

@@ -25,7 +25,7 @@ const documentationLinks: DocumentationLink[] = [
   {
     label: "REST API",
     url: "api/api_server",
-    description: "Use yaml-diffs via HTTP endpoints",
+    description: "Use yamly via HTTP endpoints",
     icon: "🌐",
   },
   {
@@ -37,7 +37,7 @@ const documentationLinks: DocumentationLink[] = [
   {
     label: "Python Library",
     url: "developer/api_reference",
-    description: "Use yaml-diffs in your Python code",
+    description: "Use yamly in your Python code",
     icon: "🐍",
   },
   {

@@ -14,7 +14,7 @@ Thank you for your interest in contributing to yaml-diffs! This guide will help 
 
 ```bash
 # Clone the repository
-git clone https://github.com/noamoss/yaml_diffs.git
+git clone https://github.com/noamoss/yamly.git
 cd yaml_diffs
 
 # Create virtual environment
@@ -317,7 +317,7 @@ If you're an AI coding agent working on this project, see [AGENTS.md](../../AGEN
 
 ## Questions?
 
-- **Issues**: [GitHub Issues](https://github.com/noamoss/yaml_diffs/issues)
+- **Issues**: [GitHub Issues](https://github.com/noamoss/yamly/issues)
 - **Documentation**: [Documentation Index](../README.md)
 - **AI Agents**: [AGENTS.md](../../AGENTS.md)
 

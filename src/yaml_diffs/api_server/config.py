@@ -49,7 +49,7 @@ class Settings:
         )
 
         # Application metadata
-        self.app_name = os.getenv("APP_NAME", "yaml-diffs API")
+        self.app_name = os.getenv("APP_NAME", "yamly API")
         self.app_version = os.getenv("APP_VERSION", "0.1.0")
 
     @staticmethod

@@ -1,7 +1,8 @@
 #!/bin/bash
 # Verification script for Railway deployment
 # Usage: ./scripts/verify_railway_deployment.sh [BASE_URL]
-# Example: ./scripts/verify_railway_deployment.sh https://yaml-diffs.up.railway.app
+# Example: ./scripts/verify_railway_deployment.sh
+# (Uses YAML_DIFFS_API_URL from .env or environment variable)
 # Or for internal: ./scripts/verify_railway_deployment.sh http://yaml_diffs.railway.internal
 
 # Check for required tools
@@ -48,7 +49,8 @@ if [ -z "$BASE_URL" ]; then
         echo "Examples:"
         echo "  $0"
         echo "    (uses YAML_DIFFS_API_URL from .env or environment)"
-        echo "  $0 https://yaml-diffs.up.railway.app"
+        echo "  $0"
+        echo "    (uses YAML_DIFFS_API_URL from .env)"
         echo "    (uses provided URL)"
         echo "  $0 http://yaml_diffs.railway.internal  # Internal Railway URL"
         echo "  $0 your-app.up.railway.app              # Protocol will be auto-detected (HTTPS for Railway)"

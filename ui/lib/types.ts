@@ -1,4 +1,4 @@
-/** TypeScript types matching the API schemas from the yaml-diffs backend. */
+/** TypeScript types matching the API schemas from the yamly backend. */
 
 export enum ChangeType {
   SECTION_ADDED = "section_added",

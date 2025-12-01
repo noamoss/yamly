@@ -1,4 +1,4 @@
-"""HTTP client for communicating with yaml-diffs API.
+"""HTTP client for communicating with yamly API.
 
 Provides a simple interface for calling the REST API endpoints.
 """
@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 
 
 class APIClient:
-    """HTTP client for yaml-diffs API.
+    """HTTP client for yamly API.
 
     Handles HTTP communication with the REST API, including error handling
     and optional authentication.

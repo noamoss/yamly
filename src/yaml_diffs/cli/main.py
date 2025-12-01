@@ -22,7 +22,7 @@ def cli(ctx: click.Context) -> None:
     - Validating YAML documents against the legal document schema
     - Diffing two versions of YAML documents to detect changes
 
-    For more information, see: https://github.com/noamoss/yaml_diffs
+    For more information, see: https://github.com/noamoss/yamly
     """
     # Ensure context object exists
     ctx.ensure_object(dict)

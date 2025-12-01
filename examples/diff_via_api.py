@@ -16,7 +16,7 @@ def diff_documents(api_url: str, old_yaml_path: str, new_yaml_path: str):
     """Diff two YAML documents using the API.
 
     Args:
-        api_url: Base URL of the API (e.g., https://yaml-diffs.up.railway.app)
+        api_url: Base URL of the API (defaults to YAML_DIFFS_API_URL env var or http://localhost:8000)
         old_yaml_path: Path to the old version YAML file
         new_yaml_path: Path to the new version YAML file
     """
@@ -111,9 +111,7 @@ if __name__ == "__main__":
         print("Examples:")
         print(f"  {sys.argv[0]} examples/document_v1.yaml examples/document_v2.yaml")
         print("    (uses YAML_DIFFS_API_URL from .env or environment)")
-        print(
-            f"  {sys.argv[0]} https://yaml-diffs.up.railway.app examples/document_v1.yaml examples/document_v2.yaml"
-        )
+        print(f"  {sys.argv[0]} examples/document_v1.yaml examples/document_v2.yaml")
         print("    (uses provided API URL)")
         print("")
         print("Environment Variables:")

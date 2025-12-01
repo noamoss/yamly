@@ -19,7 +19,7 @@ class MCPServerConfig:
     Supports both local development and production API instances.
 
     Attributes:
-        api_base_url: Base URL for the yaml-diffs API (default: "http://localhost:8000").
+        api_base_url: Base URL for the yamly API (default: "http://localhost:8000").
         api_key: Optional API key for authentication (default: None).
         timeout: Request timeout in seconds (default: 30).
     """

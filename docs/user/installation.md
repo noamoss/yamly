@@ -30,7 +30,7 @@ If you want to install from the latest source code:
 
 ```bash
 # Clone the repository
-git clone https://github.com/noamoss/yaml_diffs.git
+git clone https://github.com/noamoss/yamly.git
 cd yaml_diffs
 
 # Install the package
@@ -49,7 +49,7 @@ For development work, install in editable mode with development dependencies:
 
 ```bash
 # Clone the repository
-git clone https://github.com/noamoss/yaml_diffs.git
+git clone https://github.com/noamoss/yamly.git
 cd yaml_diffs
 
 # Create virtual environment (recommended)
@@ -64,7 +64,7 @@ Or using uv:
 
 ```bash
 # Clone the repository
-git clone https://github.com/noamoss/yaml_diffs.git
+git clone https://github.com/noamoss/yamly.git
 cd yaml_diffs
 
 # Create virtual environment and install
@@ -298,6 +298,6 @@ After successful installation:
 
 ## Additional Resources
 
-- **GitHub Repository**: https://github.com/noamoss/yaml_diffs
-- **Issue Tracker**: https://github.com/noamoss/yaml_diffs/issues
-- **Documentation**: https://github.com/noamoss/yaml_diffs/tree/main/docs
+- **GitHub Repository**: https://github.com/noamoss/yamly
+- **Issue Tracker**: https://github.com/noamoss/yamly/issues
+- **Documentation**: https://github.com/noamoss/yamly/tree/main/docs

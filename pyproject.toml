@@ -37,10 +37,10 @@ dependencies = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/noamoss/yaml_diffs"
-Documentation = "https://github.com/noamoss/yaml_diffs/tree/main/docs"
-Repository = "https://github.com/noamoss/yaml_diffs"
-Issues = "https://github.com/noamoss/yaml_diffs/issues"
+Homepage = "https://github.com/noamoss/yamly"
+Documentation = "https://github.com/noamoss/yamly/tree/main/docs"
+Repository = "https://github.com/noamoss/yamly"
+Issues = "https://github.com/noamoss/yamly/issues"
 
 [project.optional-dependencies]
 dev = [

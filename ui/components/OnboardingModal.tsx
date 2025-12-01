@@ -8,7 +8,7 @@ interface OnboardingModalProps {
   onDontShowAgain: () => void;
 }
 
-const ONBOARDING_STORAGE_KEY = "yaml-diffs-onboarding-seen";
+const ONBOARDING_STORAGE_KEY = "yamly-onboarding-seen";
 
 export function hasSeenOnboarding(): boolean {
   if (typeof window === "undefined") return false;
@@ -77,7 +77,7 @@ export default function OnboardingModal({
               id="onboarding-title"
               className="text-2xl font-semibold text-gray-900"
             >
-              Welcome to yaml-diffs
+              Welcome to yamly
             </h2>
             <button
               onClick={handleClose}

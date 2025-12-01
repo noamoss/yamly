@@ -1,4 +1,4 @@
-"""Main FastAPI application for yaml-diffs REST API.
+"""Main FastAPI application for yamly REST API.
 
 Creates and configures the FastAPI app with routers, middleware, and exception handlers.
 """
@@ -47,7 +47,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
 # Create FastAPI app with lifespan
 app = FastAPI(
     title=settings.app_name,
-    description="REST API for validating and diffing Hebrew legal documents in YAML format",
+    description="REST API for validating and diffing YAML documents (generic and Hebrew legal documents)",
     version=__version__,
     docs_url="/docs",
     redoc_url="/redoc",

@@ -52,7 +52,7 @@ For detailed guidelines on maintaining documentation, see the [Documentation Mai
 
 ## Getting Help
 
-- **Issues**: [GitHub Issues](https://github.com/noamoss/yaml_diffs/issues)
+- **Issues**: [GitHub Issues](https://github.com/noamoss/yamly/issues)
 - **Project Board**: [GitHub Project Board](https://github.com/users/noamoss/projects/4)
 - **Main README**: [README.md](../README.md)
 

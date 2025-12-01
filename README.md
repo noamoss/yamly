@@ -1,12 +1,12 @@
-# yaml-diffs
+# yamly
 
 A powerful YAML diffing service that supports both **generic YAML files** and **Hebrew legal documents**.
 
 ## Overview
 
-**yaml-diffs** provides a comprehensive solution for comparing YAML documents, offering:
+**yamly** provides a comprehensive solution for comparing YAML documents, offering:
 
-- **Dual Mode Support**: 
+- **Dual Mode Support**:
   - **Generic Mode**: Diff any YAML file (configs, Kubernetes manifests, etc.) with path-based tracking
   - **Legal Document Mode**: Schema-validated diffing for Hebrew legal documents with marker-based section matching
 - **Smart Array Matching**: Auto-detects identity fields (`id`, `name`, `key`) or use custom rules
@@ -30,9 +30,9 @@ A powerful YAML diffing service that supports both **generic YAML files** and **
 
 ## CI/CD Status
 
-[![Tests](https://github.com/noamoss/yaml_diffs/actions/workflows/test.yml/badge.svg)](https://github.com/noamoss/yaml_diffs/actions/workflows/test.yml)
-[![Lint](https://github.com/noamoss/yaml_diffs/actions/workflows/lint.yml/badge.svg)](https://github.com/noamoss/yaml_diffs/actions/workflows/lint.yml)
-[![Build](https://github.com/noamoss/yaml_diffs/actions/workflows/build.yml/badge.svg)](https://github.com/noamoss/yaml_diffs/actions/workflows/build.yml)
+[![Tests](https://github.com/noamoss/yamly/actions/workflows/test.yml/badge.svg)](https://github.com/noamoss/yamly/actions/workflows/test.yml)
+[![Lint](https://github.com/noamoss/yamly/actions/workflows/lint.yml/badge.svg)](https://github.com/noamoss/yamly/actions/workflows/lint.yml)
+[![Build](https://github.com/noamoss/yamly/actions/workflows/build.yml/badge.svg)](https://github.com/noamoss/yamly/actions/workflows/build.yml)
 
 ## Installation
 
@@ -46,7 +46,7 @@ A powerful YAML diffing service that supports both **generic YAML files** and **
 
 ```bash
 # Clone the repository
-git clone https://github.com/noamoss/yaml_diffs.git
+git clone https://github.com/noamoss/yamly.git
 cd yaml_diffs
 
 # Create virtual environment and install dependencies
@@ -75,7 +75,7 @@ cp .env.example .env
 The `.env.example` file includes:
 - **API Server Configuration**: PORT, HOST, LOG_LEVEL, etc.
 - **CORS Configuration**: CORS_ORIGINS, CORS_ALLOW_CREDENTIALS, etc.
-- **API Client Configuration**: `YAML_DIFFS_API_URL` (defaults to production: `https://yaml-diffs.up.railway.app`)
+- **API Client Configuration**: `YAML_DIFFS_API_URL` (set in `.env` file, defaults to `http://localhost:8000` in code)
 
 **Note**: The `.env` file is for local development only. Railway deployments use environment variables set in the Railway dashboard.
 
@@ -258,25 +258,29 @@ curl http://localhost:8000/health
 ```
 
 **Production API:**
-The API is deployed at: **https://yaml-diffs.up.railway.app**
+The production API URL is configured via the `YAML_DIFFS_API_URL` environment variable. Set this in your `.env` file or environment:
 
 ```bash
+# Set API URL in .env file
+# Set in .env file
+YAML_DIFFS_API_URL=https://api-yamly.thepitz.studio
+
 # Health check
-curl https://yaml-diffs.up.railway.app/health
+curl $YAML_DIFFS_API_URL/health
 
 # Validate a document
-curl -X POST https://yaml-diffs.up.railway.app/api/v1/validate \
+curl -X POST $YAML_DIFFS_API_URL/api/v1/validate \
   -H "Content-Type: application/json" \
   -d '{"yaml": "document:\n  id: \"test\"\n  ..."}'
 ```
 
 The API also provides interactive documentation:
 - **Local**: http://localhost:8000/docs (Swagger UI) and http://localhost:8000/redoc (ReDoc)
-- **Production**: https://yaml-diffs.up.railway.app/docs and https://yaml-diffs.up.railway.app/redoc
+- **Production**: `$YAML_DIFFS_API_URL/docs` and `$YAML_DIFFS_API_URL/redoc` (use your configured API URL)
 
 ### MCP Server
 
-The MCP (Model Context Protocol) server exposes the REST API endpoints as MCP tools, enabling AI assistants to interact with the yaml-diffs service.
+The MCP (Model Context Protocol) server exposes the REST API endpoints as MCP tools, enabling AI assistants to interact with the yamly service.
 
 **Quick Start:**
 
@@ -421,10 +425,10 @@ See the [Examples Guide](docs/user/examples.md) and [Examples README](examples/R
 
 ## Project Status
 
-This project is in active development. See [GitHub Issues](https://github.com/noamoss/yaml_diffs/issues) for current tasks and progress.
+This project is in active development. See [GitHub Issues](https://github.com/noamoss/yamly/issues) for current tasks and progress.
 
 ## Getting Help
 
 - **Documentation**: [Documentation Index](docs/README.md)
-- **Issues**: [GitHub Issues](https://github.com/noamoss/yaml_diffs/issues)
+- **Issues**: [GitHub Issues](https://github.com/noamoss/yamly/issues)
 - **Project Board**: [GitHub Project Board](https://github.com/users/noamoss/projects/4)

@@ -1,6 +1,6 @@
 # MCP Server for yaml-diffs
 
-The yaml-diffs MCP (Model Context Protocol) server exposes the REST API endpoints as MCP tools, enabling AI assistants to interact with the yaml-diffs service via the MCP protocol.
+The yamly MCP (Model Context Protocol) server exposes the REST API endpoints as MCP tools, enabling AI assistants to interact with the yamly service via the MCP protocol.
 
 ## Overview
 
@@ -8,7 +8,7 @@ The MCP server provides three tools that wrap the REST API endpoints:
 
 - **`validate_document`**: Validate a YAML document against the OpenSpec schema and Pydantic models
 - **`diff_documents`**: Compare two YAML documents and return detected changes
-- **`health_check`**: Check the health status of the yaml-diffs API
+- **`health_check`**: Check the health status of the yamly API
 
 ## Installation
 
@@ -21,7 +21,7 @@ pip install yaml-diffs
 Or install from source:
 
 ```bash
-git clone https://github.com/noamoss/yaml_diffs.git
+git clone https://github.com/noamoss/yamly.git
 cd yaml_diffs
 pip install -e .
 ```
@@ -32,7 +32,7 @@ The MCP server can be configured via environment variables or command-line optio
 
 ### Environment Variables
 
-- **`YAML_DIFFS_API_URL`**: Base URL for the yaml-diffs API (default: `http://localhost:8000`)
+- **`YAML_DIFFS_API_URL`**: Base URL for the yamly API (default: `http://localhost:8000`)
 - **`YAML_DIFFS_API_KEY`**: Optional API key for authentication (default: `None`)
 - **`YAML_DIFFS_API_TIMEOUT`**: Request timeout in seconds (default: `30`)
 
@@ -102,7 +102,7 @@ For a remote API instance:
       "command": "yaml-diffs-mcp-server",
       "args": [],
       "env": {
-        "YAML_DIFFS_API_URL": "https://api.example.com",
+        "YAML_DIFFS_API_URL": "http://localhost:8000",
         "YAML_DIFFS_API_KEY": "your-api-key-here"
       }
     }
@@ -183,7 +183,7 @@ Compares two YAML documents and returns detected changes.
 
 ### health_check
 
-Checks the health status of the yaml-diffs API.
+Checks the health status of the yamly API.
 
 **Input:**
 ```json
@@ -222,7 +222,7 @@ Common error scenarios:
 
 1. **Check Python version**: The MCP server requires Python 3.10 or higher
 2. **Check dependencies**: Ensure all dependencies are installed: `pip install yaml-diffs`
-3. **Check API availability**: Ensure the yaml-diffs API is running and accessible
+3. **Check API availability**: Ensure the yamly API is running and accessible
 
 ### Connection Issues
 

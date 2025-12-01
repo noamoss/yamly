@@ -166,7 +166,7 @@ The `RAILWAY_DOMAIN` secret is required for the deployment workflow to verify Ra
 2. Select your project → Your service
 3. Find the domain in one of these places:
    - **Settings** → **Domains** tab
-   - Service URL in the dashboard (e.g., `yaml-diffs.up.railway.app`)
+   - Service URL in the dashboard (set via `RAILWAY_DOMAIN` environment variable)
 
 **Step 2: Add the Secret**
 
@@ -174,14 +174,14 @@ The `RAILWAY_DOMAIN` secret is required for the deployment workflow to verify Ra
 2. Click **"New repository secret"**
 3. Enter:
    - **Name**: `RAILWAY_DOMAIN`
-   - **Value**: Your Railway domain (e.g., `yaml-diffs.up.railway.app`)
+   - **Value**: Your Railway domain (set via `RAILWAY_DOMAIN` environment variable)
 4. Click **"Add secret"**
 
 **Important Format Requirements**:
 
-- ✅ **Correct**: `yaml-diffs.up.railway.app` (domain only, no protocol)
-- ❌ **Incorrect**: `https://yaml-diffs.up.railway.app` (includes protocol - will cause issues)
-- ❌ **Incorrect**: `yaml-diffs.up.railway.app/` (trailing slash - will cause issues)
+- ✅ **Correct**: `api-yamly.thepitz.studio` (domain only, no protocol) - set via `RAILWAY_DOMAIN`
+- ❌ **Incorrect**: `https://api-yamly.thepitz.studio` (includes protocol - will cause issues)
+- ❌ **Incorrect**: `api-yamly.thepitz.studio/` (trailing slash - will cause issues)
 
 The workflow constructs the full URL automatically: `https://${{ secrets.RAILWAY_DOMAIN }}/health`
 
@@ -243,7 +243,7 @@ For more detailed setup instructions, see [CI/CD Documentation - Setting Up RAIL
    - Go to **Settings** → **Environment Variables**
    - Click **"Add New"**
    - Enter name: `NEXT_PUBLIC_API_URL`
-   - Enter value: `https://yaml-diffs.up.railway.app`
+   - Enter value: Your production API URL (configure via `NEXT_PUBLIC_API_URL` environment variable)
    - Select environments (Production, Preview, Development)
    - Click **"Save"**
 
@@ -280,14 +280,14 @@ For more detailed setup instructions, see [CI/CD Documentation - Setting Up RAIL
 
 1. **For current session:**
    ```bash
-   export YAML_DIFFS_API_URL="https://yaml-diffs.up.railway.app"
+   export YAML_DIFFS_API_URL="https://api-yamly.thepitz.studio"  # Set your production API URL
    export YAML_DIFFS_API_TIMEOUT=60
    ```
 
 2. **Persistent (bash/zsh):**
    ```bash
    # Add to ~/.bashrc or ~/.zshrc
-   echo 'export YAML_DIFFS_API_URL="https://yaml-diffs.up.railway.app"' >> ~/.zshrc
+   echo 'export YAML_DIFFS_API_URL="https://api-yamly.thepitz.studio"' >> ~/.zshrc  # Set your production API URL
    echo 'export YAML_DIFFS_API_TIMEOUT=60' >> ~/.zshrc
 
    # Reload shell
@@ -298,7 +298,7 @@ For more detailed setup instructions, see [CI/CD Documentation - Setting Up RAIL
    ```bash
    # Add to /etc/environment (requires sudo)
    sudo nano /etc/environment
-   # Add: YAML_DIFFS_API_URL="https://yaml-diffs.up.railway.app"
+   # Add: YAML_DIFFS_API_URL="https://api-yamly.thepitz.studio"  # Set your production API URL
    ```
 
 ### Windows
@@ -312,15 +312,15 @@ For more detailed setup instructions, see [CI/CD Documentation - Setting Up RAIL
 2. **Via PowerShell:**
    ```powershell
    # User-level
-   [System.Environment]::SetEnvironmentVariable("YAML_DIFFS_API_URL", "https://yaml-diffs.up.railway.app", "User")
+   [System.Environment]::SetEnvironmentVariable("YAML_DIFFS_API_URL", "https://api-yamly.thepitz.studio", "User")  # Set your production API URL
 
    # System-level (requires admin)
-   [System.Environment]::SetEnvironmentVariable("YAML_DIFFS_API_URL", "https://yaml-diffs.up.railway.app", "Machine")
+   [System.Environment]::SetEnvironmentVariable("YAML_DIFFS_API_URL", "https://api-yamly.thepitz.studio", "Machine")  # Set your production API URL
    ```
 
 3. **Via Command Prompt:**
    ```cmd
-   setx YAML_DIFFS_API_URL "https://yaml-diffs.up.railway.app"
+   setx YAML_DIFFS_API_URL "https://api-yamly.thepitz.studio"  # Set your production API URL
    ```
 
 ### Important Notes
@@ -367,7 +367,7 @@ python script.py --api-url https://cli.example.com
 | `LOG_LEVEL` | `INFO` | Logging level: DEBUG, INFO, WARNING, ERROR, CRITICAL |
 | `CORS_ORIGINS` | `""` | Comma-separated list of allowed CORS origins |
 | `CORS_ALLOW_CREDENTIALS` | `true` | Allow credentials in CORS requests |
-| `APP_NAME` | `yaml-diffs API` | Application name |
+| `APP_NAME` | `yamly API` | Application name |
 | `APP_VERSION` | `0.1.0` | Application version |
 
 ### API Client Variables
