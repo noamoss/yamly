@@ -1,6 +1,6 @@
 # REST API Server Documentation
 
-The yaml-diffs REST API provides HTTP endpoints for validating and diffing YAML documents. The API supports both **generic YAML files** (configs, K8s manifests, etc.) and **Hebrew legal documents** with schema validation. Built with FastAPI and designed for Railway deployment.
+The yamly REST API provides HTTP endpoints for validating and diffing YAML documents. The API supports both **generic YAML files** (configs, K8s manifests, etc.) and **Hebrew legal documents** with schema validation. Built with FastAPI and designed for Railway deployment.
 
 ## Table of Contents
 
@@ -39,7 +39,7 @@ The API automatically generates OpenAPI/Swagger documentation available at `/doc
 
 3. **Start the API server**:
    ```bash
-   uvicorn src.yaml_diffs.api_server.main:app --reload --port 8000
+   uvicorn src.yamly.api_server.main:app --reload --port 8000
    ```
 
 4. **Access the API**:
@@ -399,21 +399,21 @@ The start command is configured in `Procfile` (recommended) or `railway.json`:
 
 **Procfile**:
 ```
-web: uvicorn yaml_diffs.api_server.main:app --host 0.0.0.0 --port $PORT
+web: uvicorn yamly.api_server.main:app --host 0.0.0.0 --port $PORT
 ```
 
 **railway.json** (alternative):
 ```json
 {
   "deploy": {
-    "startCommand": "uvicorn yaml_diffs.api_server.main:app --host 0.0.0.0 --port $PORT"
+    "startCommand": "uvicorn yamly.api_server.main:app --host 0.0.0.0 --port $PORT"
   }
 }
 ```
 
 **Note:**
-- Railway installs the package, so the start command uses the installed package name `yaml_diffs` (not `src.yaml_diffs`)
-- For local development from the project root, use `src.yaml_diffs.api_server.main:app`
+- Railway installs the package, so the start command uses the installed package name `yamly` (not `src.yamly`)
+- For local development from the project root, use `src.yamly.api_server.main:app`
 - Railway/Nixpacks more reliably detects start commands from `Procfile` than from `railway.json`
 
 Railway automatically sets the `PORT` environment variable, which the application reads at startup.

@@ -210,7 +210,7 @@ The generic diff mode detects the following change types:
 ### Implementation
 
 The generic diff algorithm is implemented in:
-- **Main function**: `diff_yaml_generic()` in `src/yaml_diffs/generic_diff.py`
+- **Main function**: `diff_yaml_generic()` in `src/yamly/generic_diff.py`
 - **Phase 1**: `diff_node()` and `diff_sequence()` functions
 - **Phase 2**: `detect_renames()` function
 - **Phase 3**: `detect_moves()` function
@@ -367,7 +367,7 @@ The legal document diff mode detects the following change types:
 ### Implementation
 
 The legal document diff algorithm is implemented in:
-- **Main function**: `diff_documents()` in `src/yaml_diffs/diff.py`
+- **Main function**: `diff_documents()` in `src/yamly/diff.py`
 - **Marker validation**: `_validate_unique_markers()` function
 - **Marker map building**: `_build_marker_map()` function
 - **Movement detection**: `_find_moved_sections()` function

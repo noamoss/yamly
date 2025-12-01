@@ -1,6 +1,6 @@
 # Getting Started
 
-This guide will help you get started with yaml-diffs quickly. You'll learn how to install the library and use it through different interfaces.
+This guide will help you get started with yamly quickly. You'll learn how to install the library and use it through different interfaces.
 
 ## Installation
 
@@ -15,14 +15,14 @@ This guide will help you get started with yaml-diffs quickly. You'll learn how t
 # Install uv if you haven't already
 curl -LsSf https://astral.sh/uv/install.sh | sh
 
-# Install yaml-diffs
-uv pip install yaml-diffs
+# Install yamly
+uv pip install yamly
 ```
 
 ### Install with pip
 
 ```bash
-pip install yaml-diffs
+pip install yamly
 ```
 
 ### Install from Source
@@ -44,7 +44,7 @@ uv sync --extra dev
 
 ### Python Library
 
-The simplest way to use yaml-diffs is through the Python library:
+The simplest way to use yamly is through the Python library:
 
 ```python
 from yaml_diffs import load_document, diff_documents, format_diff
@@ -69,28 +69,28 @@ Use the command-line interface for quick operations:
 
 ```bash
 # Validate a legal document
-yaml-diffs validate examples/minimal_document.yaml
+yamly validate examples/minimal_document.yaml
 
 # Auto-detect mode and diff two documents
-yaml-diffs diff examples/document_v1.yaml examples/document_v2.yaml
+yamly diff examples/document_v1.yaml examples/document_v2.yaml
 
 # Force generic YAML mode (any YAML file - configs, K8s manifests, etc.)
-yaml-diffs diff config_v1.yaml config_v2.yaml --mode general
+yamly diff config_v1.yaml config_v2.yaml --mode general
 
 # Generic diff with identity rules (match array items by specific field)
-yaml-diffs diff old.yaml new.yaml --mode general --identity-rule "containers:name"
+yamly diff old.yaml new.yaml --mode general --identity-rule "containers:name"
 
 # Conditional identity rule (books by catalog_id when type=book)
-yaml-diffs diff old.yaml new.yaml --identity-rule "inventory:catalog_id:type=book"
+yamly diff old.yaml new.yaml --identity-rule "inventory:catalog_id:type=book"
 
 # Force legal document mode
-yaml-diffs diff old.yaml new.yaml --mode legal_document
+yamly diff old.yaml new.yaml --mode legal_document
 
 # Diff with text output
-yaml-diffs diff old.yaml new.yaml --format text
+yamly diff old.yaml new.yaml --format text
 
 # Save diff to file
-yaml-diffs diff old.yaml new.yaml --output diff.json
+yamly diff old.yaml new.yaml --output diff.json
 ```
 
 ### REST API
@@ -99,7 +99,7 @@ Start the API server and use HTTP endpoints:
 
 ```bash
 # Start the server
-uvicorn src.yaml_diffs.api_server.main:app --reload --port 8000
+uvicorn src.yamly.api_server.main:app --reload --port 8000
 
 # Validate a legal document (using curl)
 curl -X POST http://localhost:8000/api/v1/validate \
@@ -134,10 +134,10 @@ For AI assistants, use the MCP server:
 
 ```bash
 # Run MCP server (connects to local API by default)
-yaml-diffs mcp-server
+yamly mcp-server
 
 # Or with custom configuration
-yaml-diffs mcp-server --api-url http://api.example.com:8000
+yamly mcp-server --api-url http://api.example.com:8000
 ```
 
 ## Basic Usage Patterns

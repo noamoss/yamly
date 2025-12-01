@@ -1,6 +1,6 @@
 # CI/CD Documentation
 
-This document describes the continuous integration and continuous deployment (CI/CD) workflows for the yaml-diffs project.
+This document describes the continuous integration and continuous deployment (CI/CD) workflows for the yamly project.
 
 ## Overview
 

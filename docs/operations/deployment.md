@@ -1,6 +1,6 @@
 # Railway Deployment Guide
 
-This guide provides step-by-step instructions for deploying the yaml-diffs REST API service to Railway.
+This guide provides step-by-step instructions for deploying the yamly REST API service to Railway.
 
 ## Table of Contents
 
@@ -33,7 +33,7 @@ Before deploying to Railway, ensure you have:
 2. Click **"New Project"**
 3. Select **"Deploy from GitHub repo"**
 4. Authorize Railway to access your GitHub account (if not already done)
-5. Select the `yaml_diffs` repository
+5. Select the `yamly` repository
 6. Railway will automatically detect it as a Python project
 
 ### Step 2: Configure Environment Variables
@@ -62,8 +62,8 @@ Before deploying to Railway, ensure you have:
 Railway will automatically:
 1. Detect the Python project from `pyproject.toml`
 2. Install the package using the build configuration from `railway.json`
-3. Run the start command: `uvicorn yaml_diffs.api_server.main:app --host 0.0.0.0 --port $PORT`
-   - Note: Uses the installed package name `yaml_diffs` (not `src.yaml_diffs`) since Railway installs the package
+3. Run the start command: `uvicorn yamly.api_server.main:app --host 0.0.0.0 --port $PORT`
+   - Note: Uses the installed package name `yamly` (not `src.yamly`) since Railway installs the package
 4. Monitor the `/health` endpoint for health checks
 
 ### Step 4: Verify Deployment
@@ -344,10 +344,10 @@ jobs:
 1. **Test Locally with Railway Environment**:
    ```bash
    # For local testing (from project root, package not installed)
-   PORT=8000 uvicorn src.yaml_diffs.api_server.main:app --host 0.0.0.0 --port $PORT
+   PORT=8000 uvicorn src.yamly.api_server.main:app --host 0.0.0.0 --port $PORT
 
    # For production-like testing (with package installed)
-   PORT=8000 uvicorn yaml_diffs.api_server.main:app --host 0.0.0.0 --port $PORT
+   PORT=8000 uvicorn yamly.api_server.main:app --host 0.0.0.0 --port $PORT
    ```
 
 2. **Check Service Status**:

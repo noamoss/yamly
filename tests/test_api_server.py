@@ -8,7 +8,7 @@ from pathlib import Path
 import pytest
 from fastapi.testclient import TestClient
 
-from yaml_diffs.api_server.main import app
+from yamly.api_server.main import app
 
 # Test client
 client = TestClient(app)
@@ -401,7 +401,7 @@ def test_api_port_from_environment(monkeypatch: pytest.MonkeyPatch) -> None:
     # Set PORT environment variable
     monkeypatch.setenv("PORT", "9000")
     # Reload settings
-    from yaml_diffs.api_server.config import Settings
+    from yamly.api_server.config import Settings
 
     settings = Settings()
     assert settings.port_from_env == 9000
@@ -412,7 +412,7 @@ def test_api_port_invalid_environment(monkeypatch: pytest.MonkeyPatch) -> None:
     # Set invalid PORT
     monkeypatch.setenv("PORT", "invalid")
     # Reload settings
-    from yaml_diffs.api_server.config import Settings
+    from yamly.api_server.config import Settings
 
     settings = Settings()
     # Should fall back to default

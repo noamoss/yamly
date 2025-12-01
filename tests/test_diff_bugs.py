@@ -2,9 +2,9 @@
 
 import pytest
 
-from yaml_diffs.diff import diff_documents
-from yaml_diffs.diff_types import ChangeType
-from yaml_diffs.models import Document, Section, Source, Version
+from yamly.diff import diff_documents
+from yamly.diff_types import ChangeType
+from yamly.models import Document, Section, Source, Version
 
 
 @pytest.fixture

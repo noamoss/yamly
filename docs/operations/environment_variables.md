@@ -51,7 +51,7 @@ This guide explains how to add or update environment variables in different envi
    ```bash
    # If running API server, restart it
    # Ctrl+C to stop, then restart:
-   uvicorn src.yaml_diffs.api_server.main:app --reload --port 8000
+   uvicorn src.yamly.api_server.main:app --reload --port 8000
    ```
 
 ### Important Notes

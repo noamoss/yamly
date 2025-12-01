@@ -1,4 +1,4 @@
-"""Shared pytest fixtures for yaml-diffs test suite.
+"""Shared pytest fixtures for yamly test suite.
 
 This module provides reusable fixtures for testing across the entire test suite.
 Fixtures are organized by category: documents, sections, files, and mocks.
@@ -12,7 +12,7 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-from yaml_diffs.models import Document, Section, Source, Version
+from yamly.models import Document, Section, Source, Version
 
 if TYPE_CHECKING:
     from collections.abc import Generator

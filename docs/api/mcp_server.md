@@ -12,10 +12,10 @@ The MCP server provides three tools that wrap the REST API endpoints:
 
 ## Installation
 
-The MCP server is included with the yaml-diffs package. Install it using:
+The MCP server is included with the yamly package. Install it using:
 
 ```bash
-pip install yaml-diffs
+pip install yamly
 ```
 
 Or install from source:
@@ -41,7 +41,7 @@ The MCP server can be configured via environment variables or command-line optio
 When running the server via CLI, you can override configuration:
 
 ```bash
-yaml-diffs mcp-server --api-url http://api.example.com:8000 --api-key your-key --timeout 60
+yamly mcp-server --api-url http://api.example.com:8000 --api-key your-key --timeout 60
 ```
 
 ## Running the Server
@@ -51,7 +51,7 @@ yaml-diffs mcp-server --api-url http://api.example.com:8000 --api-key your-key -
 The simplest way to run the MCP server is using the CLI command:
 
 ```bash
-yaml-diffs mcp-server
+yamly mcp-server
 ```
 
 This starts the server with stdio transport (standard MCP protocol).
@@ -83,7 +83,7 @@ Add the following to your Claude Desktop configuration file (typically `~/Librar
 {
   "mcpServers": {
     "yaml-diffs": {
-      "command": "yaml-diffs-mcp-server",
+      "command": "yamly-mcp-server",
       "args": [],
       "env": {
         "YAML_DIFFS_API_URL": "http://localhost:8000"
@@ -99,7 +99,7 @@ For a remote API instance:
 {
   "mcpServers": {
     "yaml-diffs": {
-      "command": "yaml-diffs-mcp-server",
+      "command": "yamly-mcp-server",
       "args": [],
       "env": {
         "YAML_DIFFS_API_URL": "http://localhost:8000",
@@ -221,7 +221,7 @@ Common error scenarios:
 ### Server Won't Start
 
 1. **Check Python version**: The MCP server requires Python 3.10 or higher
-2. **Check dependencies**: Ensure all dependencies are installed: `pip install yaml-diffs`
+2. **Check dependencies**: Ensure all dependencies are installed: `pip install yamly`
 3. **Check API availability**: Ensure the yamly API is running and accessible
 
 ### Connection Issues
@@ -246,10 +246,10 @@ pytest tests/test_mcp_server.py tests/test_mcp_tools.py -v
 
 ### Code Structure
 
-- `src/yaml_diffs/mcp_server/config.py`: Configuration management
-- `src/yaml_diffs/mcp_server/client.py`: HTTP client for API communication
-- `src/yaml_diffs/mcp_server/tools.py`: Tool definitions and handlers
-- `src/yaml_diffs/mcp_server/server.py`: Main server implementation
+- `src/yamly/mcp_server/config.py`: Configuration management
+- `src/yamly/mcp_server/client.py`: HTTP client for API communication
+- `src/yamly/mcp_server/tools.py`: Tool definitions and handlers
+- `src/yamly/mcp_server/server.py`: Main server implementation
 
 ## Related Documentation
 

@@ -1,6 +1,6 @@
 # Examples Guide
 
-This guide explains how to use the example documents provided with yaml-diffs and how to create new documents from templates.
+This guide explains how to use the example documents provided with yamly and how to create new documents from templates.
 
 ## Example Files
 
@@ -20,7 +20,7 @@ The `examples/` directory contains several example documents demonstrating diffe
 
 ```bash
 # Using CLI
-yaml-diffs validate examples/minimal_document.yaml
+yamly validate examples/minimal_document.yaml
 
 # Using Python
 from yaml_diffs import validate_document
@@ -32,7 +32,7 @@ print(f"Valid document: {doc.title}")
 
 ```bash
 # Using CLI
-yaml-diffs diff examples/document_v1.yaml examples/document_v2.yaml
+yamly diff examples/document_v1.yaml examples/document_v2.yaml
 
 # Using Python
 from yaml_diffs import diff_files
@@ -138,7 +138,7 @@ for change in diff.changes:
 
 3. **Validate your document:**
    ```bash
-   yaml-diffs validate my_document.yaml
+   yamly validate my_document.yaml
    ```
 
 ### Template Structure
@@ -237,7 +237,7 @@ Always start new documents from `template.yaml` to ensure you include all requir
 Validate your document as you build it:
 
 ```bash
-yaml-diffs validate my_document.yaml
+yamly validate my_document.yaml
 ```
 
 ### 3. Use Meaningful IDs

@@ -62,7 +62,7 @@ git checkout -b feature/your-feature-name
 pytest
 
 # Run with coverage
-pytest --cov=src/yaml_diffs --cov-report=html
+pytest --cov=src/yamly --cov-report=html
 
 # Run specific test file
 pytest tests/test_your_feature.py
@@ -206,7 +206,7 @@ pytest -v
 pytest tests/test_models.py::test_create_section
 
 # Run with coverage
-pytest --cov=src/yaml_diffs --cov-report=term-missing
+pytest --cov=src/yamly --cov-report=term-missing
 
 # Run only fast tests
 pytest -m "not slow"
@@ -308,7 +308,7 @@ If you're an AI coding agent working on this project, see [AGENTS.md](../../AGEN
 
 ### Adding a New Formatter
 
-1. Create formatter in `src/yaml_diffs/formatters/`
+1. Create formatter in `src/yamly/formatters/`
 2. Implement formatter interface
 3. Register in `__init__.py`
 4. Add to `format_diff()` function

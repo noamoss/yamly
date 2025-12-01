@@ -10,7 +10,7 @@ import yaml
 from jsonschema import FormatChecker
 from jsonschema.validators import Draft202012Validator
 
-from yaml_diffs.schema import get_schema_version, load_schema
+from yamly.schema import get_schema_version, load_schema
 
 
 def validate_uri(instance: str) -> bool:

@@ -5,7 +5,7 @@ from pathlib import Path
 
 import pytest
 
-from yaml_diffs.api import (
+from yamly.api import (
     ChangeType,
     Document,
     DocumentDiff,
@@ -20,7 +20,7 @@ from yaml_diffs.api import (
     load_document,
     validate_document,
 )
-from yaml_diffs.models import Section, Source, Version
+from yamly.models import Section, Source, Version
 
 
 # Test fixtures

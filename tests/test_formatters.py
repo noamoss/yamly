@@ -9,9 +9,9 @@ from uuid import uuid4
 import pytest
 import yaml
 
-from yaml_diffs.diff import diff_documents
-from yaml_diffs.diff_types import ChangeType, DiffResult, DocumentDiff
-from yaml_diffs.formatters import (
+from yamly.diff import diff_documents
+from yamly.diff_types import ChangeType, DiffResult, DocumentDiff
+from yamly.formatters import (
     JsonFormatter,
     TextFormatter,
     YamlFormatter,
@@ -22,7 +22,7 @@ from yaml_diffs.formatters import (
     format_diff,
     format_marker_path,
 )
-from yaml_diffs.loader import load_document
+from yamly.loader import load_document
 
 
 class TestFormatMarkerPath:

@@ -5,9 +5,9 @@ from pathlib import Path
 
 import pytest
 
-from yaml_diffs.exceptions import OpenSpecValidationError, PydanticValidationError
-from yaml_diffs.models import Document
-from yaml_diffs.validator import (
+from yamly.exceptions import OpenSpecValidationError, PydanticValidationError
+from yamly.models import Document
+from yamly.validator import (
     validate_against_openspec,
     validate_against_pydantic,
     validate_document,
@@ -147,7 +147,7 @@ def test_validate_openspec_error_messages(invalid_document_missing_required: dic
 
 def test_validate_openspec_with_custom_schema(valid_document_data: dict) -> None:
     """Test validating with custom schema."""
-    from yaml_diffs.schema import load_schema
+    from yamly.schema import load_schema
 
     schema = load_schema()
     # Should not raise

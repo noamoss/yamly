@@ -82,7 +82,7 @@ The `.env.example` file includes:
 ## Project Structure
 
 ```
-yaml-diffs/
+yamly/
 ├── src/
 │   └── yaml_diffs/          # Main package
 │       ├── __init__.py
@@ -127,7 +127,7 @@ yaml-diffs/
 pytest
 
 # Run with coverage
-pytest --cov=src/yaml_diffs --cov-report=html
+pytest --cov=src/yamly --cov-report=html
 
 # Run specific test file
 pytest tests/test_models.py
@@ -184,28 +184,28 @@ print(json_output)
 
 ```bash
 # Validate a legal document
-yaml-diffs validate examples/minimal_document.yaml
+yamly validate examples/minimal_document.yaml
 
 # Auto-detect mode and diff two documents
-yaml-diffs diff examples/document_v1.yaml examples/document_v2.yaml
+yamly diff examples/document_v1.yaml examples/document_v2.yaml
 
 # Force generic YAML mode (any YAML file)
-yaml-diffs diff config_v1.yaml config_v2.yaml --mode general
+yamly diff config_v1.yaml config_v2.yaml --mode general
 
 # Generic diff with identity rules (match containers by name)
-yaml-diffs diff old.yaml new.yaml --mode general --identity-rule "containers:name"
+yamly diff old.yaml new.yaml --mode general --identity-rule "containers:name"
 
 # Conditional identity rule (books by catalog_id when type=book)
-yaml-diffs diff old.yaml new.yaml --identity-rule "inventory:catalog_id:type=book"
+yamly diff old.yaml new.yaml --identity-rule "inventory:catalog_id:type=book"
 
 # Force legal document mode
-yaml-diffs diff old.yaml new.yaml --mode legal_document
+yamly diff old.yaml new.yaml --mode legal_document
 
 # Diff with text output
-yaml-diffs diff old.yaml new.yaml --format text
+yamly diff old.yaml new.yaml --format text
 
 # Save diff to file
-yaml-diffs diff old.yaml new.yaml --output diff.json
+yamly diff old.yaml new.yaml --output diff.json
 ```
 
 ### REST API
@@ -229,7 +229,7 @@ This will start:
 **Manual Start (Alternative):**
 ```bash
 # Start API server only
-uvicorn src.yaml_diffs.api_server.main:app --reload --port 8000
+uvicorn src.yamly.api_server.main:app --reload --port 8000
 
 # Validate a document
 curl -X POST http://localhost:8000/api/v1/validate \
@@ -285,10 +285,10 @@ The MCP (Model Context Protocol) server exposes the REST API endpoints as MCP to
 
 ```bash
 # Run MCP server (connects to local API by default)
-yaml-diffs mcp-server
+yamly mcp-server
 
 # Or with custom configuration
-yaml-diffs mcp-server --api-url http://api.example.com:8000 --api-key your-key
+yamly mcp-server --api-url http://api.example.com:8000 --api-key your-key
 ```
 
 **Available Tools:**

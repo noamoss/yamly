@@ -12,7 +12,7 @@ The yaml-diffs schema is defined using OpenSpec (JSON Schema Draft 2020-12) and 
 - **Stable IDs** for reliable change tracking
 - **Version information** for document versioning
 
-The schema file is located at: `src/yaml_diffs/schema/legal_document_spec.yaml`
+The schema file is located at: `src/yamly/schema/legal_document_spec.yaml`
 
 ## Document Structure
 
@@ -371,7 +371,7 @@ The `sections` field is the only required field. All metadata fields (id, title,
 ## Schema File Location
 
 The complete OpenSpec schema is located at:
-- **File:** `src/yaml_diffs/schema/legal_document_spec.yaml`
+- **File:** `src/yamly/schema/legal_document_spec.yaml`
 - **Version:** 1.0.0
 - **Format:** JSON Schema Draft 2020-12 (in YAML format)
 

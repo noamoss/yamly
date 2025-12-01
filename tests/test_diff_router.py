@@ -2,9 +2,9 @@
 
 import pytest
 
-from yaml_diffs.diff_router import DiffMode, detect_mode, diff_yaml_with_mode
-from yaml_diffs.diff_types import DocumentDiff
-from yaml_diffs.generic_diff_types import DiffOptions, GenericDiff, IdentityRule
+from yamly.diff_router import DiffMode, detect_mode, diff_yaml_with_mode
+from yamly.diff_types import DocumentDiff
+from yamly.generic_diff_types import DiffOptions, GenericDiff, IdentityRule
 
 
 class TestModeDetection:

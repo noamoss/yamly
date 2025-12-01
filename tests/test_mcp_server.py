@@ -11,8 +11,8 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import httpx
 import pytest
 
-from yaml_diffs.mcp_server.client import APIClient
-from yaml_diffs.mcp_server.config import MCPServerConfig
+from yamly.mcp_server.client import APIClient
+from yamly.mcp_server.config import MCPServerConfig
 
 
 class TestMCPServerConfig:

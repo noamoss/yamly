@@ -1,10 +1,10 @@
 # API Reference
 
-This document provides a comprehensive reference for the yaml-diffs Python library API.
+This document provides a comprehensive reference for the yamly Python library API.
 
 ## Overview
 
-The yaml-diffs library provides a clean, intuitive interface for working with Hebrew legal documents in YAML format. The API supports loading, validating, and diffing documents with full support for Hebrew content and nested document structures.
+The yamly library provides a clean, intuitive interface for working with Hebrew legal documents in YAML format. The API supports loading, validating, and diffing documents with full support for Hebrew content and nested document structures.
 
 ## Quick Start
 

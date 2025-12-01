@@ -1,6 +1,6 @@
 # Examples Directory
 
-This directory contains example YAML documents demonstrating various features and use cases of yaml-diffs.
+This directory contains example YAML documents demonstrating various features and use cases of yamly.
 
 ## Example Files
 
@@ -59,10 +59,10 @@ A template file for creating new documents. Copy this file and replace placehold
 
 ```bash
 # Using CLI
-yaml-diffs validate examples/minimal_document.yaml
+yamly validate examples/minimal_document.yaml
 
 # Using Python
-from yaml_diffs import validate_document
+from yamly import validate_document
 doc = validate_document("examples/minimal_document.yaml")
 ```
 
@@ -70,10 +70,10 @@ doc = validate_document("examples/minimal_document.yaml")
 
 ```bash
 # Using CLI
-yaml-diffs diff examples/document_v1.yaml examples/document_v2.yaml
+yamly diff examples/document_v1.yaml examples/document_v2.yaml
 
 # Using Python
-from yaml_diffs import diff_files
+from yamly import diff_files
 diff = diff_files("examples/document_v1.yaml", "examples/document_v2.yaml")
 ```
 
@@ -86,7 +86,7 @@ cp examples/template.yaml my_document.yaml
 # Edit my_document.yaml with your content
 
 # Validate
-yaml-diffs validate my_document.yaml
+yamly validate my_document.yaml
 ```
 
 ## Example Use Cases
@@ -96,7 +96,7 @@ yaml-diffs validate my_document.yaml
 Start with `minimal_document.yaml` to understand the basic structure:
 
 ```python
-from yaml_diffs import load_document
+from yamly import load_document
 
 doc = load_document("examples/minimal_document.yaml")
 print(f"Document: {doc.title}")
@@ -108,7 +108,7 @@ print(f"Sections: {len(doc.sections)}")
 Use `complex_document.yaml` to see how sections can be nested:
 
 ```python
-from yaml_diffs import load_document
+from yamly import load_document
 
 doc = load_document("examples/complex_document.yaml")
 # Explore the nested structure
@@ -122,7 +122,7 @@ for section in doc.sections:
 Use `document_v1.yaml` and `document_v2.yaml` to test diffing:
 
 ```python
-from yaml_diffs import diff_files, ChangeType
+from yamly import diff_files, ChangeType
 
 diff = diff_files("examples/document_v1.yaml", "examples/document_v2.yaml")
 
@@ -148,7 +148,7 @@ Always start new documents from `template.yaml` to ensure you include all requir
 Validate your document as you build it:
 
 ```bash
-yaml-diffs validate my_document.yaml
+yamly validate my_document.yaml
 ```
 
 ### 3. Use Meaningful IDs

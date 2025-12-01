@@ -3,7 +3,7 @@ requires = ["setuptools>=61.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "yaml-diffs"
+name = "yamly"
 version = "0.1.0"
 description = "Python service for representing Hebrew legal and regulatory documents in a flexible, nested YAML format"
 readme = "README.md"
@@ -64,11 +64,11 @@ include-package-data = true
 where = ["src"]
 
 [tool.setuptools.package-data]
-yaml_diffs = ["schema/*.yaml"]
+yamly = ["schema/*.yaml"]
 
 [project.scripts]
-yaml-diffs = "yaml_diffs.cli.main:main"
-yaml-diffs-mcp-server = "yaml_diffs.mcp_server.server:main"
+yamly = "yamly.cli.main:main"
+yamly-mcp-server = "yamly.mcp_server.server:main"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
@@ -87,7 +87,7 @@ markers = [
 asyncio_mode = "auto"
 
 [tool.coverage.run]
-source = ["src/yaml_diffs"]
+source = ["src/yamly"]
 omit = [
     "*/tests/*",
     "*/test_*.py",
@@ -128,7 +128,7 @@ ignore = [
 "__init__.py" = ["F401"]  # unused imports
 
 [tool.ruff.lint.isort]
-known-first-party = ["yaml_diffs"]
+known-first-party = ["yamly"]
 
 [tool.mypy]
 python_version = "3.10"

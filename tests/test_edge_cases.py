@@ -1,4 +1,4 @@
-"""Comprehensive edge case tests for yaml-diffs.
+"""Comprehensive edge case tests for yamly.
 
 Tests for handling edge cases including empty documents, malformed YAML,
 invalid encoding, missing fields, duplicate markers, and other boundary conditions.
@@ -9,16 +9,16 @@ from pathlib import Path
 
 import pytest
 
-from yaml_diffs.api import diff_documents, load_and_validate, load_document
-from yaml_diffs.diff import _validate_unique_markers
-from yaml_diffs.exceptions import (
+from yamly.api import diff_documents, load_and_validate, load_document
+from yamly.diff import _validate_unique_markers
+from yamly.exceptions import (
     OpenSpecValidationError,
     PydanticValidationError,
     ValidationError,
     YAMLLoadError,
 )
-from yaml_diffs.loader import load_yaml, load_yaml_file
-from yaml_diffs.models import Document, Section, Source, Version
+from yamly.loader import load_yaml, load_yaml_file
+from yamly.models import Document, Section, Source, Version
 
 
 class TestEmptyDocuments:

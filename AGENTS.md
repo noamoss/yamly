@@ -4,7 +4,7 @@ This file provides essential context and instructions for AI coding agents worki
 
 ## Project Overview
 
-**yaml-diffs** is a powerful YAML diffing service that supports both **generic YAML files** and **Hebrew legal documents**. The service provides:
+**yamly** is a powerful YAML diffing service that supports both **generic YAML files** and **Hebrew legal documents**. The service provides:
 
 - **Dual Mode Support**: Generic YAML diffing (any YAML file) and Legal Document diffing (schema-validated)
 - **Schema Layer**: OpenSpec definition (language-agnostic contract) for legal document structure
@@ -25,7 +25,7 @@ The project supports unlimited nesting, flexible structural markers, Hebrew cont
 - **Recursive Structure**: Documents use recursive sections with unlimited nesting depth
 - **Optional IDs**: Section IDs are optional and will be auto-generated if not provided. IDs are used for tracking but not for matching sections (markers are used instead).
 - **Hebrew Support**: Full UTF-8 support for Hebrew legal text throughout
-- **Multiple Interfaces**: Library (Python), CLI (`yaml-diffs`), REST API (`/api/v1/*`), and Web UI (Next.js)
+- **Multiple Interfaces**: Library (Python), CLI (`yamly`), REST API (`/api/v1/*`), and Web UI (Next.js)
 - **Schema Validation**: Dual validation via OpenSpec (contract) and Pydantic (runtime) for legal documents
 
 ## Development Environment Setup
@@ -75,7 +75,7 @@ PORT=8000  # Railway sets this automatically
 ## Project Structure
 
 ```
-yaml-diffs/
+yamly/
 ├── src/
 │   └── yaml_diffs/
 │       ├── __init__.py
@@ -148,7 +148,7 @@ uv sync --extra dev
 pytest
 
 # Run tests with coverage
-pytest --cov=src/yaml_diffs --cov-report=html
+pytest --cov=src/yamly --cov-report=html
 
 # Run specific test file
 pytest tests/test_models.py
@@ -203,28 +203,28 @@ uv pip install dist/yaml_diffs-*.whl
 
 ```bash
 # Validate a legal document
-yaml-diffs validate examples/minimal_document.yaml
+yamly validate examples/minimal_document.yaml
 
 # Auto-detect mode and diff two documents
-yaml-diffs diff examples/document_v1.yaml examples/document_v2.yaml
+yamly diff examples/document_v1.yaml examples/document_v2.yaml
 
 # Force generic YAML mode (any YAML file)
-yaml-diffs diff config_v1.yaml config_v2.yaml --mode general
+yamly diff config_v1.yaml config_v2.yaml --mode general
 
 # Generic diff with identity rules (match containers by name)
-yaml-diffs diff old.yaml new.yaml --mode general --identity-rule "containers:name"
+yamly diff old.yaml new.yaml --mode general --identity-rule "containers:name"
 
 # Conditional identity rule (books by catalog_id when type=book)
-yaml-diffs diff old.yaml new.yaml --identity-rule "inventory:catalog_id:type=book"
+yamly diff old.yaml new.yaml --identity-rule "inventory:catalog_id:type=book"
 
 # Force legal document mode
-yaml-diffs diff old.yaml new.yaml --mode legal_document
+yamly diff old.yaml new.yaml --mode legal_document
 
 # Diff with JSON output
-yaml-diffs diff --format json old.yaml new.yaml
+yamly diff --format json old.yaml new.yaml
 
 # Save diff to file
-yaml-diffs diff --output diff.json old.yaml new.yaml
+yamly diff --output diff.json old.yaml new.yaml
 ```
 
 ### API Server Commands
@@ -241,10 +241,10 @@ yaml-diffs diff --output diff.json old.yaml new.yaml
 **Manual Start:**
 ```bash
 # Run API server locally
-uvicorn src.yaml_diffs.api_server.main:app --reload --port 8000
+uvicorn src.yamly.api_server.main:app --reload --port 8000
 
 # Run with Railway port (production)
-uvicorn src.yaml_diffs.api_server.main:app --host 0.0.0.0 --port ${PORT:-8000}
+uvicorn src.yamly.api_server.main:app --host 0.0.0.0 --port ${PORT:-8000}
 ```
 
 ### UI Development Commands
@@ -364,7 +364,7 @@ pytest -v
 pytest tests/test_models.py::test_create_section_with_all_fields
 
 # Run with coverage
-pytest --cov=src/yaml_diffs --cov-report=term-missing
+pytest --cov=src/yamly --cov-report=term-missing
 
 # Run only fast tests (exclude performance)
 pytest -m "not slow"
@@ -604,7 +604,7 @@ Before committing documentation changes:
    python -c "from yaml_diffs import ..."
 
    # Verify YAML examples validate
-   yaml-diffs validate examples/your_example.yaml
+   yamly validate examples/your_example.yaml
    ```
 
 2. **Check links:**

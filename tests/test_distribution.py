@@ -46,7 +46,7 @@ def built_package() -> Generator[tuple[Path, Path], None, None]:
     dist_dir = PROJECT_ROOT / "dist"
     build_dir = PROJECT_ROOT / "build"
     if dist_dir.exists():
-        for file in dist_dir.glob("yaml_diffs-*"):
+        for file in dist_dir.glob("yamly-*"):
             file.unlink()
     if build_dir.exists():
         shutil.rmtree(build_dir)
@@ -287,8 +287,8 @@ def test_imports_work_after_install(built_package: tuple[Path, Path], tmp_path: 
 
     # Test imports
     import_test = """
-import yaml_diffs
-from yaml_diffs import (
+import yamly
+from yamly import (
     load_document,
     validate_document,
     diff_documents,
@@ -341,7 +341,7 @@ def test_schema_accessible_after_install(built_package: tuple[Path, Path], tmp_p
 
     # Test schema file access
     schema_test = """
-from yaml_diffs.schema import load_schema
+from yamly.schema import load_schema
 
 # Check that schema can be loaded
 schema = load_schema()

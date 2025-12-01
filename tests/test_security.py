@@ -4,9 +4,9 @@ from pathlib import Path
 
 import pytest
 
-from yaml_diffs.exceptions import PathValidationError
-from yaml_diffs.loader import load_yaml_file
-from yaml_diffs.security import is_path_safe, validate_path_safe
+from yamly.exceptions import PathValidationError
+from yamly.loader import load_yaml_file
+from yamly.security import is_path_safe, validate_path_safe
 
 
 class TestValidatePathSafe:

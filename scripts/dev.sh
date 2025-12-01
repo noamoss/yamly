@@ -86,7 +86,7 @@ trap cleanup INT TERM EXIT
 
 # Start backend in background
 echo -e "${BLUE}📡 Starting backend API server on http://localhost:8000...${NC}"
-uvicorn src.yaml_diffs.api_server.main:app --reload --port 8000 > /tmp/yaml-diffs-backend.log 2>&1 &
+uvicorn src.yamly.api_server.main:app --reload --port 8000 > /tmp/yamly-backend.log 2>&1 &
 BACKEND_PID=$!
 echo "$BACKEND_PID" > "$PID_FILE"
 

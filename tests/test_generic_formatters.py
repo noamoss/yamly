@@ -6,8 +6,8 @@ from uuid import uuid4
 
 import yaml
 
-from yaml_diffs.formatters import GenericTextFormatter, GenericYamlFormatter
-from yaml_diffs.generic_diff_types import GenericChangeType, GenericDiff, GenericDiffResult
+from yamly.formatters import GenericTextFormatter, GenericYamlFormatter
+from yamly.generic_diff_types import GenericChangeType, GenericDiff, GenericDiffResult
 
 
 class TestGenericTextFormatter:

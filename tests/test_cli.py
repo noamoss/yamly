@@ -7,7 +7,7 @@ from pathlib import Path
 import pytest
 from click.testing import CliRunner
 
-from yaml_diffs.cli.main import cli, main
+from yamly.cli.main import cli, main
 
 
 @pytest.fixture
