@@ -103,17 +103,17 @@ export default function OnboardingModal({
           {/* Content */}
           <div className="space-y-4 text-gray-700">
             <p className="text-base leading-relaxed">
-              Compare and review changes in YAML documents. Perfect for tracking
-              changes in legal documents, configuration files, and more.
+              Compare and review changes in YAML documents. Ideal for tracking
+              updates in legal docs, configuration files, and more.
             </p>
 
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
               <h3 className="font-semibold text-blue-900 mb-2">
-                Try the demo section
+                Try Example Documents
               </h3>
               <p className="text-sm text-blue-800">
-                Scroll up to see example documents that demonstrate how the
-                diffing works. Click any example to load it into the editors.
+                Scroll up to explore sample documents that show how diffing
+                works. Click any example to load it into the editors.
               </p>
             </div>
 
@@ -137,8 +137,8 @@ export default function OnboardingModal({
                     />
                   </svg>
                   <span>
-                    <strong>Diff Visualization:</strong> See all changes
-                    highlighted with context
+                    <strong>Diff Visualization:</strong> See all changes clearly
+                    highlighted with contextual line-by-line comparisons.
                   </span>
                 </li>
                 <li className="flex items-start gap-2">
@@ -156,8 +156,8 @@ export default function OnboardingModal({
                     />
                   </svg>
                   <span>
-                    <strong>Threaded Discussions:</strong> Add comments and
-                    replies to specific changes
+                    <strong>Explain:</strong> Add comments and replies to specific
+                    changes.
                   </span>
                 </li>
                 <li className="flex items-start gap-2">
@@ -175,8 +175,93 @@ export default function OnboardingModal({
                     />
                   </svg>
                   <span>
-                    <strong>Export:</strong> Download diff results and
-                    discussions as JSON
+                    <strong>Flexible Interfaces:</strong> Use the Web UI, CLI
+                    commands, REST API, or a local MCP integration. Download diff
+                    results as JSON.
+                  </span>
+                </li>
+              </ul>
+            </div>
+
+            <div>
+              <h3 className="font-semibold text-gray-900 mb-2">
+                Coming Soon
+              </h3>
+              <ul className="space-y-2 text-sm">
+                <li className="flex items-start gap-2">
+                  <svg
+                    className="h-5 w-5 text-[var(--brand-primary)] mt-0.5 flex-shrink-0"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                    />
+                  </svg>
+                  <span>
+                    <strong>Version History Tracking</strong> — Compare across
+                    multiple document versions.
+                  </span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <svg
+                    className="h-5 w-5 text-[var(--brand-primary)] mt-0.5 flex-shrink-0"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                    />
+                  </svg>
+                  <span>
+                    <strong>Explainable Diffs</strong> — Add external references
+                    or reasons to detected changes.
+                  </span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <svg
+                    className="h-5 w-5 text-[var(--brand-primary)] mt-0.5 flex-shrink-0"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                    />
+                  </svg>
+                  <span>
+                    <strong>Online MCP (SSE)</strong> — Stream real-time diffs
+                    and events.
+                  </span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <svg
+                    className="h-5 w-5 text-[var(--brand-primary)] mt-0.5 flex-shrink-0"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                    />
+                  </svg>
+                  <span>
+                    <strong>GenAI Summaries</strong> — Automatically generate
+                    human-readable summaries of changes.
                   </span>
                 </li>
               </ul>
@@ -184,8 +269,8 @@ export default function OnboardingModal({
 
             <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
               <p className="text-sm text-gray-700">
-                <strong>Get started:</strong> Load two YAML documents or try a
-                demo example above. Then click "Run Diff" to see the changes.
+                <strong>Get started:</strong> Load two YAML documents and click{" "}
+                <strong>Run Diff</strong> to see the changes.
               </p>
             </div>
           </div>
