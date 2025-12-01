@@ -4,7 +4,15 @@ import { useState, useEffect, useRef } from "react";
 import ReactMarkdown, { Components } from "react-markdown";
 import remarkGfm from "remark-gfm";
 import type { Element } from "hast";
+import type { Components as ReactMarkdownComponents } from "react-markdown";
 import MermaidDiagram from "./MermaidDiagram";
+
+// Constants for scroll behavior
+const SCROLL_OFFSET_TOP = 20; // px offset from top when scrolling to anchor
+const SCROLL_RETRY_DELAY_1 = 100; // ms - first retry delay
+const SCROLL_RETRY_DELAY_2 = 200; // ms - second retry delay
+const ANCHOR_SCROLL_DELAY = 100; // ms - delay before scrolling to anchor after navigation
+const ANCHOR_SCROLL_DELAY_2 = 300; // ms - delay for nested scroll after content load
 
 interface MarkdownViewerProps {
   docPath: string;
@@ -39,17 +47,69 @@ function extractTextFromNode(node: React.ReactNode): string {
   return '';
 }
 
+// Track generated heading IDs to handle duplicates
+const headingIdCounter = new Map<string, number>();
+
 /**
- * Generates an ID from heading text for anchor links
+ * Generates a unique ID from heading text for anchor links
+ * Handles duplicate headings by appending a counter
  */
 function generateHeadingId(children: React.ReactNode): string {
   const text = extractTextFromNode(children);
-  return text
+  const baseId = text
     .toLowerCase()
     .replace(/\s+/g, '-')
     .replace(/[^\w-]/g, '')
     .replace(/-+/g, '-')
     .replace(/^-|-$/g, '');
+
+  // Handle duplicate IDs by appending a counter
+  if (headingIdCounter.has(baseId)) {
+    const count = headingIdCounter.get(baseId)! + 1;
+    headingIdCounter.set(baseId, count);
+    return `${baseId}-${count}`;
+  } else {
+    headingIdCounter.set(baseId, 0);
+    return baseId;
+  }
+}
+
+/**
+ * Resets the heading ID counter (call when content changes)
+ */
+function resetHeadingIdCounter(): void {
+  headingIdCounter.clear();
+}
+
+/**
+ * Scrolls to an element within a scrollable container
+ * @param elementId - The ID of the element to scroll to
+ * @param container - Optional container element (defaults to finding .overflow-y-auto)
+ * @returns true if scroll was successful, false otherwise
+ */
+function scrollToElementInContainer(elementId: string, container?: HTMLElement): boolean {
+  const element = document.getElementById(elementId);
+  if (!element) return false;
+
+  const scrollableParent = container || (element.closest('.overflow-y-auto') as HTMLElement);
+  if (scrollableParent) {
+    // Calculate position relative to scrollable container
+    const containerRect = scrollableParent.getBoundingClientRect();
+    const elementRect = element.getBoundingClientRect();
+    const scrollTop = scrollableParent.scrollTop;
+    const elementTop = elementRect.top - containerRect.top + scrollTop;
+
+    // Scroll to element with offset from top
+    scrollableParent.scrollTo({
+      top: Math.max(0, elementTop - SCROLL_OFFSET_TOP),
+      behavior: 'smooth'
+    });
+    return true;
+  } else {
+    // Fallback: scroll element into view
+    element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    return true;
+  }
 }
 
 /**
@@ -185,61 +245,46 @@ export default function MarkdownViewer({
     };
   }, [docPath]);
 
+  // Reset heading ID counter when content changes
+  useEffect(() => {
+    resetHeadingIdCounter();
+  }, [content]);
+
   // Handle scrolling to anchors when content loads or hash changes
   useEffect(() => {
     if (isLoading || error || !content) return;
 
-    // Function to scroll to anchor
-    const scrollToAnchor = (anchorId: string) => {
-      // Try multiple times with increasing delays to handle async rendering
-      const tryScroll = (attempt = 0) => {
-        const element = document.getElementById(anchorId);
-        if (element && contentRef.current) {
-          // Find the scrollable parent container (in DocumentationModal)
-          const scrollableParent = contentRef.current.closest('.overflow-y-auto') as HTMLElement;
-          if (scrollableParent) {
-            // Calculate position relative to scrollable container
-            const containerRect = scrollableParent.getBoundingClientRect();
-            const elementRect = element.getBoundingClientRect();
-            const scrollTop = scrollableParent.scrollTop;
-            const elementTop = elementRect.top - containerRect.top + scrollTop;
-
-            // Scroll to element with some offset from top
-            scrollableParent.scrollTo({
-              top: Math.max(0, elementTop - 20), // 20px offset from top, ensure non-negative
-              behavior: 'smooth'
-            });
-            return true;
-          } else {
-            // Fallback: scroll element into view
-            element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            return true;
-          }
-        }
-        return false;
-      };
-
-      // Try immediately, then with delays
-      if (!tryScroll()) {
-        setTimeout(() => {
-          if (!tryScroll()) {
-            setTimeout(() => tryScroll(), 200);
-          }
-        }, 100);
-      }
-    };
+    const container = contentRef.current?.closest('.overflow-y-auto') as HTMLElement | undefined;
+    const timeouts: NodeJS.Timeout[] = [];
 
     const hash = window.location.hash;
     if (hash) {
       const anchorId = hash.slice(1); // Remove the #
-      scrollToAnchor(anchorId);
+
+      // Try immediately
+      if (!scrollToElementInContainer(anchorId, container)) {
+        // Retry with delays to handle async rendering
+        const timeout1 = setTimeout(() => {
+          if (!scrollToElementInContainer(anchorId, container)) {
+            const timeout2 = setTimeout(() => {
+              scrollToElementInContainer(anchorId, container);
+            }, SCROLL_RETRY_DELAY_2);
+            timeouts.push(timeout2);
+          }
+        }, SCROLL_RETRY_DELAY_1);
+        timeouts.push(timeout1);
+      }
     } else {
       // If no hash, scroll to top
-      const scrollableParent = contentRef.current?.closest('.overflow-y-auto') as HTMLElement;
-      if (scrollableParent) {
-        scrollableParent.scrollTo({ top: 0, behavior: 'smooth' });
+      if (container) {
+        container.scrollTo({ top: 0, behavior: 'smooth' });
       }
     }
+
+    // Cleanup function to clear all timeouts
+    return () => {
+      timeouts.forEach(timeout => clearTimeout(timeout));
+    };
   }, [content, isLoading, error]);
 
   if (isLoading) {
@@ -313,29 +358,35 @@ export default function MarkdownViewer({
         remarkPlugins={[remarkGfm]}
         components={{
           // Generate IDs for headings to support anchor links
-          h1: ({ children, ...props }: any) => {
+          h1: (props) => {
+            const { children, ...rest } = props;
             const id = generateHeadingId(children);
-            return <h1 id={id} {...props}>{children}</h1>;
+            return <h1 id={id} {...rest}>{children}</h1>;
           },
-          h2: ({ children, ...props }: any) => {
+          h2: (props) => {
+            const { children, ...rest } = props;
             const id = generateHeadingId(children);
-            return <h2 id={id} {...props}>{children}</h2>;
+            return <h2 id={id} {...rest}>{children}</h2>;
           },
-          h3: ({ children, ...props }: any) => {
+          h3: (props) => {
+            const { children, ...rest } = props;
             const id = generateHeadingId(children);
-            return <h3 id={id} {...props}>{children}</h3>;
+            return <h3 id={id} {...rest}>{children}</h3>;
           },
-          h4: ({ children, ...props }: any) => {
+          h4: (props) => {
+            const { children, ...rest } = props;
             const id = generateHeadingId(children);
-            return <h4 id={id} {...props}>{children}</h4>;
+            return <h4 id={id} {...rest}>{children}</h4>;
           },
-          h5: ({ children, ...props }: any) => {
+          h5: (props) => {
+            const { children, ...rest } = props;
             const id = generateHeadingId(children);
-            return <h5 id={id} {...props}>{children}</h5>;
+            return <h5 id={id} {...rest}>{children}</h5>;
           },
-          h6: ({ children, ...props }: any) => {
+          h6: (props) => {
+            const { children, ...rest } = props;
             const id = generateHeadingId(children);
-            return <h6 id={id} {...props}>{children}</h6>;
+            return <h6 id={id} {...rest}>{children}</h6>;
           },
           code(props: CodeProps) {
             const { node, inline, className, children, ...rest } = props;
@@ -360,9 +411,8 @@ export default function MarkdownViewer({
               </code>
             );
           },
-          a(props: any) {
+          a: (props) => {
             const { href, children, ...rest } = props;
-
             // Check if it's an external link (starts with http:// or https://)
             if (href && (href.startsWith("http://") || href.startsWith("https://"))) {
               return (
@@ -371,6 +421,7 @@ export default function MarkdownViewer({
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-blue-600 hover:text-blue-800 underline"
+                  aria-label={`Open ${typeof children === 'string' ? children : 'link'} in new tab`}
                   {...rest}
                 >
                   {children}
@@ -380,46 +431,25 @@ export default function MarkdownViewer({
 
             // Check if it's an anchor-only link (starts with #) - handle scrolling manually
             if (href && href.startsWith("#")) {
+              const anchorId = href.slice(1); // Remove the #
               return (
                 <a
                   href={href}
                   onClick={(e) => {
                     e.preventDefault();
-                    const anchorId = href.slice(1); // Remove the #
                     // Update URL hash first
                     window.history.pushState(null, '', href);
                     // Then scroll to element
-                    const scrollToElement = () => {
-                      const element = document.getElementById(anchorId);
-                      if (element) {
-                        // Find the scrollable parent container
-                        const scrollableParent = element.closest('.overflow-y-auto') as HTMLElement;
-                        if (scrollableParent) {
-                          // Calculate position relative to scrollable container
-                          const containerRect = scrollableParent.getBoundingClientRect();
-                          const elementRect = element.getBoundingClientRect();
-                          const scrollTop = scrollableParent.scrollTop;
-                          const elementTop = elementRect.top - containerRect.top + scrollTop;
-
-                          // Scroll to element with some offset from top
-                          scrollableParent.scrollTo({
-                            top: Math.max(0, elementTop - 20), // 20px offset from top, ensure non-negative
-                            behavior: 'smooth'
-                          });
-                        } else {
-                          // Fallback: scroll element into view
-                          element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                        }
-                        return true;
-                      }
-                      return false;
-                    };
-                    // Try immediately, then with delay if element not found
-                    if (!scrollToElement()) {
-                      setTimeout(() => scrollToElement(), 100);
+                    const container = contentRef.current?.closest('.overflow-y-auto') as HTMLElement | undefined;
+                    if (!scrollToElementInContainer(anchorId, container)) {
+                      // Retry with delay if element not found
+                      setTimeout(() => {
+                        scrollToElementInContainer(anchorId, container);
+                      }, SCROLL_RETRY_DELAY_1);
                     }
                   }}
                   className="text-blue-600 hover:text-blue-800 underline"
+                  aria-label={`Jump to section: ${anchorId}`}
                   {...rest}
                 >
                   {children}
@@ -434,9 +464,13 @@ export default function MarkdownViewer({
                 const [pathPart, anchorPart] = href.split("#");
                 const resolvedPath = resolveDocPath(docPath, pathPart);
 
-                // Only navigate if the resolved path is valid and different from current path
-                // (to avoid unnecessary re-renders for anchor links that resolve to current path)
-                if (resolvedPath && resolvedPath !== docPath && resolvedPath.trim() !== "") {
+                // Validate resolved path
+                if (!resolvedPath || resolvedPath.trim() === "") {
+                  console.warn(`Invalid resolved path for link: ${href}`, { docPath, pathPart });
+                  // Fall through to default handling
+                } else if (resolvedPath !== docPath) {
+                  // Navigate to different document
+                  const container = contentRef.current?.closest('.overflow-y-auto') as HTMLElement | undefined;
                   return (
                     <a
                       href={anchorPart ? `#${anchorPart}` : "#"}
@@ -444,61 +478,37 @@ export default function MarkdownViewer({
                         e.preventDefault();
                         // Navigate to the new document
                         onDocClick(resolvedPath);
-                        // If there's an anchor, update URL hash (scrolling will happen in useEffect)
+                        // If there's an anchor, scroll after content loads
                         if (anchorPart) {
-                          // Small delay to ensure new content loads before scrolling
                           setTimeout(() => {
                             window.history.pushState(null, '', `#${anchorPart}`);
                             // Trigger scroll after content loads
                             setTimeout(() => {
-                              const element = document.getElementById(anchorPart);
-                              if (element) {
-                                const scrollableParent = element.closest('.overflow-y-auto');
-                                if (scrollableParent) {
-                                  const containerRect = scrollableParent.getBoundingClientRect();
-                                  const elementRect = element.getBoundingClientRect();
-                                  const scrollTop = scrollableParent.scrollTop;
-                                  const elementTop = elementRect.top - containerRect.top + scrollTop;
-                                  scrollableParent.scrollTo({
-                                    top: elementTop - 20,
-                                    behavior: 'smooth'
-                                  });
-                                }
-                              }
-                            }, 300);
-                          }, 100);
+                              scrollToElementInContainer(anchorPart, container);
+                            }, ANCHOR_SCROLL_DELAY_2);
+                          }, ANCHOR_SCROLL_DELAY);
                         }
                       }}
                       className="text-blue-600 hover:text-blue-800 underline"
+                      aria-label={`Navigate to ${resolvedPath}${anchorPart ? ` and jump to ${anchorPart}` : ''}`}
                       {...rest}
                     >
                       {children}
                     </a>
                   );
-                } else if (resolvedPath === docPath && anchorPart) {
+                } else if (anchorPart) {
                   // Same document, just scroll to anchor
+                  const container = contentRef.current?.closest('.overflow-y-auto') as HTMLElement | undefined;
                   return (
                     <a
                       href={`#${anchorPart}`}
                       onClick={(e) => {
                         e.preventDefault();
-                        const element = document.getElementById(anchorPart);
-                        if (element) {
-                          const scrollableParent = element.closest('.overflow-y-auto');
-                          if (scrollableParent) {
-                            const containerRect = scrollableParent.getBoundingClientRect();
-                            const elementRect = element.getBoundingClientRect();
-                            const scrollTop = scrollableParent.scrollTop;
-                            const elementTop = elementRect.top - containerRect.top + scrollTop;
-                            scrollableParent.scrollTo({
-                              top: elementTop - 20,
-                              behavior: 'smooth'
-                            });
-                          }
-                        }
                         window.history.pushState(null, '', `#${anchorPart}`);
+                        scrollToElementInContainer(anchorPart, container);
                       }}
                       className="text-blue-600 hover:text-blue-800 underline"
+                      aria-label={`Jump to section: ${anchorPart}`}
                       {...rest}
                     >
                       {children}
@@ -508,12 +518,24 @@ export default function MarkdownViewer({
               } catch (error) {
                 // If path resolution fails, log error and fall through to default handling
                 console.error("Error resolving doc path:", error, { docPath, href });
+                // Return a link that will show an error or do nothing
+                return (
+                  <a
+                    href={href}
+                    className="text-blue-600 hover:text-blue-800 underline"
+                    aria-label={`Link to ${href} (error resolving path)`}
+                    {...rest}
+                  >
+                    {children}
+                  </a>
+                );
               }
-              // If resolved path is same as current, empty, or resolution failed, let browser handle it
+              // If resolved path is same as current and no anchor, let browser handle it
               return (
                 <a
                   href={href}
                   className="text-blue-600 hover:text-blue-800 underline"
+                  aria-label={`Link to ${href}`}
                   {...rest}
                 >
                   {children}
