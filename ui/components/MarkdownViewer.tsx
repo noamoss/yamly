@@ -4,7 +4,6 @@ import { useState, useEffect, useRef } from "react";
 import ReactMarkdown, { Components } from "react-markdown";
 import remarkGfm from "remark-gfm";
 import type { Element } from "hast";
-import type { Components as ReactMarkdownComponents } from "react-markdown";
 import MermaidDiagram from "./MermaidDiagram";
 
 // Constants for scroll behavior
@@ -47,14 +46,13 @@ function extractTextFromNode(node: React.ReactNode): string {
   return '';
 }
 
-// Track generated heading IDs to handle duplicates
-const headingIdCounter = new Map<string, number>();
-
 /**
  * Generates a unique ID from heading text for anchor links
  * Handles duplicate headings by appending a counter
+ * @param children - The heading content
+ * @param idCounter - Map to track generated IDs (component-scoped)
  */
-function generateHeadingId(children: React.ReactNode): string {
+function generateHeadingId(children: React.ReactNode, idCounter: Map<string, number>): string {
   const text = extractTextFromNode(children);
   const baseId = text
     .toLowerCase()
@@ -64,21 +62,14 @@ function generateHeadingId(children: React.ReactNode): string {
     .replace(/^-|-$/g, '');
 
   // Handle duplicate IDs by appending a counter
-  if (headingIdCounter.has(baseId)) {
-    const count = headingIdCounter.get(baseId)! + 1;
-    headingIdCounter.set(baseId, count);
+  if (idCounter.has(baseId)) {
+    const count = idCounter.get(baseId)! + 1;
+    idCounter.set(baseId, count);
     return `${baseId}-${count}`;
   } else {
-    headingIdCounter.set(baseId, 0);
+    idCounter.set(baseId, 0);
     return baseId;
   }
-}
-
-/**
- * Resets the heading ID counter (call when content changes)
- */
-function resetHeadingIdCounter(): void {
-  headingIdCounter.clear();
 }
 
 /**
@@ -191,6 +182,8 @@ export default function MarkdownViewer({
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const contentRef = useRef<HTMLDivElement>(null);
+  // Component-scoped heading ID counter to handle duplicates
+  const headingIdCounterRef = useRef<Map<string, number>>(new Map());
 
   useEffect(() => {
     const abortController = new AbortController();
@@ -247,7 +240,7 @@ export default function MarkdownViewer({
 
   // Reset heading ID counter when content changes
   useEffect(() => {
-    resetHeadingIdCounter();
+    headingIdCounterRef.current.clear();
   }, [content]);
 
   // Handle scrolling to anchors when content loads or hash changes
@@ -360,32 +353,32 @@ export default function MarkdownViewer({
           // Generate IDs for headings to support anchor links
           h1: (props) => {
             const { children, ...rest } = props;
-            const id = generateHeadingId(children);
+            const id = generateHeadingId(children, headingIdCounterRef.current);
             return <h1 id={id} {...rest}>{children}</h1>;
           },
           h2: (props) => {
             const { children, ...rest } = props;
-            const id = generateHeadingId(children);
+            const id = generateHeadingId(children, headingIdCounterRef.current);
             return <h2 id={id} {...rest}>{children}</h2>;
           },
           h3: (props) => {
             const { children, ...rest } = props;
-            const id = generateHeadingId(children);
+            const id = generateHeadingId(children, headingIdCounterRef.current);
             return <h3 id={id} {...rest}>{children}</h3>;
           },
           h4: (props) => {
             const { children, ...rest } = props;
-            const id = generateHeadingId(children);
+            const id = generateHeadingId(children, headingIdCounterRef.current);
             return <h4 id={id} {...rest}>{children}</h4>;
           },
           h5: (props) => {
             const { children, ...rest } = props;
-            const id = generateHeadingId(children);
+            const id = generateHeadingId(children, headingIdCounterRef.current);
             return <h5 id={id} {...rest}>{children}</h5>;
           },
           h6: (props) => {
             const { children, ...rest } = props;
-            const id = generateHeadingId(children);
+            const id = generateHeadingId(children, headingIdCounterRef.current);
             return <h6 id={id} {...rest}>{children}</h6>;
           },
           code(props: CodeProps) {
