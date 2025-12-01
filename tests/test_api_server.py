@@ -569,3 +569,45 @@ def test_error_response_format() -> None:
     assert "message" in data
     # Should have either details or be None
     assert "details" in data or data.get("details") is None
+
+
+# Schema endpoint tests
+def test_schema_endpoint_returns_yaml() -> None:
+    """Test GET /api/v1/schema returns the OpenSpec schema."""
+    response = client.get("/api/v1/schema")
+    assert response.status_code == 200
+    assert "application/x-yaml" in response.headers.get("content-type", "")
+    # Verify it's valid YAML
+    import yaml
+
+    schema = yaml.safe_load(response.text)
+    assert "properties" in schema
+    assert "document" in schema["properties"]
+
+
+def test_schema_endpoint_content_disposition() -> None:
+    """Test schema endpoint includes Content-Disposition header."""
+    response = client.get("/api/v1/schema")
+    assert response.status_code == 200
+    content_disposition = response.headers.get("content-disposition", "")
+    assert "legal_document_spec.yaml" in content_disposition
+
+
+def test_schema_endpoint_contains_expected_structure() -> None:
+    """Test schema endpoint returns schema with expected structure."""
+    import yaml
+
+    response = client.get("/api/v1/schema")
+    assert response.status_code == 200
+    schema = yaml.safe_load(response.text)
+
+    # Verify key schema elements
+    assert "openspec" in schema or "properties" in schema
+    doc_props = schema.get("properties", {}).get("document", {}).get("properties", {})
+
+    # Check that the document properties include expected fields
+    assert "sections" in doc_props
+    # Optional metadata fields should be present in schema
+    assert "id" in doc_props
+    assert "title" in doc_props
+    assert "type" in doc_props

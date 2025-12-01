@@ -110,9 +110,7 @@ def find_section_line_number(
                                     # Otherwise, look backwards for the section start
                                     if trimmed.startswith("-"):
                                         # Marker is on the same line as the "-", return this line
-                                        result = (
-                                            i + 1
-                                        )  # 1-indexed                                        return result
+                                        return i + 1  # 1-indexed
 
                                     # Otherwise, look backwards for the section start (the "-" line)
                                     max_lookback = max(0, i - 20)
@@ -127,9 +125,7 @@ def find_section_line_number(
                                                 prev_indent < indent
                                                 and prev_indent >= sections_indent
                                             ):
-                                                result = (
-                                                    k + 1
-                                                )  # 1-indexed                                                return result
+                                                return k + 1  # 1-indexed
 
                                         if prev_trimmed and not prev_trimmed.startswith("#"):
                                             prev_indent = len(prev_line) - len(prev_line.lstrip())

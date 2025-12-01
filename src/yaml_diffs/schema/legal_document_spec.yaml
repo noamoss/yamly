@@ -58,7 +58,6 @@ properties:
           - "policy"
           - "other"
           - "custom-type"
-          - "regulation"
 
       language:
         type: string
