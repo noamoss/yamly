@@ -58,9 +58,7 @@ class MCPServerConfig:
         try:
             self.timeout = timeout if timeout is not None else int(timeout_str)
         except ValueError:
-            logger.warning(
-                f"Invalid YAMLY_API_TIMEOUT value: {timeout_str}. Using default: 30"
-            )
+            logger.warning(f"Invalid YAMLY_API_TIMEOUT value: {timeout_str}. Using default: 30")
             self.timeout = timeout if timeout is not None else 30
 
     def __repr__(self) -> str:
