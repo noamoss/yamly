@@ -355,16 +355,16 @@ These variables are used by client scripts and tools (e.g., `examples/diff_via_a
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `YAML_DIFFS_API_URL` | `http://localhost:8000` | Base URL for the yamly API. Set in `.env` file for production |
-| `YAML_DIFFS_API_KEY` | `""` (empty) | Optional API key for authentication (if implemented in the future) |
-| `YAML_DIFFS_API_TIMEOUT` | `30` | Request timeout in seconds |
+| `YAMLY_API_URL` | `http://localhost:8000` | Base URL for the yamly API. Set in `.env` file for production |
+| `YAMLY_API_KEY` | `""` (empty) | Optional API key for authentication (if implemented in the future) |
+| `YAMLY_API_TIMEOUT` | `30` | Request timeout in seconds |
 
 ### .env.example File
 
 The project includes a `.env.example` file with all available environment variables and their descriptions. This file includes:
 
 - API server configuration (PORT, HOST, LOG_LEVEL, CORS settings, etc.)
-- API client configuration (`YAML_DIFFS_API_URL` should be set in `.env` file for production)
+- API client configuration (`YAMLY_API_URL` should be set in `.env` file for production)
 - Comments explaining each variable
 
 See the `.env.example` file in the project root for the complete list of variables and their descriptions.
@@ -463,19 +463,19 @@ curl http://localhost:8000/health
 
 ### Production API
 
-The production API URL is configured via the `YAML_DIFFS_API_URL` environment variable. Set this in your `.env` file:
+The production API URL is configured via the `YAMLY_API_URL` environment variable. Set this in your `.env` file:
 
 ```bash
 # In .env file
-YAML_DIFFS_API_URL=https://api-yamly.thepitz.studio
+YAMLY_API_URL=https://api-yamly.thepitz.studio
 ```
 
 **Example 1: Validate a Document (Production)**
 ```bash
 # Load environment variable from .env
-source .env  # or export YAML_DIFFS_API_URL=https://api-yamly.thepitz.studio
+source .env  # or export YAMLY_API_URL=https://api-yamly.thepitz.studio
 
-curl -X POST $YAML_DIFFS_API_URL/api/v1/validate \
+curl -X POST $YAMLY_API_URL/api/v1/validate \
   -H "Content-Type: application/json" \
   -d '{
     "yaml": "document:\n  id: \"law-1234\"\n  title: \"חוק הדוגמה\"\n  type: \"law\"\n  language: \"hebrew\"\n  version:\n    number: \"2024-01-01\"\n  source:\n    url: \"https://example.gov.il/law1234\"\n    fetched_at: \"2025-01-20T09:50:00Z\"\n  sections: []"
@@ -484,7 +484,7 @@ curl -X POST $YAML_DIFFS_API_URL/api/v1/validate \
 
 **Example 2: Diff Two Documents (Production)**
 ```bash
-curl -X POST $YAML_DIFFS_API_URL/api/v1/diff \
+curl -X POST $YAMLY_API_URL/api/v1/diff \
   -H "Content-Type: application/json" \
   -d '{
     "old_yaml": "document:\n  id: \"law-1234\"\n  ...",
@@ -494,7 +494,7 @@ curl -X POST $YAML_DIFFS_API_URL/api/v1/diff \
 
 **Example 3: Check Health (Production)**
 ```bash
-curl $YAML_DIFFS_API_URL/health
+curl $YAMLY_API_URL/health
 ```
 
 ### Example 4: Python Client

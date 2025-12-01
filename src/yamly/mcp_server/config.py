@@ -33,13 +33,13 @@ class MCPServerConfig:
         """Initialize configuration from parameters or environment variables.
 
         Args:
-            api_base_url: Override API base URL. If None, uses YAML_DIFFS_API_URL env var
+            api_base_url: Override API base URL. If None, uses YAMLY_API_URL env var
                 or defaults to "http://localhost:8000".
-            api_key: Override API key. If None, uses YAML_DIFFS_API_KEY env var or None.
-            timeout: Override timeout. If None, uses YAML_DIFFS_API_TIMEOUT env var
+            api_key: Override API key. If None, uses YAMLY_API_KEY env var or None.
+            timeout: Override timeout. If None, uses YAMLY_API_TIMEOUT env var
                 or defaults to 30 seconds.
         """
-        base_url = api_base_url or os.getenv("YAML_DIFFS_API_URL", "http://localhost:8000")
+        base_url = api_base_url or os.getenv("YAMLY_API_URL", "http://localhost:8000")
         assert base_url is not None  # Type narrowing for mypy
         base_url = base_url.rstrip("/")
 
@@ -52,14 +52,14 @@ class MCPServerConfig:
 
         self.api_base_url = base_url
 
-        self.api_key = api_key or os.getenv("YAML_DIFFS_API_KEY")
+        self.api_key = api_key or os.getenv("YAMLY_API_KEY")
 
-        timeout_str = os.getenv("YAML_DIFFS_API_TIMEOUT", "30")
+        timeout_str = os.getenv("YAMLY_API_TIMEOUT", "30")
         try:
             self.timeout = timeout if timeout is not None else int(timeout_str)
         except ValueError:
             logger.warning(
-                f"Invalid YAML_DIFFS_API_TIMEOUT value: {timeout_str}. Using default: 30"
+                f"Invalid YAMLY_API_TIMEOUT value: {timeout_str}. Using default: 30"
             )
             self.timeout = timeout if timeout is not None else 30
 

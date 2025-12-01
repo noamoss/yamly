@@ -73,8 +73,8 @@ Railway will automatically:
 3. Test the health endpoint:
    ```bash
    # Load environment variable from .env
-   source .env  # or export YAML_DIFFS_API_URL=https://api-yamly.thepitz.studio
-   curl $YAML_DIFFS_API_URL/health
+   source .env  # or export YAMLY_API_URL=https://api-yamly.thepitz.studio
+   curl $YAMLY_API_URL/health
    ```
    Expected response:
    ```json
@@ -86,12 +86,12 @@ Railway will automatically:
 4. Test the API endpoints:
    ```bash
    # Validate endpoint
-   curl -X POST $YAML_DIFFS_API_URL/api/v1/validate \
+   curl -X POST $YAMLY_API_URL/api/v1/validate \
      -H "Content-Type: application/json" \
      -d '{"yaml": "document:\n  id: \"test\"\n  title: \"Test\"\n  type: \"law\"\n  language: \"hebrew\"\n  version:\n    number: \"2024-01-01\"\n  source:\n    url: \"https://example.com\"\n    fetched_at: \"2024-01-01T00:00:00Z\"\n  sections: []"}'
    ```
 
-**Production API URL**: Configure the production API URL via the `YAML_DIFFS_API_URL` environment variable in your `.env` file
+**Production API URL**: Configure the production API URL via the `YAMLY_API_URL` environment variable in your `.env` file
 
 You can also use the verification script:
 ```bash
@@ -99,7 +99,7 @@ You can also use the verification script:
 ./scripts/verify_railway_deployment.sh
 
 # Or specify the URL directly
-# Uses YAML_DIFFS_API_URL from .env file
+# Uses YAMLY_API_URL from .env file
 ./scripts/verify_railway_deployment.sh
 ```
 
@@ -214,7 +214,7 @@ If health checks are failing:
 2. **Verify Endpoint**: Test `/health` endpoint manually:
    ```bash
    # Use environment variable
-   curl $YAML_DIFFS_API_URL/health
+   curl $YAMLY_API_URL/health
    ```
 3. **Check Port Binding**: Ensure the service binds to `0.0.0.0` and uses `$PORT`
 4. **Check Startup Time**: Increase `healthcheckTimeout` if service takes longer to start

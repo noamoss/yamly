@@ -59,11 +59,11 @@ def validate_command(file: Path) -> None:
 
         \b
         # Validate a document
-        yamly validate document.yaml
+        yaml-diffs validate document.yaml
 
         \b
         # Validate with progress indicator (for large files)
-        yamly validate large-document.yaml
+        yaml-diffs validate large-document.yaml
     """
     try:
         _show_progress("Loading", file)
@@ -150,31 +150,31 @@ def diff_command(
 
         \b
         # Basic diff with JSON output (auto-detect mode)
-        yamly diff old.yaml new.yaml
+        yaml-diffs diff old.yaml new.yaml
 
         \b
         # Generic YAML mode with identity rules
-        yamly diff old.yaml new.yaml --mode general --identity-rule "containers:name"
+        yaml-diffs diff old.yaml new.yaml --mode general --identity-rule "containers:name"
 
         \b
         # Conditional identity rule for polymorphic arrays
-        yamly diff old.yaml new.yaml --identity-rule "inventory:catalog_id:type=book"
+        yaml-diffs diff old.yaml new.yaml --identity-rule "inventory:catalog_id:type=book"
 
         \b
         # Diff with text format
-        yamly diff old.yaml new.yaml --format text
+        yaml-diffs diff old.yaml new.yaml --format text
 
         \b
         # Save diff to file
-        yamly diff old.yaml new.yaml --output diff.json
+        yaml-diffs diff old.yaml new.yaml --output diff.json
 
         \b
         # Filter by change type
-        yamly diff old.yaml new.yaml --filter-change-types CONTENT_CHANGED
+        yaml-diffs diff old.yaml new.yaml --filter-change-types CONTENT_CHANGED
 
         \b
         # Filter by section path
-        yamly diff old.yaml new.yaml --filter-section-path "1.2.3"
+        yaml-diffs diff old.yaml new.yaml --filter-section-path "1.2.3"
     """
     try:
         # Parse identity rules
@@ -352,21 +352,21 @@ def diff_command(
     "api_url",
     type=str,
     default=None,
-    help="Override API base URL (default: http://localhost:8000 or YAMLY_API_URL env var)",
+    help="Override API base URL (default: http://localhost:8000 or YAML_DIFFS_API_URL env var)",
 )
 @click.option(
     "--api-key",
     "api_key",
     type=str,
     default=None,
-    help="Override API key for authentication (default: YAMLY_API_KEY env var)",
+    help="Override API key for authentication (default: YAML_DIFFS_API_KEY env var)",
 )
 @click.option(
     "--timeout",
     "timeout",
     type=int,
     default=None,
-    help="Override request timeout in seconds (default: 30 or YAMLY_API_TIMEOUT env var)",
+    help="Override request timeout in seconds (default: 30 or YAML_DIFFS_API_TIMEOUT env var)",
 )
 def mcp_server_command(api_url: str | None, api_key: str | None, timeout: int | None) -> None:
     """Run the MCP (Model Context Protocol) server for yamly API.
@@ -383,23 +383,23 @@ def mcp_server_command(api_url: str | None, api_key: str | None, timeout: int | 
 
     Configuration can be provided via command-line options or environment
     variables:
-    - YAMLY_API_URL: API base URL (default: http://localhost:8000)
-    - YAMLY_API_KEY: Optional API key for authentication
-    - YAMLY_API_TIMEOUT: Request timeout in seconds (default: 30)
+    - YAML_DIFFS_API_URL: API base URL (default: http://localhost:8000)
+    - YAML_DIFFS_API_KEY: Optional API key for authentication
+    - YAML_DIFFS_API_TIMEOUT: Request timeout in seconds (default: 30)
 
     Examples:
 
         \b
         # Run with default settings (local API)
-        yamly mcp-server
+        yaml-diffs mcp-server
 
         \b
         # Run with custom API URL
-        yamly mcp-server --api-url http://api.example.com:8000
+        yaml-diffs mcp-server --api-url http://api.example.com:8000
 
         \b
         # Run with API key authentication
-        yamly mcp-server --api-key your-api-key-here
+        yaml-diffs mcp-server --api-key your-api-key-here
     """
     try:
         # Create configuration from CLI arguments

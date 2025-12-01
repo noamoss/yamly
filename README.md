@@ -75,7 +75,7 @@ cp .env.example .env
 The `.env.example` file includes:
 - **API Server Configuration**: PORT, HOST, LOG_LEVEL, etc.
 - **CORS Configuration**: CORS_ORIGINS, CORS_ALLOW_CREDENTIALS, etc.
-- **API Client Configuration**: `YAML_DIFFS_API_URL` (set in `.env` file, defaults to `http://localhost:8000` in code)
+- **API Client Configuration**: `YAMLY_API_URL` (set in `.env` file, defaults to `http://localhost:8000` in code)
 
 **Note**: The `.env` file is for local development only. Railway deployments use environment variables set in the Railway dashboard.
 
@@ -258,24 +258,24 @@ curl http://localhost:8000/health
 ```
 
 **Production API:**
-The production API URL is configured via the `YAML_DIFFS_API_URL` environment variable. Set this in your `.env` file or environment:
+The production API URL is configured via the `YAMLY_API_URL` environment variable. Set this in your `.env` file or environment:
 
 ```bash
 # Set API URL in .env file
-YAML_DIFFS_API_URL=https://api-yamly.thepitz.studio
+YAMLY_API_URL=https://api-yamly.thepitz.studio
 
 # Health check
-curl $YAML_DIFFS_API_URL/health
+curl $YAMLY_API_URL/health
 
 # Validate a document
-curl -X POST $YAML_DIFFS_API_URL/api/v1/validate \
+curl -X POST $YAMLY_API_URL/api/v1/validate \
   -H "Content-Type: application/json" \
   -d '{"yaml": "document:\n  id: \"test\"\n  ..."}'
 ```
 
 The API also provides interactive documentation:
 - **Local**: http://localhost:8000/docs (Swagger UI) and http://localhost:8000/redoc (ReDoc)
-- **Production**: `$YAML_DIFFS_API_URL/docs` and `$YAML_DIFFS_API_URL/redoc` (use your configured API URL)
+- **Production**: `$YAMLY_API_URL/docs` and `$YAMLY_API_URL/redoc` (use your configured API URL)
 
 ### MCP Server
 
@@ -297,9 +297,9 @@ yamly mcp-server --api-url http://api.example.com:8000 --api-key your-key
 - `health_check`: Check API health status
 
 **Configuration:**
-- `YAML_DIFFS_API_URL`: API base URL (default: `http://localhost:8000`, or from `.env` file)
-- `YAML_DIFFS_API_KEY`: Optional API key for authentication (can be set in `.env` file)
-- `YAML_DIFFS_API_TIMEOUT`: Request timeout in seconds (default: `30`, can be set in `.env` file)
+- `YAMLY_API_URL`: API base URL (default: `http://localhost:8000`, or from `.env` file)
+- `YAMLY_API_KEY`: Optional API key for authentication (can be set in `.env` file)
+- `YAMLY_API_TIMEOUT`: Request timeout in seconds (default: `30`, can be set in `.env` file)
 
 These can be configured via environment variables or in a `.env` file (see [Environment Configuration](#environment-configuration)).
 

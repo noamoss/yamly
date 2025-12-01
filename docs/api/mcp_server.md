@@ -32,9 +32,9 @@ The MCP server can be configured via environment variables or command-line optio
 
 ### Environment Variables
 
-- **`YAML_DIFFS_API_URL`**: Base URL for the yamly API (default: `http://localhost:8000`)
-- **`YAML_DIFFS_API_KEY`**: Optional API key for authentication (default: `None`)
-- **`YAML_DIFFS_API_TIMEOUT`**: Request timeout in seconds (default: `30`)
+- **`YAMLY_API_URL`**: Base URL for the yamly API (default: `http://localhost:8000`)
+- **`YAMLY_API_KEY`**: Optional API key for authentication (default: `None`)
+- **`YAMLY_API_TIMEOUT`**: Request timeout in seconds (default: `30`)
 
 ### Command-Line Options
 
@@ -86,7 +86,7 @@ Add the following to your Claude Desktop configuration file (typically `~/Librar
       "command": "yamly-mcp-server",
       "args": [],
       "env": {
-        "YAML_DIFFS_API_URL": "http://localhost:8000"
+        "YAMLY_API_URL": "http://localhost:8000"
       }
     }
   }
@@ -102,8 +102,8 @@ For a remote API instance:
       "command": "yamly-mcp-server",
       "args": [],
       "env": {
-        "YAML_DIFFS_API_URL": "http://localhost:8000",
-        "YAML_DIFFS_API_KEY": "your-api-key-here"
+        "YAMLY_API_URL": "http://localhost:8000",
+        "YAMLY_API_KEY": "your-api-key-here"
       }
     }
   }
@@ -226,7 +226,7 @@ Common error scenarios:
 
 ### Connection Issues
 
-1. **Verify API URL**: Check that `YAML_DIFFS_API_URL` points to a running API instance
+1. **Verify API URL**: Check that `YAMLY_API_URL` points to a running API instance
 2. **Check network connectivity**: Ensure the API endpoint is reachable
 3. **Verify authentication**: If using API key authentication, ensure the key is correct
 

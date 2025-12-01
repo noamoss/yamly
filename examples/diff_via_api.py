@@ -16,7 +16,7 @@ def diff_documents(api_url: str, old_yaml_path: str, new_yaml_path: str):
     """Diff two YAML documents using the API.
 
     Args:
-        api_url: Base URL of the API (defaults to YAML_DIFFS_API_URL env var or http://localhost:8000)
+        api_url: Base URL of the API (defaults to YAMLY_API_URL env var or http://localhost:8000)
         old_yaml_path: Path to the old version YAML file
         new_yaml_path: Path to the new version YAML file
     """
@@ -36,7 +36,7 @@ def diff_documents(api_url: str, old_yaml_path: str, new_yaml_path: str):
 
     # Make API request
     # Get timeout from environment variable or use default
-    timeout = float(os.getenv("YAML_DIFFS_API_TIMEOUT", "30.0"))
+    timeout = float(os.getenv("YAMLY_API_TIMEOUT", "30.0"))
     try:
         response = httpx.post(
             f"{api_url}/api/v1/diff",
@@ -95,7 +95,7 @@ if __name__ == "__main__":
         new_yaml = sys.argv[3]
     elif len(sys.argv) == 3:
         # Use API URL from environment variable or default
-        api_url = os.getenv("YAML_DIFFS_API_URL", "http://localhost:8000")
+        api_url = os.getenv("YAMLY_API_URL", "http://localhost:8000")
         old_yaml = sys.argv[1]
         new_yaml = sys.argv[2]
     else:
@@ -103,20 +103,20 @@ if __name__ == "__main__":
         print("")
         print("Arguments:")
         print("  API_URL    Optional. Base URL of the API.")
-        print("             If not provided, uses YAML_DIFFS_API_URL from .env file")
+        print("             If not provided, uses YAMLY_API_URL from .env file")
         print("             or environment variable (default: http://localhost:8000)")
         print("  OLD_YAML   Path to the old version YAML file")
         print("  NEW_YAML   Path to the new version YAML file")
         print("")
         print("Examples:")
         print(f"  {sys.argv[0]} examples/document_v1.yaml examples/document_v2.yaml")
-        print("    (uses YAML_DIFFS_API_URL from .env or environment)")
+        print("    (uses YAMLY_API_URL from .env or environment)")
         print(f"  {sys.argv[0]} <API_URL> examples/document_v1.yaml examples/document_v2.yaml")
         print("    (uses provided API URL)")
         print("")
         print("Environment Variables:")
-        print("  YAML_DIFFS_API_URL      Base URL of the API (default: http://localhost:8000)")
-        print("  YAML_DIFFS_API_TIMEOUT  Request timeout in seconds (default: 30.0)")
+        print("  YAMLY_API_URL      Base URL of the API (default: http://localhost:8000)")
+        print("  YAMLY_API_TIMEOUT  Request timeout in seconds (default: 30.0)")
         print("")
         print("Note: Create a .env file from .env.example to configure the API URL.")
         sys.exit(1)

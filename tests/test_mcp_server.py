@@ -41,9 +41,9 @@ class TestMCPServerConfig:
         with patch.dict(
             os.environ,
             {
-                "YAML_DIFFS_API_URL": "http://env.example.com:8000",
-                "YAML_DIFFS_API_KEY": "env-key",
-                "YAML_DIFFS_API_TIMEOUT": "45",
+                "YAMLY_API_URL": "http://env.example.com:8000",
+                "YAMLY_API_KEY": "env-key",
+                "YAMLY_API_TIMEOUT": "45",
             },
         ):
             config = MCPServerConfig()
@@ -56,8 +56,8 @@ class TestMCPServerConfig:
         with patch.dict(
             os.environ,
             {
-                "YAML_DIFFS_API_URL": "http://env.example.com:8000",
-                "YAML_DIFFS_API_KEY": "env-key",
+                "YAMLY_API_URL": "http://env.example.com:8000",
+                "YAMLY_API_KEY": "env-key",
             },
         ):
             config = MCPServerConfig(
@@ -69,7 +69,7 @@ class TestMCPServerConfig:
 
     def test_config_invalid_timeout(self) -> None:
         """Test configuration with invalid timeout value."""
-        with patch.dict(os.environ, {"YAML_DIFFS_API_TIMEOUT": "invalid"}):
+        with patch.dict(os.environ, {"YAMLY_API_TIMEOUT": "invalid"}):
             config = MCPServerConfig()
             assert config.timeout == 30  # Should use default
 
@@ -80,7 +80,7 @@ class TestMCPServerConfig:
 
     def test_config_timeout_zero_with_env(self) -> None:
         """Test that timeout=0 parameter overrides environment variable."""
-        with patch.dict(os.environ, {"YAML_DIFFS_API_TIMEOUT": "45"}):
+        with patch.dict(os.environ, {"YAMLY_API_TIMEOUT": "45"}):
             config = MCPServerConfig(timeout=0)
             assert config.timeout == 0  # Should use parameter, not env var
 

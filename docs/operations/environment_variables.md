@@ -36,10 +36,10 @@ This guide explains how to add or update environment variables in different envi
 3. **Add or modify variables:**
    ```bash
    # Example: Update API URL
-   YAML_DIFFS_API_URL=http://localhost:8000
+   YAMLY_API_URL=http://localhost:8000
 
    # Example: Set custom timeout
-   YAML_DIFFS_API_TIMEOUT=60
+   YAMLY_API_TIMEOUT=60
 
    # Example: Configure CORS for local frontend
    CORS_ORIGINS=http://localhost:3000,http://localhost:5173
@@ -280,15 +280,15 @@ For more detailed setup instructions, see [CI/CD Documentation - Setting Up RAIL
 
 1. **For current session:**
    ```bash
-   export YAML_DIFFS_API_URL="https://api-yamly.thepitz.studio"  # Set your production API URL
-   export YAML_DIFFS_API_TIMEOUT=60
+   export YAMLY_API_URL="https://api-yamly.thepitz.studio"  # Set your production API URL
+   export YAMLY_API_TIMEOUT=60
    ```
 
 2. **Persistent (bash/zsh):**
    ```bash
    # Add to ~/.bashrc or ~/.zshrc
-   echo 'export YAML_DIFFS_API_URL="https://api-yamly.thepitz.studio"' >> ~/.zshrc  # Set your production API URL
-   echo 'export YAML_DIFFS_API_TIMEOUT=60' >> ~/.zshrc
+   echo 'export YAMLY_API_URL="https://api-yamly.thepitz.studio"' >> ~/.zshrc  # Set your production API URL
+   echo 'export YAMLY_API_TIMEOUT=60' >> ~/.zshrc
 
    # Reload shell
    source ~/.zshrc
@@ -298,7 +298,7 @@ For more detailed setup instructions, see [CI/CD Documentation - Setting Up RAIL
    ```bash
    # Add to /etc/environment (requires sudo)
    sudo nano /etc/environment
-   # Add: YAML_DIFFS_API_URL="https://api-yamly.thepitz.studio"  # Set your production API URL
+   # Add: YAMLY_API_URL="https://api-yamly.thepitz.studio"  # Set your production API URL
    ```
 
 ### Windows
@@ -312,15 +312,15 @@ For more detailed setup instructions, see [CI/CD Documentation - Setting Up RAIL
 2. **Via PowerShell:**
    ```powershell
    # User-level
-   [System.Environment]::SetEnvironmentVariable("YAML_DIFFS_API_URL", "https://api-yamly.thepitz.studio", "User")  # Set your production API URL
+   [System.Environment]::SetEnvironmentVariable("YAMLY_API_URL", "https://api-yamly.thepitz.studio", "User")  # Set your production API URL
 
    # System-level (requires admin)
-   [System.Environment]::SetEnvironmentVariable("YAML_DIFFS_API_URL", "https://api-yamly.thepitz.studio", "Machine")  # Set your production API URL
+   [System.Environment]::SetEnvironmentVariable("YAMLY_API_URL", "https://api-yamly.thepitz.studio", "Machine")  # Set your production API URL
    ```
 
 3. **Via Command Prompt:**
    ```cmd
-   setx YAML_DIFFS_API_URL "https://api-yamly.thepitz.studio"  # Set your production API URL
+   setx YAMLY_API_URL "https://api-yamly.thepitz.studio"  # Set your production API URL
    ```
 
 ### Important Notes
@@ -345,10 +345,10 @@ When multiple sources define the same variable, the order of precedence is:
 Example:
 ```bash
 # System variable
-export YAML_DIFFS_API_URL="https://system.example.com"
+export YAMLY_API_URL="https://system.example.com"
 
 # .env file
-YAML_DIFFS_API_URL=https://env.example.com
+YAMLY_API_URL=https://env.example.com
 
 # Command-line (wins!)
 python script.py --api-url https://cli.example.com
@@ -374,9 +374,9 @@ python script.py --api-url https://cli.example.com
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `YAML_DIFFS_API_URL` | `http://localhost:8000` | Base URL for the API |
-| `YAML_DIFFS_API_KEY` | `""` | Optional API key for authentication |
-| `YAML_DIFFS_API_TIMEOUT` | `30` | Request timeout in seconds |
+| `YAMLY_API_URL` | `http://localhost:8000` | Base URL for the API |
+| `YAMLY_API_KEY` | `""` | Optional API key for authentication |
+| `YAMLY_API_TIMEOUT` | `30` | Request timeout in seconds |
 
 ### UI Variables
 
@@ -397,8 +397,8 @@ python script.py --api-url https://cli.example.com
 2. **Check file syntax:**
    ```bash
    # No spaces around =
-   CORRECT: YAML_DIFFS_API_URL=https://example.com
-   WRONG:   YAML_DIFFS_API_URL = https://example.com
+   CORRECT: YAMLY_API_URL=https://example.com
+   WRONG:   YAMLY_API_URL = https://example.com
 
    # No quotes needed (unless value has spaces)
    CORRECT: CORS_ORIGINS=http://localhost:3000,http://localhost:5173
