@@ -8,86 +8,61 @@ document:
   version:
     number: "1.0"
     description: "Initial care schedule"
-  schedule:
-    daily_routine:
-      morning:
-        time: "07:00"
-        activities:
-          - activity: "Battery Check"
-            duration_minutes: 5
-            priority: "high"
-          - activity: "Software Update Check"
-            duration_minutes: 10
-            priority: "medium"
-          - activity: "Cleaning Protocol"
-            duration_minutes: 15
-            priority: "high"
-        sections:
-          - marker: "morning-1"
-            title: "Battery Maintenance"
-            content: |
-              Check battery levels and charge if below 50%.
-            sections:
-              - marker: "battery-1"
-                title: "Level Check"
-                content: |
-                  Verify current battery percentage.
-                sections:
-                  - marker: "battery-1-a"
-                    title: "Low Battery Protocol"
-                    content: |
-                      If battery below 20%, initiate emergency charging.
-                    sections: []
+  sections:
+    - marker: "morning"
+      title: "Morning Routine"
+      content: |
+        Morning care activities starting at 07:00.
+      sections:
+        - marker: "morning-1"
+          title: "Battery Maintenance"
+          content: |
+            Check battery levels and charge if below 50%.
+          sections:
+            - marker: "battery-1"
+              title: "Level Check"
+              content: |
+                Verify current battery percentage.
+              sections:
+                - marker: "battery-1-a"
+                  title: "Low Battery Protocol"
+                  content: |
+                    If battery below 20%, initiate emergency charging.
+                  sections: []
 
-      afternoon:
-        time: "14:00"
-        activities:
-          - activity: "Exercise Routine"
-            duration_minutes: 30
-            priority: "medium"
-          - activity: "Social Interaction"
-            duration_minutes: 20
-            priority: "low"
-        sections:
-          - marker: "afternoon-1"
-            title: "Physical Activity"
-            content: |
-              Ensure robot gets adequate exercise.
-            sections:
-              - marker: "exercise-1"
-                title: "Walking Protocol"
-                content: |
-                  Take robot for a 30-minute walk.
-                sections:
-                  - marker: "walk-1"
-                    title: "Route Planning"
-                    content: |
-                      Plan safe walking routes.
-                    sections: []
+    - marker: "afternoon"
+      title: "Afternoon Routine"
+      content: |
+        Afternoon care activities starting at 14:00.
+      sections:
+        - marker: "afternoon-1"
+          title: "Physical Activity"
+          content: |
+            Ensure robot gets adequate exercise.
+          sections:
+            - marker: "exercise-1"
+              title: "Walking Protocol"
+              content: |
+                Take robot for a 30-minute walk.
+              sections:
+                - marker: "walk-1"
+                  title: "Route Planning"
+                  content: |
+                    Plan safe walking routes.
+                  sections: []
 
-      evening:
-        time: "19:00"
-        activities:
-          - activity: "Data Backup"
-            duration_minutes: 10
-            priority: "high"
-          - activity: "System Diagnostics"
-            duration_minutes: 15
-            priority: "medium"
-        sections:
-          - marker: "evening-1"
-            title: "Maintenance Tasks"
-            content: |
-              Perform end-of-day maintenance.
-            sections:
-              - marker: "maintenance-1"
-                title: "Backup Procedures"
-                content: |
-                  Backup all robot data to cloud storage.
-                sections: []
-
-  emergency_protocols:
-    - protocol: "Malfunction Detection"
-      response: "Immediate shutdown and diagnostic mode"
-    - protocol: "Battery Failure"
-      response: "Switch to backup power and alert owner"
+    - marker: "evening"
+      title: "Evening Routine"
+      content: |
+        Evening care activities starting at 19:00.
+      sections:
+        - marker: "evening-1"
+          title: "Maintenance Tasks"
+          content: |
+            Perform end-of-day maintenance.
+          sections:
+            - marker: "maintenance-1"
+              title: "Backup Procedures"
+              content: |
+                Backup all robot data to cloud storage.
+              sections: []

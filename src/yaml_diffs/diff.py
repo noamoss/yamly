@@ -239,8 +239,10 @@ def _diff_document_metadata(old: Document, new: Document) -> list[DiffResult]:
     """
     changes: list[DiffResult] = []
 
-    # Diff version fields
-    if old.version.number != new.version.number:
+    # Diff version fields (handle None values)
+    old_version_number = old.version.number if old.version else None
+    new_version_number = new.version.number if new.version else None
+    if old_version_number != new_version_number:
         changes.append(
             DiffResult(
                 id=str(uuid4()),
@@ -249,11 +251,13 @@ def _diff_document_metadata(old: Document, new: Document) -> list[DiffResult]:
                 marker="__metadata__",
                 old_marker_path=("__metadata__", "version", "number"),
                 new_marker_path=("__metadata__", "version", "number"),
-                old_content=old.version.number,
-                new_content=new.version.number,
+                old_content=old_version_number or "",
+                new_content=new_version_number or "",
             )
         )
-    if old.version.description != new.version.description:
+    old_version_description = old.version.description if old.version else None
+    new_version_description = new.version.description if new.version else None
+    if old_version_description != new_version_description:
         changes.append(
             DiffResult(
                 id=str(uuid4()),
@@ -262,13 +266,15 @@ def _diff_document_metadata(old: Document, new: Document) -> list[DiffResult]:
                 marker="__metadata__",
                 old_marker_path=("__metadata__", "version", "description"),
                 new_marker_path=("__metadata__", "version", "description"),
-                old_content=old.version.description or "",
-                new_content=new.version.description or "",
+                old_content=old_version_description or "",
+                new_content=new_version_description or "",
             )
         )
 
-    # Diff source fields
-    if old.source.url != new.source.url:
+    # Diff source fields (handle None values)
+    old_source_url = old.source.url if old.source else None
+    new_source_url = new.source.url if new.source else None
+    if old_source_url != new_source_url:
         changes.append(
             DiffResult(
                 id=str(uuid4()),
@@ -277,11 +283,13 @@ def _diff_document_metadata(old: Document, new: Document) -> list[DiffResult]:
                 marker="__metadata__",
                 old_marker_path=("__metadata__", "source", "url"),
                 new_marker_path=("__metadata__", "source", "url"),
-                old_content=old.source.url,
-                new_content=new.source.url,
+                old_content=old_source_url or "",
+                new_content=new_source_url or "",
             )
         )
-    if old.source.fetched_at != new.source.fetched_at:
+    old_source_fetched_at = old.source.fetched_at if old.source else None
+    new_source_fetched_at = new.source.fetched_at if new.source else None
+    if old_source_fetched_at != new_source_fetched_at:
         changes.append(
             DiffResult(
                 id=str(uuid4()),
@@ -290,8 +298,8 @@ def _diff_document_metadata(old: Document, new: Document) -> list[DiffResult]:
                 marker="__metadata__",
                 old_marker_path=("__metadata__", "source", "fetched_at"),
                 new_marker_path=("__metadata__", "source", "fetched_at"),
-                old_content=old.source.fetched_at,
-                new_content=new.source.fetched_at,
+                old_content=old_source_fetched_at or "",
+                new_content=new_source_fetched_at or "",
             )
         )
 
@@ -631,7 +639,6 @@ def enrich_diff_with_yaml_extraction(
                 )
             else:
                 change.old_line_number = find_section_line_number(old_yaml, change.old_marker_path)
-
         # Extract new section YAML and line number
         if new_yaml and change.new_marker_path:
             change.new_section_yaml = extract_section_yaml(
@@ -651,5 +658,4 @@ def enrich_diff_with_yaml_extraction(
                 )
             else:
                 change.new_line_number = find_section_line_number(new_yaml, change.new_marker_path)
-
     return diff

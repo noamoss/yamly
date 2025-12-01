@@ -20,12 +20,12 @@ A valid document must have the following top-level structure:
 
 ```yaml
 document:
-  id: string              # Required: Stable document identifier
-  title: string           # Required: Document title in Hebrew
-  type: string            # Required: Document type (law, regulation, etc.)
-  language: string        # Required: Must be "hebrew"
-  version: object         # Required: Version information
-  source: object          # Required: Source information
+  id: string              # Optional (Recommended): Stable document identifier
+  title: string           # Optional (Recommended): Document title in Hebrew
+  type: string            # Optional (Recommended): Document type (law, regulation, etc.)
+  language: string        # Optional (Recommended): Must be "hebrew"
+  version: object         # Optional (Recommended): Version information
+  source: object          # Optional (Recommended): Source information
   sections: array         # Required: Array of sections (can be empty)
   authors: array          # Optional: List of authors
   published_date: string  # Optional: Publication date (ISO 8601)
@@ -35,80 +35,6 @@ document:
 ## Document Fields
 
 ### Required Fields
-
-#### `id` (string)
-
-Stable document identifier. Recommended formats:
-- UUID: `"550e8400-e29b-41d4-a716-446655440000"`
-- Canonical ID: `"law-1234"`
-
-**Example:**
-```yaml
-id: "law-1234"
-```
-
-#### `title` (string)
-
-Document title in Hebrew. Must be at least 1 character.
-
-**Example:**
-```yaml
-title: "חוק הדוגמה לרגולציה"
-```
-
-#### `type` (string)
-
-Type of legal document. Must be one of:
-- `"law"` - Law
-- `"regulation"` - Regulation
-- `"directive"` - Directive
-- `"circular"` - Circular
-- `"policy"` - Policy
-- `"other"` - Other
-
-**Example:**
-```yaml
-type: "law"
-```
-
-#### `language` (string)
-
-Document language. Must be `"hebrew"`.
-
-**Example:**
-```yaml
-language: "hebrew"
-```
-
-#### `version` (object)
-
-Version information object with required `number` field.
-
-**Fields:**
-- `number` (string, required): Version identifier or date (e.g., `"2024-01-01"` or `"v1.0"`)
-- `description` (string, optional): Version description
-
-**Example:**
-```yaml
-version:
-  number: "2024-01-01"
-  description: "גרסה ראשונית"
-```
-
-#### `source` (object)
-
-Source information object with required fields.
-
-**Fields:**
-- `url` (string, required): Original source URL (must be valid URI)
-- `fetched_at` (string, required): ISO 8601 timestamp when document was fetched
-
-**Example:**
-```yaml
-source:
-  url: "https://example.gov.il/law1234"
-  fetched_at: "2025-01-20T09:50:00Z"
-```
 
 #### `sections` (array)
 
@@ -122,6 +48,93 @@ sections:
     title: "הגדרות"
     content: "תוכן הסעיף"
     sections: []
+```
+
+### Recommended Fields (Optional)
+
+The following fields are **optional but recommended** for better document organization, tracking, and management. The core diffing functionality only requires the `sections` array, but these metadata fields enhance the document's usefulness.
+
+#### `id` (string, optional)
+
+Stable document identifier for tracking and reference (recommended: UUID or canonical ID). Enables stable document identification across systems and versions. Useful for database storage, API references, and cross-referencing.
+
+**Recommended formats:**
+- UUID: `"550e8400-e29b-41d4-a716-446655440000"`
+- Canonical ID: `"law-1234"`
+
+**Example:**
+```yaml
+id: "law-1234"
+```
+
+#### `title` (string, optional)
+
+Document title for human readability (recommended for documentation). Improves human readability and document organization. Essential for UI display and document management.
+
+**Example:**
+```yaml
+title: "חוק הדוגמה לרגולציה"
+```
+
+#### `type` (string, optional)
+
+Document type classification (recommended for organization and filtering). Enables document categorization and filtering. Useful for organizing large document collections. Accepts any string value (free text).
+
+**Common examples:**
+- `"law"` - Law
+- `"regulation"` - Regulation
+- `"directive"` - Directive
+- `"circular"` - Circular
+- `"policy"` - Policy
+- `"other"` - Other
+- `"custom-type"` - Any custom string value
+
+**Example:**
+```yaml
+type: "law"
+# or any custom value:
+type: "custom-document-type"
+```
+
+#### `language` (string, optional)
+
+Document language specification (recommended for multi-language support). Specifies document language for proper rendering and processing. Important for multi-language systems.
+
+**Must be `"hebrew"` if provided.**
+
+**Example:**
+```yaml
+language: "hebrew"
+```
+
+#### `version` (object, optional)
+
+Document version information (recommended for version control). Tracks document version history. Essential for version control and change tracking workflows.
+
+**Fields:**
+- `number` (string, optional): Version identifier for tracking document versions (recommended for version control). Version identifier or date (e.g., `"2024-01-01"` or `"v1.0"`)
+- `description` (string, optional): Version description
+
+**Example:**
+```yaml
+version:
+  number: "2024-01-01"
+  description: "גרסה ראשונית"
+```
+
+#### `source` (object, optional)
+
+Document source information (recommended for traceability). Provides provenance and attribution. Important for legal compliance and audit trails.
+
+**Fields:**
+- `url` (string, optional): Source URL for provenance and attribution (recommended for traceability). Original source URL (must be valid URI if provided)
+- `fetched_at` (string, optional): Timestamp when document was retrieved (recommended for audit trails). ISO 8601 timestamp when document was fetched
+
+**Example:**
+```yaml
+source:
+  url: "https://example.gov.il/law1234"
+  fetched_at: "2025-01-20T09:50:00Z"
 ```
 
 ### Optional Fields
@@ -235,12 +248,13 @@ sections:
 
 ### Document-Level Rules
 
-1. **All required fields** must be present
-2. **`language`** must be exactly `"hebrew"`
-3. **`type`** must be one of the allowed values
-4. **`source.url`** must be a valid URI
-5. **`source.fetched_at`** must be a valid ISO 8601 date-time
-6. **`version.number`** must be at least 1 character
+1. **Required fields** (`sections`) must be present
+2. **Recommended fields** (metadata) are optional but enhance document organization
+3. **`language`** (if provided) must be exactly `"hebrew"`
+4. **`type`** (if provided) must be one of the allowed values
+5. **`source.url`** (if provided) must be a valid URI
+6. **`source.fetched_at`** (if provided) must be a valid ISO 8601 date-time
+7. **`version.number`** (if provided) must be at least 1 character
 
 ### Section-Level Rules
 
@@ -270,7 +284,20 @@ sections:
 
 ## Example Documents
 
-### Minimal Valid Document
+### Truly Minimal Document (No Metadata)
+
+The absolute minimum valid document requires only the `sections` array:
+
+```yaml
+document:
+  sections: []
+```
+
+This demonstrates that metadata fields are optional. The core diffing functionality only requires sections.
+
+### Minimal Document with Metadata
+
+A document with all recommended metadata fields:
 
 ```yaml
 document:
@@ -315,9 +342,11 @@ document:
 
 ## Common Validation Errors
 
-### Missing Required Field
+### Missing Required Field (sections)
 
-**Error:** `Field required: document.id`
+**Error:** `Field required: document.sections`
+
+The `sections` field is the only required field. All metadata fields (id, title, type, language, version, source) are optional.
 
 **Solution:** Ensure all required fields are present in the document.
 

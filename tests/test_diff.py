@@ -6,7 +6,7 @@ import pytest
 
 from yaml_diffs.diff import diff_documents
 from yaml_diffs.diff_types import ChangeType, DiffResult, DocumentDiff
-from yaml_diffs.models import Document, DocumentType, Section, Source, Version
+from yaml_diffs.models import Document, Section, Source, Version
 
 
 @pytest.fixture
@@ -21,7 +21,7 @@ def minimal_document(sample_id: str) -> Document:
     return Document(
         id="law-1234",
         title="חוק הדוגמה",
-        type=DocumentType.LAW,
+        type="law",
         version=Version(number="1.0"),
         source=Source(url="https://example.com/law", fetched_at="2025-01-20T09:50:00Z"),
     )

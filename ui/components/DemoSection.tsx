@@ -249,7 +249,7 @@ export default function DemoSection({
             What is yaml-diffs?
           </h2>
           <p className="text-gray-700 text-sm leading-relaxed">
-            <strong>Semantic YAML diffing</strong> that understands structure, not just lines. Unlike standard diff tools that compare line-by-line, yaml-diffs intelligently detects moves, renames, and structural changes while reducing noise from formatting. Features advanced array matching with custom identity rules, dual-mode operation (generic YAML + legal documents), and a complete API/UI ecosystem. Perfect for tracking configuration changes, infrastructure-as-code updates, legal document revisions, and any structured YAML data where context matters.
+            <strong>ymal-diffs</strong> reads YAML as structured data rather than plain text. It highlights meaningful changes and filters out noise, making it easier to review config updates, infrastructure changes, and YAML produced or rewritten by LLM-powered tools.
           </p>
         </div>
 
@@ -407,48 +407,49 @@ export default function DemoSection({
 
                     <div className="space-y-3">
                       <div>
-                        <h5 className="text-xs font-semibold text-blue-800 mb-1.5">Document (all required fields):</h5>
+                        <h5 className="text-xs font-semibold text-blue-800 mb-1.5">Document (recommended fields):</h5>
+                        <p className="text-xs text-blue-700 mb-2 italic">Note: Only <code className="bg-blue-100 px-1 rounded text-xs">sections</code> is required. All metadata fields are optional but recommended.</p>
                         <ul className="text-sm text-blue-800 space-y-1">
                           <li className="flex items-start gap-2">
                             <span className="text-blue-600 mt-0.5">•</span>
                             <span>
-                              <code className="bg-blue-100 px-1 rounded text-xs">id</code>: String identifier (UUID or custom)
+                              <code className="bg-blue-100 px-1 rounded text-xs">id</code>: <span className="text-blue-600">(Optional)</span> String identifier for tracking (UUID or custom)
                             </span>
                           </li>
                           <li className="flex items-start gap-2">
                             <span className="text-blue-600 mt-0.5">•</span>
                             <span>
-                              <code className="bg-blue-100 px-1 rounded text-xs">title</code>: Document title (Hebrew)
+                              <code className="bg-blue-100 px-1 rounded text-xs">title</code>: <span className="text-blue-600">(Optional)</span> Document title for human readability
                             </span>
                           </li>
                           <li className="flex items-start gap-2">
                             <span className="text-blue-600 mt-0.5">•</span>
                             <span>
-                              <code className="bg-blue-100 px-1 rounded text-xs">type</code>: Must be <code className="bg-blue-100 px-0.5 rounded text-xs">'law'</code>, <code className="bg-blue-100 px-0.5 rounded text-xs">'regulation'</code>, <code className="bg-blue-100 px-0.5 rounded text-xs">'directive'</code>, <code className="bg-blue-100 px-0.5 rounded text-xs">'circular'</code>, <code className="bg-blue-100 px-0.5 rounded text-xs">'policy'</code>, or <code className="bg-blue-100 px-0.5 rounded text-xs">'other'</code>
+                              <code className="bg-blue-100 px-1 rounded text-xs">type</code>: <span className="text-blue-600">(Optional)</span> Any string value (recommended for organization and filtering). Common examples: <code className="bg-blue-100 px-0.5 rounded text-xs">'law'</code>, <code className="bg-blue-100 px-0.5 rounded text-xs">'regulation'</code>, <code className="bg-blue-100 px-0.5 rounded text-xs">'directive'</code>, <code className="bg-blue-100 px-0.5 rounded text-xs">'circular'</code>, <code className="bg-blue-100 px-0.5 rounded text-xs">'policy'</code>, <code className="bg-blue-100 px-0.5 rounded text-xs">'other'</code>
                             </span>
                           </li>
                           <li className="flex items-start gap-2">
                             <span className="text-blue-600 mt-0.5">•</span>
                             <span>
-                              <code className="bg-blue-100 px-1 rounded text-xs">language</code>: Must be <code className="bg-blue-100 px-0.5 rounded text-xs">'hebrew'</code>
+                              <code className="bg-blue-100 px-1 rounded text-xs">language</code>: <span className="text-blue-600">(Optional)</span> Must be <code className="bg-blue-100 px-0.5 rounded text-xs">'hebrew'</code> if provided
                             </span>
                           </li>
                           <li className="flex items-start gap-2">
                             <span className="text-blue-600 mt-0.5">•</span>
                             <span>
-                              <code className="bg-blue-100 px-1 rounded text-xs">version</code>: Object with required <code className="bg-blue-100 px-0.5 rounded text-xs">number</code> field
+                              <code className="bg-blue-100 px-1 rounded text-xs">version</code>: <span className="text-blue-600">(Optional)</span> Object with optional <code className="bg-blue-100 px-0.5 rounded text-xs">number</code> field
                             </span>
                           </li>
                           <li className="flex items-start gap-2">
                             <span className="text-blue-600 mt-0.5">•</span>
                             <span>
-                              <code className="bg-blue-100 px-1 rounded text-xs">source</code>: Object with required <code className="bg-blue-100 px-0.5 rounded text-xs">url</code> and <code className="bg-blue-100 px-0.5 rounded text-xs">fetched_at</code> fields
+                              <code className="bg-blue-100 px-1 rounded text-xs">source</code>: <span className="text-blue-600">(Optional)</span> Object with optional <code className="bg-blue-100 px-0.5 rounded text-xs">url</code> and <code className="bg-blue-100 px-0.5 rounded text-xs">fetched_at</code> fields
                             </span>
                           </li>
                           <li className="flex items-start gap-2">
                             <span className="text-blue-600 mt-0.5">•</span>
                             <span>
-                              <code className="bg-blue-100 px-1 rounded text-xs">sections</code>: Array of section objects
+                              <code className="bg-blue-100 px-1 rounded text-xs font-semibold">sections</code>: <span className="text-blue-700 font-semibold">(Required)</span> Array of section objects
                             </span>
                           </li>
                         </ul>

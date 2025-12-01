@@ -53,11 +53,10 @@ def valid_document_data_unwrapped() -> dict:
 
 @pytest.fixture
 def invalid_document_missing_required() -> dict:
-    """Invalid document data missing required fields."""
+    """Invalid document data missing required fields (only sections is required now)."""
     return {
         "document": {
-            "id": "test-123",
-            # Missing title, type, language, version, source, sections
+            # Missing sections (only required field)
         }
     }
 
@@ -180,13 +179,14 @@ def test_validate_pydantic_unwrapped(valid_document_data_unwrapped: dict) -> Non
 
 
 def test_validate_pydantic_invalid(invalid_document_missing_required: dict) -> None:
-    """Test validating invalid document raises PydanticValidationError."""
-    with pytest.raises(PydanticValidationError) as exc_info:
-        validate_against_pydantic(invalid_document_missing_required)
+    """Test validating invalid document (missing sections) raises OpenSpecValidationError."""
+    # Now that metadata is optional, missing sections should fail OpenSpec validation
+    # (Pydantic allows default, but schema requires it)
+    with pytest.raises(OpenSpecValidationError) as exc_info:
+        validate_against_openspec(invalid_document_missing_required)
 
-    assert "validation failed" in str(exc_info.value).lower()
+    assert "validation" in str(exc_info.value).lower() or "error" in str(exc_info.value).lower()
     assert len(exc_info.value.errors) > 0
-    assert exc_info.value.original_error is not None
 
 
 def test_validate_pydantic_wrong_type(invalid_document_wrong_type: dict) -> None:
@@ -200,12 +200,13 @@ def test_validate_pydantic_wrong_type(invalid_document_wrong_type: dict) -> None
 
 def test_validate_pydantic_error_messages(invalid_document_missing_required: dict) -> None:
     """Test that error messages are clear and include field paths."""
-    with pytest.raises(PydanticValidationError) as exc_info:
-        validate_against_pydantic(invalid_document_missing_required)
+    # Now that metadata is optional, missing sections should fail OpenSpec validation
+    with pytest.raises(OpenSpecValidationError) as exc_info:
+        validate_against_openspec(invalid_document_missing_required)
 
     error_message = str(exc_info.value)
     # Should contain field paths
-    assert " -> " in error_message or any("field" in str(err) for err in exc_info.value.errors)
+    assert " -> " in error_message or "sections" in error_message.lower()
     # Should be formatted clearly
     assert "\n" in error_message or ":" in error_message
 
@@ -308,3 +309,111 @@ def test_validate_document_invalid_type() -> None:
         validate_document(123)  # type: ignore[arg-type]
 
     assert "must be str, Path, or TextIO" in str(exc_info.value)
+
+
+# Tests for optional metadata fields
+def test_validate_minimal_document_without_metadata() -> None:
+    """Test validating minimal document with only sections (no metadata)."""
+    minimal_data = {"document": {"sections": []}}
+    doc = validate_against_pydantic(minimal_data)
+    assert isinstance(doc, Document)
+    assert doc.id is None
+    assert doc.title is None
+    assert doc.type is None
+    assert doc.language is None
+    assert doc.version is None
+    assert doc.source is None
+    assert doc.sections == []
+
+
+def test_validate_openspec_minimal_document() -> None:
+    """Test OpenSpec validation accepts minimal document without metadata."""
+    minimal_data = {"document": {"sections": []}}
+    # Should not raise
+    validate_against_openspec(minimal_data)
+
+
+def test_validate_document_without_id() -> None:
+    """Test validating document without id field."""
+    data = {
+        "document": {
+            "title": "Test Document",
+            "type": "law",
+            "language": "hebrew",
+            "version": {"number": "1.0"},
+            "source": {"url": "https://example.com", "fetched_at": "2025-01-20T09:50:00Z"},
+            "sections": [],
+        }
+    }
+    doc = validate_against_pydantic(data)
+    assert doc.id is None
+    assert doc.title == "Test Document"
+
+
+def test_validate_document_without_version() -> None:
+    """Test validating document without version object."""
+    data = {
+        "document": {
+            "id": "test-123",
+            "title": "Test",
+            "sections": [],
+        }
+    }
+    doc = validate_against_pydantic(data)
+    assert doc.version is None
+    assert doc.id == "test-123"
+
+
+def test_validate_document_without_source() -> None:
+    """Test validating document without source object."""
+    data = {
+        "document": {
+            "id": "test-123",
+            "sections": [],
+        }
+    }
+    doc = validate_against_pydantic(data)
+    assert doc.source is None
+
+
+def test_validate_document_with_version_but_without_number() -> None:
+    """Test validating document with version object but without number."""
+    data = {
+        "document": {
+            "version": {},
+            "sections": [],
+        }
+    }
+    doc = validate_against_pydantic(data)
+    assert doc.version is not None
+    assert doc.version.number is None
+
+
+def test_validate_document_with_source_but_without_url_or_fetched_at() -> None:
+    """Test validating document with source object but without url or fetched_at."""
+    data = {
+        "document": {
+            "source": {},
+            "sections": [],
+        }
+    }
+    doc = validate_against_pydantic(data)
+    assert doc.source is not None
+    assert doc.source.url is None
+    assert doc.source.fetched_at is None
+
+
+def test_validate_full_document_minimal(tmp_path: Path) -> None:
+    """Test full validation pipeline with minimal document (no metadata)."""
+    import yaml
+
+    minimal_data = {"document": {"sections": [{"marker": "1", "content": "Test", "sections": []}]}}
+    yaml_file = tmp_path / "minimal.yaml"
+    yaml_file.write_text(yaml.dump(minimal_data), encoding="utf-8")
+
+    doc = validate_document(yaml_file)
+    assert isinstance(doc, Document)
+    assert doc.id is None
+    assert doc.title is None
+    assert len(doc.sections) == 1
+    assert doc.sections[0].marker == "1"

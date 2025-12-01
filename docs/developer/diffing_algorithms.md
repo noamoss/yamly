@@ -1,337 +1,396 @@
 # Diffing Algorithms
 
-This document describes the diffing algorithms used in yaml-diffs for both generic YAML files and legal documents.
+This document provides detailed explanations of the diffing algorithms used in yaml-diffs, including workflow diagrams and comprehensive descriptions of how each change type is detected.
 
 ## Overview
 
-yaml-diffs implements two distinct diffing algorithms optimized for different use cases:
+yaml-diffs supports two distinct diffing modes, each optimized for different use cases:
 
-1. **Generic YAML Diffing** - For arbitrary YAML structures (configs, Kubernetes manifests, etc.)
-2. **Legal Document Diffing** - For schema-validated Hebrew legal documents
+- **Generic YAML Diff Mode**: For any YAML file (configs, Kubernetes manifests, etc.) using path-based tracking and smart array matching
+- **Legal Document Diff Mode**: For schema-validated Hebrew legal documents using marker-based section matching
 
-Both algorithms detect comprehensive change types including additions, deletions, modifications, moves, and renames.
+Both modes implement sophisticated algorithms to accurately detect changes, including additions, deletions, modifications, renames, and moves. The algorithms are designed to handle complex nested structures and provide meaningful change detection even when items are reordered or restructured.
 
-## Generic YAML Diffing Algorithm
+## Generic YAML Diff Mode
 
-The generic diffing algorithm uses a **3-phase approach** to detect all types of changes in arbitrary YAML structures.
+The generic YAML diff mode uses a **3-phase algorithm** to detect changes in arbitrary YAML structures. The algorithm recursively compares nodes, detects local changes, then performs global analysis to identify renames and moves.
+
+### Algorithm Summary
+
+The generic diff algorithm works in three phases: (1) **Recursive Local Diff** - compares nodes at the same paths, detecting value changes, key additions/removals, and array item changes using a 4-phase array matching algorithm; (2) **Rename Detection** - matches removed and added keys with similar values at the same parent path, converting them to KEY_RENAMED; (3) **Global Move Detection** - matches remaining removed vs added items globally by identity or content similarity, converting them to KEY_MOVED or ITEM_MOVED. This cascading approach ensures high-confidence matches are identified first, then lower-confidence matches are handled separately, preventing false positives.
+
+### Workflow Diagram
+
+```mermaid
+flowchart TD
+    Start([Start: Generic YAML Diff]) --> Phase1Start
+
+    subgraph Phase1["🔵 PHASE 1: Recursive Local Diff"]
+        Phase1Start[Start Phase 1] --> CheckType{Node Type Match?}
+
+        CheckType -->|Types Different| TypeChanged[🔴 TYPE_CHANGED]
+
+        CheckType -->|Types Match| NodeType{Node Structure?}
+
+        NodeType -->|Dictionary| DictProcess[For each key in dictionary]
+        DictProcess -->|Key in both| Recurse[Recurse into nested structure]
+        DictProcess -->|Key only in new| KeyAdded[🟢 KEY_ADDED]
+        DictProcess -->|Key only in old| KeyRemoved[🔴 KEY_REMOVED]
+        Recurse --> CheckType
+
+        NodeType -->|Array| ArrayProcess[Array Matching Algorithm]
+        ArrayProcess --> ArrayMatch1[1. Match by identity field<br/>id, name, key, etc.]
+        ArrayMatch1 -->|Matched| ArrayCheck1{Changed?}
+        ArrayCheck1 -->|Yes| ItemChanged[🔵 ITEM_CHANGED]
+        ArrayCheck1 -->|No| Unchanged[⚪ UNCHANGED]
+
+        ArrayMatch1 -->|Not matched| ArrayMatch2[2. Match by similarity ≥90%]
+        ArrayMatch2 -->|Matched| ArrayCheck2{Changed?}
+        ArrayCheck2 -->|Yes| ItemChanged
+        ArrayCheck2 -->|No| Unchanged
+
+        ArrayMatch2 -->|Not matched| ArrayMatch3[3. Match by similarity ≥70%]
+        ArrayMatch3 -->|Matched| ArrayCheck3{Changed?}
+        ArrayCheck3 -->|Yes| ItemChanged
+        ArrayCheck3 -->|No| Unchanged
+
+        ArrayMatch3 -->|Not matched| ArrayMatch4[4. Match identical by position]
+        ArrayMatch4 -->|Matched| Unchanged
+
+        ArrayMatch4 -->|Not matched| ArrayRemaining[Remaining items]
+        ArrayRemaining -->|In old only| ItemRemoved[🔴 ITEM_REMOVED]
+        ArrayRemaining -->|In new only| ItemAdded[🟢 ITEM_ADDED]
+
+        NodeType -->|Scalar| ScalarCheck{Values equal?}
+        ScalarCheck -->|No| ValueChanged[🔵 VALUE_CHANGED]
+        ScalarCheck -->|Yes| Unchanged
+
+        TypeChanged --> Phase1End
+        KeyAdded --> Phase1End
+        KeyRemoved --> Phase1End
+        ItemChanged --> Phase1End
+        ItemRemoved --> Phase1End
+        ItemAdded --> Phase1End
+        ValueChanged --> Phase1End
+        Unchanged --> Phase1End
+
+        Phase1End[Phase 1 Complete<br/>All changes collected in context]
+    end
+
+    Phase1End --> Phase2Start
+
+    subgraph Phase2["🟠 PHASE 2: Rename Detection"]
+        Phase2Start[Start Phase 2] --> RenameCheck{Removed key + Added key<br/>at same parent path?}
+        RenameCheck -->|Yes, value similarity ≥90%| KeyRenamed[🟡 KEY_RENAMED<br/>Replaces KEY_REMOVED + KEY_ADDED]
+        RenameCheck -->|No| Phase2End
+        KeyRenamed --> Phase2End[Phase 2 Complete]
+    end
+
+    Phase2End --> Phase3Start
+
+    subgraph Phase3["🟣 PHASE 3: Move Detection"]
+        Phase3Start[Start Phase 3] --> KeyMoveCheck{Removed key + Added key<br/>same key name, different path?}
+        KeyMoveCheck -->|Yes, value similarity ≥90%| KeyMoved[🟣 KEY_MOVED<br/>Replaces KEY_REMOVED + KEY_ADDED]
+        KeyMoveCheck -->|No| ItemMoveCheck
+
+        ItemMoveCheck{Removed item + Added item<br/>same identity, different path?}
+        ItemMoveCheck -->|Yes| ItemMoved[🟣 ITEM_MOVED<br/>Replaces ITEM_REMOVED + ITEM_ADDED]
+        ItemMoveCheck -->|No| Phase3End
+
+        KeyMoved --> Phase3End
+        ItemMoved --> Phase3End[Phase 3 Complete]
+    end
+
+    Phase3End --> Finalize[Calculate Statistics<br/>Return GenericDiff]
+    Finalize --> End([End])
+
+    %% Styling
+    style Phase1 fill:#e1f5ff,stroke:#0066cc,stroke-width:3px
+    style Phase2 fill:#fff4e1,stroke:#cc6600,stroke-width:3px
+    style Phase3 fill:#ffe1f5,stroke:#cc0066,stroke-width:3px
+    style TypeChanged fill:#ffcccc,stroke:#cc0000
+    style KeyAdded fill:#ccffcc,stroke:#00cc00
+    style KeyRemoved fill:#ffcccc,stroke:#cc0000
+    style KeyRenamed fill:#ffffcc,stroke:#cccc00
+    style KeyMoved fill:#ffccff,stroke:#cc00cc
+    style ItemAdded fill:#ccffcc,stroke:#00cc00
+    style ItemRemoved fill:#ffcccc,stroke:#cc0000
+    style ItemChanged fill:#ccccff,stroke:#0000cc
+    style ItemMoved fill:#ffccff,stroke:#cc00cc
+    style ValueChanged fill:#ccccff,stroke:#0000cc
+    style Unchanged fill:#e0e0e0,stroke:#666666
+    style Finalize fill:#f0f0f0,stroke:#333333,stroke-width:2px
+```
 
 ### Phase 1: Recursive Local Diff
 
-The algorithm recursively compares nodes at the same paths in both documents.
+Phase 1 performs a recursive comparison of nodes at the same paths in the document structure. It handles three types of nodes:
 
-**Process:**
-1. Start at root level, compare old and new documents
-2. For each path that exists in both documents:
-   - If values differ → `VALUE_CHANGED`
-   - If types differ → `TYPE_CHANGED`
-3. For mappings (objects):
-   - Keys only in old → collect as removed (for later phases)
-   - Keys only in new → collect as added (for later phases)
-4. For sequences (arrays):
-   - Match items by identity (using identity rules or auto-detection)
-   - Unmatched items → collect as removed/added (for later phases)
-   - Matched items with different content → `ITEM_CHANGED`
+#### Dictionary (Mapping) Processing
 
-**Identity Detection for Arrays:**
+For dictionaries, the algorithm:
+- Compares keys present in both versions and recurses into nested structures
+- Detects keys present only in the new version as `KEY_ADDED`
+- Detects keys present only in the old version as `KEY_REMOVED`
 
-The algorithm uses a priority-based approach to identify array items:
+#### Array (Sequence) Processing
 
-1. **Conditional Rules** (most specific):
-   ```python
-   # Example: books by catalog_id when type=book
-   IdentityRule(array="inventory", identity_field="catalog_id",
-                when_field="type", when_value="book")
-   ```
+Array matching uses a **4-phase algorithm** to match items between old and new arrays:
 
-2. **Unconditional Rules**:
-   ```python
-   # Example: containers by name
-   IdentityRule(array="containers", identity_field="name")
-   ```
+1. **Identity Field Matching**: Matches items by identity fields (auto-detected: `id`, `_id`, `uuid`, `key`, `name`, `host`, `hostname`, or custom rules). Items with matching identity values are considered the same item.
 
-3. **Auto-detection** (fallback):
-   - Checks common field names: `id`, `_id`, `uuid`, `key`, `name`, `host`, `hostname`
-   - Uses first field found in all items
+2. **Content Similarity (90% threshold)**: For unmatched items, calculates structural similarity using word-based Jaccard similarity. Items with ≥90% similarity are matched. This catches items that are very similar (likely the same item with minor edits).
 
-**Output:**
-- Direct value/type changes
-- Lists of unmatched keys and items for later phases
+3. **Content Similarity (70% threshold)**: For remaining unmatched items, tries matching with ≥70% similarity. This catches items that are moderately similar (likely the same item with more substantial edits).
+
+4. **Positional Fallback**: Matches identical items by position as a last resort for items without identity fields and low similarity.
+
+5. **Remaining Items**: Items that couldn't be matched are classified as `ITEM_ADDED` (in new only) or `ITEM_REMOVED` (in old only).
+
+**Why Two Similarity Thresholds?** The cascading approach (90% then 70%) ensures high-confidence matches are paired first, preventing false matches. A 75% similar item won't match at 90% threshold, but will match at 70% threshold from the remaining pool. This balances precision (avoiding false matches) with recall (catching true matches even after significant changes).
+
+#### Scalar Processing
+
+For scalar values (strings, numbers, booleans, etc.):
+- If values are equal → `UNCHANGED`
+- If values differ → `VALUE_CHANGED`
+
+#### Type Changes
+
+If the node type changes between versions (e.g., string → number, dict → list), it's detected as `TYPE_CHANGED` and processing stops for that branch.
 
 ### Phase 2: Rename Detection
 
-Matches removed and added keys at the same parent path with similar values.
+Phase 2 analyzes the context collected in Phase 1 to detect renamed keys. It looks for pairs of `KEY_REMOVED` and `KEY_ADDED` entries that:
+- Are at the same parent path
+- Have different key names
+- Have values with ≥90% similarity
 
-**Process:**
-1. For each removed key at path `P`:
-   - Find added keys at the same path `P`
-   - Calculate similarity between old and new values
-   - If similarity ≥ threshold (typically 0.95) → `KEY_RENAMED`
-   - Remove matched keys from removed/added lists
-
-**Similarity Calculation:**
-- Uses JSON serialization and word-based Jaccard similarity
-- Compares word sets from both values
-- Formula: `|words_old ∩ words_new| / |words_old ∪ words_new|`
+When such a pair is found, both entries are replaced with a single `KEY_RENAMED` entry, indicating the key name changed but the value remained essentially the same.
 
 **Example:**
 ```yaml
-# Old
+# Old version
 database:
-  host: "localhost"
+  hostname: "db.example.com"
 
-# New
+# New version
 database:
-  hostname: "localhost"  # Same value, different key
+  host: "db.example.com"  # Renamed from hostname
 ```
-Result: `KEY_RENAMED` at `database.host` → `database.hostname`
 
 ### Phase 3: Global Move Detection
 
-Matches remaining removed items with added items globally by identity or content similarity.
+Phase 3 performs global analysis to detect moved keys and items:
 
-**Process:**
-1. For each remaining removed key/item:
-   - Search all added keys/items globally
-   - Match by:
-     - **Identity** (for array items with identity fields)
-     - **Content similarity** (≥0.95 threshold)
-   - If match found → `KEY_MOVED` or `ITEM_MOVED`
-   - Record old_path and new_path
+- **KEY_MOVED**: Detects when a removed key and added key have the same key name but different paths, with ≥90% value similarity. This indicates the key+value was moved to a different location in the document.
 
-**Move Detection Rules:**
-- Keys: Match by value similarity across different paths
-- Items: Match by identity field value, then by content similarity
-- Empty content sections are not matched (to avoid false positives)
+- **ITEM_MOVED**: Detects when a removed item and added item have the same identity but different paths. This indicates an array item was moved to a different array or location.
 
-**Example:**
-```yaml
-# Old
-config:
-  database:
-    host: "localhost"
+Both move types replace the original `KEY_REMOVED`/`KEY_ADDED` or `ITEM_REMOVED`/`ITEM_ADDED` pairs with a single move entry.
 
-# New
-database:
-  host: "localhost"  # Moved up one level
-```
-Result: `KEY_MOVED` from `config.database.host` to `database.host`
+### Change Types
 
-### Change Types Detected
-
-The generic diffing algorithm detects the following change types:
+The generic diff mode detects the following change types:
 
 | Change Type | Description | Example |
 |------------|-------------|---------|
-| `VALUE_CHANGED` | Same key/item, value changed | `port: 5432` → `port: 5433` |
-| `TYPE_CHANGED` | Value type changed | `port: "5432"` → `port: 5432` |
-| `KEY_ADDED` | New key in mapping | Added `timeout: 30` |
-| `KEY_REMOVED` | Key removed from mapping | Removed `deprecated: true` |
-| `KEY_RENAMED` | Key name changed, value same | `host` → `hostname` |
-| `KEY_MOVED` | Key+value moved to different path | `config.db.host` → `db.host` |
-| `ITEM_ADDED` | New item in array | Added to `servers[]` |
-| `ITEM_REMOVED` | Item removed from array | Removed from `servers[]` |
-| `ITEM_CHANGED` | Same item (by identity), content changed | `servers[0].port` changed |
-| `ITEM_MOVED` | Item moved to different array/path | `servers[2]` → `servers[0]` |
-| `UNCHANGED` | No changes detected | - |
+| `VALUE_CHANGED` | Same key/item, different value | `port: 8080` → `port: 9090` |
+| `TYPE_CHANGED` | Node type changed | `count: "5"` → `count: 5` |
+| `KEY_ADDED` | New key in mapping | New `timeout` key added |
+| `KEY_REMOVED` | Key removed from mapping | `retries` key removed |
+| `KEY_RENAMED` | Key name changed, value same | `hostname` → `host` |
+| `KEY_MOVED` | Key+value moved to different path | `config.db.host` → `database.host` |
+| `ITEM_ADDED` | New item in array | New container in list |
+| `ITEM_REMOVED` | Item removed from array | Container deleted |
+| `ITEM_CHANGED` | Same item (by identity), content changed | Container config modified |
+| `ITEM_MOVED` | Item moved to different array/path | Container moved to different list |
+| `UNCHANGED` | No changes detected | Value identical |
 
-## Legal Document Diffing Algorithm
+### Implementation
 
-The legal document diffing algorithm uses **marker-based matching** to reliably track sections across document versions.
+The generic diff algorithm is implemented in:
+- **Main function**: `diff_yaml_generic()` in `src/yaml_diffs/generic_diff.py`
+- **Phase 1**: `diff_node()` and `diff_sequence()` functions
+- **Phase 2**: `detect_renames()` function
+- **Phase 3**: `detect_moves()` function
+
+## Legal Document Diff Mode
+
+The legal document diff mode uses **marker-based matching** to detect changes in Hebrew legal documents. Sections are matched by their markers (structural identifiers like "1", "א", "(a)") rather than IDs, enabling reliable diffing across document versions even when sections are reordered or restructured.
+
+### Algorithm Summary
+
+The legal document diff algorithm builds marker maps for both document versions, then: (1) finds exact matches (same marker + same parent marker path) and detects content/title changes; (2) detects moved sections by content similarity (≥95% threshold) for unmatched sections; (3) classifies remaining unmatched sections as added or removed. The algorithm uses content similarity to detect movements even when markers change, and can record multiple change types for a single section (e.g., both MOVED and TITLE_CHANGED).
+
+### Workflow Diagram
+
+```mermaid
+flowchart TD
+    Start([Start: Legal Document Diff]) --> Validate[Validate Unique Markers<br/>at each nesting level]
+
+    Validate --> BuildMaps[Build Marker Maps<br/>marker + parent_path → section]
+
+    BuildMaps --> ExactMatch{Exact Match?<br/>Same marker + same parent path}
+
+    ExactMatch -->|Yes| CheckChanges{Changes detected?}
+    CheckChanges -->|Content changed| ContentChanged[Change Type: CONTENT_CHANGED<br/>Same marker+path, content modified]
+    CheckChanges -->|Title changed| TitleChanged[Change Type: TITLE_CHANGED<br/>Same marker+path, title modified]
+    CheckChanges -->|Both changed| BothChanged[Change Type: CONTENT_CHANGED<br/>Change Type: TITLE_CHANGED<br/>Both recorded separately]
+    CheckChanges -->|No changes| Unchanged[Change Type: UNCHANGED]
+
+    ExactMatch -->|No| Unmatched[Unmatched Sections<br/>Different marker or path]
+
+    Unmatched --> MoveDetection[Find Moved Sections<br/>Content similarity ≥ 95%]
+
+    MoveDetection --> MoveCheck{Content similarity<br/>≥ 95%?}
+    MoveCheck -->|Yes, non-empty content| Moved[Change Type: SECTION_MOVED<br/>Path changed, possibly marker changed<br/>Content similarity ≥ 95%]
+    MoveCheck -->|No or empty content| Remaining
+
+    Moved --> MovedChanges{Additional changes?}
+    MovedChanges -->|Title changed| MovedTitleChanged[Change Type: TITLE_CHANGED<br/>Recorded separately from MOVED]
+    MovedChanges -->|Content changed| MovedContentChanged[Change Type: CONTENT_CHANGED<br/>Recorded separately from MOVED]
+    MovedChanges -->|No additional changes| Remaining
+
+    Remaining[Remaining Unmatched Sections]
+    Remaining --> OldOnly{Section in old only?}
+    OldOnly -->|Yes| SectionRemoved[Change Type: SECTION_REMOVED<br/>Section removed from document]
+
+    Remaining --> NewOnly{Section in new only?}
+    NewOnly -->|Yes| SectionAdded[Change Type: SECTION_ADDED<br/>New section added to document]
+
+    ContentChanged --> MetadataDiff
+    TitleChanged --> MetadataDiff
+    BothChanged --> MetadataDiff
+    Unchanged --> MetadataDiff
+    Moved --> MetadataDiff
+    MovedTitleChanged --> MetadataDiff
+    MovedContentChanged --> MetadataDiff
+    SectionRemoved --> MetadataDiff
+    SectionAdded --> MetadataDiff
+
+    MetadataDiff[Diff Document Metadata<br/>version, source, authors, dates]
+    MetadataDiff -->|Metadata field changed| MetadataChanged[Change Type: CONTENT_CHANGED<br/>marker: __metadata__<br/>path: __metadata__.field]
+
+    MetadataChanged --> Finalize
+    MetadataDiff -->|No metadata changes| Finalize
+
+    Finalize[Finalize: Calculate Counts<br/>added_count, deleted_count<br/>modified_count, moved_count]
+    Finalize --> End([End: Return DocumentDiff])
+
+    style Validate fill:#e1f5ff
+    style BuildMaps fill:#e1f5ff
+    style MoveDetection fill:#fff4e1
+    style MetadataDiff fill:#ffe1f5
+    style ContentChanged fill:#ccccff
+    style TitleChanged fill:#ccccff
+    style SectionAdded fill:#ccffcc
+    style SectionRemoved fill:#ffcccc
+    style Moved fill:#ffccff
+    style MovedTitleChanged fill:#ccccff
+    style MovedContentChanged fill:#ccccff
+    style MetadataChanged fill:#ccccff
+    style Unchanged fill:#e0e0e0
+    style BothChanged fill:#ccccff
+```
 
 ### Marker-Based Matching
 
-Legal documents use **markers** (not IDs) as the primary identifier for sections. Markers must be unique within the same nesting level.
+The algorithm uses **markers** (structural identifiers like "1", "א", "(a)") as the primary identifiers for matching sections, not IDs. This approach:
 
-**Why Markers Instead of IDs?**
-- Markers are stable across versions (e.g., "פרק א'", "1", "(א)")
-- IDs may change or be auto-generated
-- Markers provide semantic meaning (section numbers, Hebrew markers)
+- **Enables semantic matching**: Markers are human-readable and reflect document structure
+- **Handles reordering**: Sections can be matched even when their position changes
+- **Supports Hebrew conventions**: Works with Hebrew legal document numbering systems
 
-### Algorithm Overview
+Markers must be unique within the same nesting level. The algorithm validates this before processing.
 
-1. **Build Marker Maps**: Create maps of `(marker, parent_path)` → section for both documents
-2. **Find Exact Matches**: Match sections with same marker and same parent path
-3. **Detect Changes**: Compare content and title for matched sections
-4. **Detect Movements**: Match unmatched sections by content similarity
-5. **Detect Additions/Deletions**: Unmatched sections are added or removed
+### Building Marker Maps
 
-### Phase 1: Exact Matching
+For each document, the algorithm builds a marker map that associates `(marker, parent_marker_path)` tuples with sections. This allows:
+- Fast lookup of sections by marker and location
+- Tracking of section paths through the document hierarchy
+- Detection of sections that moved to different parent sections
 
-Match sections with identical marker paths.
+### Exact Match Detection
 
-**Process:**
-1. Build marker maps for both documents:
-   ```python
-   marker_map = {
-       (marker, parent_path): (section, marker_path, id_path)
-   }
-   ```
-2. Find intersection of marker keys
-3. For each exact match:
-   - Compare content → `CONTENT_CHANGED` if different
-   - Compare title → `TITLE_CHANGED` if different
-   - If both same → `UNCHANGED`
+Sections with the same marker and same parent marker path are considered exact matches. For these sections, the algorithm checks:
+- **Content changes**: If the `content` field differs → `CONTENT_CHANGED`
+- **Title changes**: If the `title` field differs → `TITLE_CHANGED`
+- **Both can occur**: A section can have both change types recorded separately
+- **No changes**: If both content and title are identical → `UNCHANGED`
 
-**Example:**
-```yaml
-# Old
-sections:
-  - marker: "1"
-    content: "Old content"
+### Movement Detection
 
-# New
-sections:
-  - marker: "1"
-    content: "New content"  # Same marker, different content
-```
-Result: `CONTENT_CHANGED` for section with marker "1"
+Sections that don't have exact matches are analyzed for movement. The algorithm:
+- Calculates content similarity using word-based Jaccard similarity
+- Matches sections with ≥95% content similarity (one-to-one matching)
+- Filters out empty content sections (parent sections) to avoid false positives
+- Records `SECTION_MOVED` when a match is found
 
-### Phase 2: Movement Detection
+**Important**: Movement detection is based on content similarity, not marker or title. This means:
+- A section can be detected as moved even if its marker changed
+- A section can be detected as moved even if its title changed
+- Title changes are recorded separately as `TITLE_CHANGED` entries
+- Content changes in moved sections are recorded separately as `CONTENT_CHANGED` entries
 
-Match unmatched sections by content similarity.
+### Remaining Sections
 
-**Process:**
-1. Collect unmatched sections from both documents
-2. For each unmatched old section:
-   - Find unmatched new sections with similar content (≥0.95 similarity)
-   - If match found → `SECTION_MOVED`
-   - Record old_marker_path and new_marker_path
+Sections that couldn't be matched (neither exact match nor movement) are classified as:
+- `SECTION_ADDED`: Present in new version only
+- `SECTION_REMOVED`: Present in old version only
 
-**Similarity Calculation:**
-- Uses content similarity scoring
-- Only matches sections with non-empty content
-- Empty content sections (parent sections) are not matched
+### Metadata Diffing
 
-**Example:**
-```yaml
-# Old
-sections:
-  - marker: "1"
-    content: "Section content"
-  - marker: "2"
-    content: "Another section"
+The algorithm also diffs document-level metadata fields:
+- Version information (number, description)
+- Source information (URL, fetched_at)
+- Authors list
+- Dates (published_date, updated_date)
 
-# New
-sections:
-  - marker: "2"
-    content: "Section content"  # Moved from marker "1"
-  - marker: "1"
-    content: "Another section"  # Moved from marker "2"
-```
-Result: Two `SECTION_MOVED` changes
+Metadata changes are recorded as `CONTENT_CHANGED` entries with marker `__metadata__` and appropriate paths.
 
-### Phase 3: Additions and Deletions
+### Change Types
 
-Remaining unmatched sections are additions or deletions.
-
-**Process:**
-1. Unmatched sections in new document → `SECTION_ADDED`
-2. Unmatched sections in old document → `SECTION_REMOVED`
-
-### Change Types Detected
-
-The legal document diffing algorithm detects:
+The legal document diff mode detects the following change types:
 
 | Change Type | Description | Example |
 |------------|-------------|---------|
-| `SECTION_ADDED` | New section added | New section with marker "3" |
-| `SECTION_REMOVED` | Section removed | Removed section with marker "2" |
-| `CONTENT_CHANGED` | Content changed (same marker+path) | Same marker, different content |
-| `TITLE_CHANGED` | Title changed (same marker+path) | Same marker, different title |
-| `SECTION_MOVED` | Path changed (and possibly marker) | Marker "1" moved to different parent |
-| `UNCHANGED` | No changes detected | - |
+| `SECTION_ADDED` | New section added in new version | New section with marker "3" added |
+| `SECTION_REMOVED` | Section removed from old version | Section with marker "2" removed |
+| `CONTENT_CHANGED` | Content changed (same marker+path) | Section "1" content modified |
+| `SECTION_MOVED` | Path changed (possibly marker changed) | Section moved to different parent |
+| `TITLE_CHANGED` | Title changed (same marker+path+content) | Section "1" title modified |
+| `UNCHANGED` | No changes detected | Section identical in both versions |
 
-## Line Number Extraction
+**Multiple Change Types**: A single section can have multiple change types recorded. For example, a section that moved and had its title changed will have both `SECTION_MOVED` and `TITLE_CHANGED` entries.
 
-Both algorithms support line number tracking for changes, enabling precise location of modifications in source files.
+### Implementation
 
-### Generic YAML Line Numbers
+The legal document diff algorithm is implemented in:
+- **Main function**: `diff_documents()` in `src/yaml_diffs/diff.py`
+- **Marker validation**: `_validate_unique_markers()` function
+- **Marker map building**: `_build_marker_map()` function
+- **Movement detection**: `_find_moved_sections()` function
+- **Metadata diffing**: `_diff_document_metadata()` function
 
-Line numbers are extracted using path-based traversal:
+## Comparison: Generic vs Legal Document Mode
 
-1. Parse YAML to get line numbers for each node
-2. For each change, extract line number from path:
-   - Direct keys: Line number of the key
-   - Array items: Line number of the item (or parent if inline)
-   - Nested paths: Traverse to the target node
+| Aspect | Generic Mode | Legal Document Mode |
+|--------|-------------|---------------------|
+| **Use Case** | Any YAML file | Schema-validated legal documents |
+| **Matching Strategy** | Path-based + identity/content similarity | Marker-based + content similarity |
+| **Array Matching** | 4-phase: identity → 90% → 70% → positional | N/A (sections are matched by markers) |
+| **Similarity Thresholds** | 90% (rename/move), 70% (array fallback) | 95% (movement detection) |
+| **Change Types** | 11 types (VALUE_CHANGED, KEY_*, ITEM_*, etc.) | 6 types (SECTION_*, CONTENT_CHANGED, TITLE_CHANGED) |
+| **Multiple Changes** | Single change type per path | Multiple change types per section possible |
+| **Schema Required** | No | Yes (OpenSpec + Pydantic) |
+| **Hebrew Support** | Yes (UTF-8) | Yes (full Hebrew support) |
+| **Identity Fields** | Auto-detected or custom rules | Markers (required, semantic) |
+| **Movement Detection** | Global analysis by identity/content | Content similarity (≥95%) |
 
-**Challenges:**
-- Inline arrays: All items on same line → fallback to parent key line
-- Nested array indices: Complex path traversal required
-- Flow style YAML: Less precise line numbers
+## Related Documentation
 
-### Legal Document Line Numbers
-
-Line numbers are extracted using marker-based lookup:
-
-1. Parse YAML to get line numbers for each section
-2. Match sections by marker path
-3. Extract line number from section's YAML representation
-
-**Challenges:**
-- Same-line markers: `- marker: "value"` on one line
-- Nested sections: Need to track parent paths
-- Multi-line content: Use section start line
-
-## Performance Considerations
-
-### Generic Diffing
-
-- **Time Complexity**: O(n + m) where n, m are document sizes
-- **Similarity Calculations**: O(k) where k is number of unmatched items
-- **Optimization Opportunities**:
-  - Use `rapidfuzz` for faster similarity (10-100x speedup)
-  - Structural hashing to quickly eliminate non-matches
-  - Lazy evaluation for large diffs
-
-### Legal Document Diffing
-
-- **Time Complexity**: O(n + m) for marker map building, O(n×m) worst case for movement detection
-- **Similarity Calculations**: Only for unmatched sections (typically small)
-- **Optimization**: Content similarity only computed when needed
-
-## Edge Cases
-
-### Generic Diffing
-
-1. **Empty Arrays**: `[]` → `[1, 2, 3]` → All items are `ITEM_ADDED`
-2. **Scalar Arrays**: `["a", "b"]` → `["b", "c"]` → Items matched by value
-3. **Duplicate Values**: `[1, 1, 1]` → Matching by position
-4. **Very Long Paths**: 10+ levels deep → Handled recursively
-5. **Type Coercion**: String numbers vs actual numbers → `TYPE_CHANGED`
-
-### Legal Document Diffing
-
-1. **Duplicate Markers**: Validation error (markers must be unique)
-2. **Missing Markers**: Validation error (markers required)
-3. **Empty Content**: Parent sections with no content → Not matched for moves
-4. **Hebrew Content**: Full UTF-8 support throughout
-5. **Deep Nesting**: Unlimited depth supported recursively
-
-## Algorithm Selection
-
-The system automatically detects which algorithm to use:
-
-1. **Mode Detection** (`diff_router.py`):
-   - Checks for `document` → `sections` → `marker` structure
-   - If found → Legal Document Mode
-   - Otherwise → Generic Mode
-
-2. **Manual Override**:
-   - CLI: `--mode general` or `--mode legal_document`
-   - API: `mode` parameter
-   - MCP: `mode` parameter
-
-## Implementation Files
-
-- **Generic Diffing**: `src/yaml_diffs/generic_diff.py`
-- **Legal Document Diffing**: `src/yaml_diffs/diff.py`
-- **Mode Detection**: `src/yaml_diffs/diff_router.py`
-- **Line Number Extraction**: `src/yaml_diffs/yaml_extract.py`
-
-## References
-
-- [Architecture Documentation](./architecture.md) - System architecture overview
-- [API Reference](./api_reference.md) - API usage examples
-- [Generic Diff Types](../../src/yaml_diffs/generic_diff_types.py) - Type definitions
-- [Diff Types](../../src/yaml_diffs/diff_types.py) - Legal document diff types
+- [Architecture](architecture.md) - System architecture overview
+- [API Reference](api_reference.md) - Python library API documentation
+- [Schema Reference](../user/schema_reference.md) - Legal document schema documentation
+- [AGENTS.md](../../AGENTS.md) - Development guide for AI coding agents

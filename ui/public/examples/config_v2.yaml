@@ -48,4 +48,3 @@ features:
   - name: ai_assistant  # New feature
     enabled: false
     rollout_percentage: 0
-

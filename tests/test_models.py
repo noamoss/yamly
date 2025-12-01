@@ -6,7 +6,7 @@ import pytest
 import yaml
 from pydantic import ValidationError
 
-from yaml_diffs.models import Document, DocumentType, Section, Source, Version
+from yaml_diffs.models import Document, Section, Source, Version
 
 
 # Test fixtures
@@ -48,14 +48,8 @@ def full_section(sample_id: str, hebrew_text: str) -> Section:
 
 @pytest.fixture
 def minimal_document(sample_id: str) -> Document:
-    """Create a minimal document with required fields only."""
-    return Document(
-        id="law-1234",
-        title="חוק הדוגמה",
-        type=DocumentType.LAW,
-        version=Version(number="1.0"),
-        source=Source(url="https://example.com/law", fetched_at="2025-01-20T09:50:00Z"),
-    )
+    """Create a minimal document with only required sections field."""
+    return Document(sections=[])
 
 
 class TestSectionCreation:
@@ -212,7 +206,7 @@ class TestDocumentCreation:
         doc = Document(
             id="law-1234",
             title="חוק יסוד: כבוד האדם וחירותו",
-            type=DocumentType.LAW,
+            type="law",
             language="hebrew",
             version=Version(number="1.0", description="Initial version"),
             source=Source(url="https://example.com/law", fetched_at="2025-01-20T09:50:00Z"),
@@ -224,7 +218,7 @@ class TestDocumentCreation:
 
         assert doc.id == "law-1234"
         assert doc.title == "חוק יסוד: כבוד האדם וחירותו"
-        assert doc.type == DocumentType.LAW
+        assert doc.type == "law"
         assert doc.language == "hebrew"
         assert doc.version.number == "1.0"
         assert doc.version.description == "Initial version"
@@ -237,22 +231,15 @@ class TestDocumentCreation:
         assert doc.sections[0].id == sample_id
 
     def test_create_document_with_minimal_fields(self):
-        """Test creating Document with minimal required fields."""
-        doc = Document(
-            id="law-1234",
-            title="חוק הדוגמה",
-            type=DocumentType.LAW,
-            version=Version(number="1.0"),
-            source=Source(url="https://example.com/law", fetched_at="2025-01-20T09:50:00Z"),
-        )
+        """Test creating Document with minimal required fields (only sections)."""
+        doc = Document(sections=[])
 
-        assert doc.id == "law-1234"
-        assert doc.title == "חוק הדוגמה"
-        assert doc.type == DocumentType.LAW
-        assert doc.language == "hebrew"  # Default value
-        assert doc.version.number == "1.0"
-        assert doc.version.description is None
-        assert doc.source.url == "https://example.com/law"
+        assert doc.id is None
+        assert doc.title is None
+        assert doc.type is None
+        assert doc.language is None
+        assert doc.version is None
+        assert doc.source is None
         assert doc.authors is None
         assert doc.published_date is None
         assert doc.updated_date is None
@@ -263,14 +250,14 @@ class TestDocumentCreation:
         doc = Document(
             id="law-1234",
             title="Test Document",
-            type=DocumentType.REGULATION,
+            type="regulation",
             version=Version(number="1.0"),
             source=Source(url="https://example.com/law", fetched_at="2025-01-20T09:50:00Z"),
             published_date="2024-01-15",
         )
 
         assert doc.title == "Test Document"
-        assert doc.type == DocumentType.REGULATION
+        assert doc.type == "regulation"
         assert doc.authors is None
         assert doc.version.number == "1.0"
         assert doc.published_date == "2024-01-15"
@@ -281,7 +268,7 @@ class TestDocumentCreation:
         doc = Document(
             id="law-1234",
             title=hebrew_text,
-            type=DocumentType.LAW,
+            type="law",
             authors=["מחבר ראשון", "מחבר שני"],
             version=Version(number="1.0"),
             source=Source(url="https://example.com/law", fetched_at="2025-01-20T09:50:00Z"),
@@ -297,7 +284,7 @@ class TestDocumentCreation:
         doc1 = Document(
             id="law-1234",
             title="Test",
-            type=DocumentType.LAW,
+            type="law",
             version=Version(number="1.0"),
             source=Source(url="https://example.com/law", fetched_at="2025-01-20T09:50:00Z"),
             published_date="2024-01-15",
@@ -308,7 +295,7 @@ class TestDocumentCreation:
         doc2 = Document(
             id="law-1234",
             title="Test",
-            type=DocumentType.LAW,
+            type="law",
             version=Version(number="1.0"),
             source=Source(url="https://example.com/law", fetched_at="2025-01-20T09:50:00Z"),
             updated_date="2024-01-15T10:30:00Z",
@@ -319,7 +306,7 @@ class TestDocumentCreation:
         doc3 = Document(
             id="law-1234",
             title="Test",
-            type=DocumentType.LAW,
+            type="law",
             version=Version(number="1.0"),
             source=Source(url="https://example.com/law", fetched_at="2025-01-20T09:50:00Z"),
             published_date="2024-01-15",
@@ -334,7 +321,7 @@ class TestDocumentCreation:
         doc = Document(
             id="law-1234",
             title="Test",
-            type=DocumentType.LAW,
+            type="law",
             version=Version(number="1.0"),
             source=Source(url="https://example.com/law", fetched_at="2025-01-20T09:50:00Z"),
             authors=[],
@@ -342,58 +329,17 @@ class TestDocumentCreation:
         assert doc.authors == []
 
     def test_document_rejects_missing_required_fields(self):
-        """Test Document rejects missing required fields."""
-        # Missing id
-        with pytest.raises(ValidationError) as exc_info:
-            Document(
-                title="Test",
-                type=DocumentType.LAW,
-                version=Version(number="1.0"),
-                source=Source(url="https://example.com/law", fetched_at="2025-01-20T09:50:00Z"),
-            )
-        errors = exc_info.value.errors()
-        assert len(errors) > 0
-        error_msg = str(exc_info.value).lower()
-        assert "id" in error_msg
+        """Test Document schema requires sections field (Pydantic allows default, but schema validation requires it)."""
+        # Note: Pydantic allows Document() because sections has default_factory=list
+        # But schema validation should require sections to be present
+        from yaml_diffs.validator import validate_against_openspec
 
-        # Missing title
-        with pytest.raises(ValidationError) as exc_info:
-            Document(
-                id="law-1234",
-                type=DocumentType.LAW,
-                version=Version(number="1.0"),
-                source=Source(url="https://example.com/law", fetched_at="2025-01-20T09:50:00Z"),
-            )
-        errors = exc_info.value.errors()
-        assert len(errors) > 0
+        # Missing sections in schema validation
+        data_without_sections = {"document": {}}
+        with pytest.raises(Exception) as exc_info:
+            validate_against_openspec(data_without_sections)
         error_msg = str(exc_info.value).lower()
-        assert "title" in error_msg
-
-        # Missing version
-        with pytest.raises(ValidationError) as exc_info:
-            Document(
-                id="law-1234",
-                title="Test",
-                type=DocumentType.LAW,
-                source=Source(url="https://example.com/law", fetched_at="2025-01-20T09:50:00Z"),
-            )
-        errors = exc_info.value.errors()
-        assert len(errors) > 0
-        error_msg = str(exc_info.value).lower()
-        assert "version" in error_msg
-
-        # Missing source
-        with pytest.raises(ValidationError) as exc_info:
-            Document(
-                id="law-1234",
-                title="Test",
-                type=DocumentType.LAW,
-                version=Version(number="1.0"),
-            )
-        errors = exc_info.value.errors()
-        assert len(errors) > 0
-        error_msg = str(exc_info.value).lower()
-        assert "source" in error_msg
+        assert "sections" in error_msg
 
     def test_document_rejects_invalid_date_format(self):
         """Test Document rejects invalid date formats."""
@@ -402,7 +348,7 @@ class TestDocumentCreation:
             Document(
                 id="law-1234",
                 title="Test",
-                type=DocumentType.LAW,
+                type="law",
                 version=Version(number="1.0"),
                 source=Source(url="https://example.com/law", fetched_at="2025-01-20T09:50:00Z"),
                 published_date="not-a-date",
@@ -417,7 +363,7 @@ class TestDocumentCreation:
             Document(
                 id="law-1234",
                 title="Test",
-                type=DocumentType.LAW,
+                type="law",
                 version=Version(number="1.0"),
                 source=Source(url="https://example.com/law", fetched_at="2025-01-20T09:50:00Z"),
                 updated_date="2024/01/15",  # Wrong format
@@ -433,7 +379,7 @@ class TestDocumentCreation:
         doc1 = Document(
             id="law-1234",
             title="Test",
-            type=DocumentType.LAW,
+            type="law",
             version=Version(number="1.0"),
             source=Source(url="https://example.com/law", fetched_at="2025-01-20T09:50:00Z"),
             published_date="2024-01-15",
@@ -444,7 +390,7 @@ class TestDocumentCreation:
         doc2 = Document(
             id="law-1234",
             title="Test",
-            type=DocumentType.LAW,
+            type="law",
             version=Version(number="1.0"),
             source=Source(url="https://example.com/law", fetched_at="2025-01-20T09:50:00Z"),
             updated_date="2024-01-15T10:30:00",
@@ -455,27 +401,30 @@ class TestDocumentCreation:
         doc3 = Document(
             id="law-1234",
             title="Test",
-            type=DocumentType.LAW,
+            type="law",
             version=Version(number="1.0"),
             source=Source(url="https://example.com/law", fetched_at="2025-01-20T09:50:00Z"),
             updated_date="2024-01-15T10:30:00Z",
         )
         assert doc3.updated_date == "2024-01-15T10:30:00Z"
 
-    def test_document_type_enum(self):
-        """Test DocumentType enum values."""
-        doc = Document(
-            id="law-1234",
-            title="Test",
-            type=DocumentType.LAW,
-            version=Version(number="1.0"),
-            source=Source(url="https://example.com/law", fetched_at="2025-01-20T09:50:00Z"),
-        )
-        assert doc.type == DocumentType.LAW
-        assert doc.type.value == "law"
+    def test_document_type_free_text(self):
+        """Test that type field accepts any string value (free text)."""
+        # Test common type values
+        common_types = ["law", "regulation", "directive", "circular", "policy", "other"]
+        for doc_type in common_types:
+            doc = Document(
+                id="law-1234",
+                title="Test",
+                type=doc_type,
+                version=Version(number="1.0"),
+                source=Source(url="https://example.com/law", fetched_at="2025-01-20T09:50:00Z"),
+            )
+            assert doc.type == doc_type
 
-        # Test all enum values
-        for doc_type in DocumentType:
+        # Test custom type values
+        custom_types = ["custom-type", "my-document-type", "special-law", "תקנה מיוחדת"]
+        for doc_type in custom_types:
             doc = Document(
                 id="law-1234",
                 title="Test",
@@ -536,6 +485,142 @@ class TestDocumentCreation:
         assert "url" in error_msg or "uri" in error_msg
 
 
+class TestOptionalMetadataFields:
+    """Test optional metadata fields in Document model."""
+
+    def test_create_document_without_id(self):
+        """Test creating Document without id field."""
+        doc = Document(sections=[])
+        assert doc.id is None
+        assert doc.sections == []
+
+    def test_create_document_without_title(self):
+        """Test creating Document without title field."""
+        doc = Document(sections=[])
+        assert doc.title is None
+        assert doc.sections == []
+
+    def test_create_document_without_type(self):
+        """Test creating Document without type field."""
+        doc = Document(sections=[])
+        assert doc.type is None
+        assert doc.sections == []
+
+    def test_create_document_without_language(self):
+        """Test creating Document without language field."""
+        doc = Document(sections=[])
+        assert doc.language is None
+        assert doc.sections == []
+
+    def test_create_document_without_version(self):
+        """Test creating Document without version object."""
+        doc = Document(sections=[])
+        assert doc.version is None
+        assert doc.sections == []
+
+    def test_create_document_without_source(self):
+        """Test creating Document without source object."""
+        doc = Document(sections=[])
+        assert doc.source is None
+        assert doc.sections == []
+
+    def test_create_document_with_version_but_without_number(self):
+        """Test creating Document with version object but without number."""
+        doc = Document(version=Version(), sections=[])
+        assert doc.version is not None
+        assert doc.version.number is None
+        assert doc.version.description is None
+        assert doc.sections == []
+
+    def test_create_document_with_source_but_without_url_or_fetched_at(self):
+        """Test creating Document with source object but without url or fetched_at."""
+        doc = Document(source=Source(), sections=[])
+        assert doc.source is not None
+        assert doc.source.url is None
+        assert doc.source.fetched_at is None
+        assert doc.sections == []
+
+    def test_create_minimal_document_with_only_sections(self):
+        """Test creating minimal document with only sections array."""
+        section = Section(marker="1", content="Test content")
+        doc = Document(sections=[section])
+        assert doc.id is None
+        assert doc.title is None
+        assert doc.type is None
+        assert doc.language is None
+        assert doc.version is None
+        assert doc.source is None
+        assert len(doc.sections) == 1
+        assert doc.sections[0].marker == "1"
+        assert doc.sections[0].content == "Test content"
+
+    def test_backward_compatibility_all_fields_still_work(self):
+        """Test backward compatibility - documents with all fields still work."""
+        doc = Document(
+            id="law-1234",
+            title="חוק הדוגמה",
+            type="law",
+            language="hebrew",
+            version=Version(number="1.0", description="Initial version"),
+            source=Source(url="https://example.com/law", fetched_at="2025-01-20T09:50:00Z"),
+            authors=["הכנסת"],
+            published_date="1992-03-17",
+            updated_date="2024-01-15",
+            sections=[],
+        )
+        assert doc.id == "law-1234"
+        assert doc.title == "חוק הדוגמה"
+        assert doc.type == "law"
+        assert doc.language == "hebrew"
+        assert doc.version is not None
+        assert doc.version.number == "1.0"
+        assert doc.source is not None
+        assert doc.source.url == "https://example.com/law"
+        assert doc.authors == ["הכנסת"]
+        assert doc.published_date == "1992-03-17"
+        assert doc.updated_date == "2024-01-15"
+        assert doc.sections == []
+
+    def test_document_with_partial_optional_fields(self):
+        """Test creating Document with some optional fields provided."""
+        doc = Document(
+            id="law-1234",
+            title="Test Document",
+            sections=[],
+        )
+        assert doc.id == "law-1234"
+        assert doc.title == "Test Document"
+        assert doc.type is None
+        assert doc.language is None
+        assert doc.version is None
+        assert doc.source is None
+        assert doc.sections == []
+
+    def test_version_with_optional_number(self):
+        """Test Version model with optional number field."""
+        version = Version(description="Test version")
+        assert version.number is None
+        assert version.description == "Test version"
+
+        version2 = Version()
+        assert version2.number is None
+        assert version2.description is None
+
+    def test_source_with_optional_fields(self):
+        """Test Source model with optional url and fetched_at fields."""
+        source = Source()
+        assert source.url is None
+        assert source.fetched_at is None
+
+        source2 = Source(url="https://example.com/law")
+        assert source2.url == "https://example.com/law"
+        assert source2.fetched_at is None
+
+        source3 = Source(fetched_at="2025-01-20T09:50:00Z")
+        assert source3.url is None
+        assert source3.fetched_at == "2025-01-20T09:50:00Z"
+
+
 class TestIntegration:
     """Integration tests for YAML loading and round-trip conversion."""
 
@@ -584,7 +669,7 @@ document:
         # Verify structure is correct
         assert doc.id == "law-1234"
         assert doc.title == "חוק יסוד: כבוד האדם וחירותו"
-        assert doc.type == DocumentType.LAW
+        assert doc.type == "law"
         assert doc.language == "hebrew"
         assert doc.version.number == "1.0"
         assert doc.source.url == "https://example.com/test"
@@ -604,7 +689,7 @@ document:
         original_doc = Document(
             id="law-1234",
             title="חוק יסוד: כבוד האדם וחירותו",
-            type=DocumentType.LAW,
+            type="law",
             language="hebrew",
             version=Version(number="1.0", description="Initial version"),
             source=Source(url="https://example.com/law", fetched_at="2025-01-20T09:50:00Z"),
@@ -670,7 +755,7 @@ document:
         original_doc = Document(
             id="law-1234",
             title="Test",
-            type=DocumentType.LAW,
+            type="law",
             version=Version(number="1.0"),
             source=Source(url="https://example.com/law", fetched_at="2025-01-20T09:50:00Z"),
             sections=[
