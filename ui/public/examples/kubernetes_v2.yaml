@@ -38,4 +38,3 @@ spec:
         - name: sidecar
           image: busybox:1.35  # Updated from 1.32
           command: ["sh", "-c", "while true; do echo 'heartbeat'; sleep 30; done"]  # Changed interval
-

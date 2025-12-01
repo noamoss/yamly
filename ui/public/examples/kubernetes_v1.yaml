@@ -34,4 +34,3 @@ spec:
         - name: sidecar
           image: busybox:1.32
           command: ["sh", "-c", "while true; do echo 'heartbeat'; sleep 60; done"]
-

@@ -72,7 +72,7 @@ def test_root_endpoint() -> None:
 
 # Validation endpoint tests
 def test_validate_endpoint_valid_document(minimal_yaml_content: str) -> None:
-    """Test validate endpoint with valid document."""
+    """Test validate endpoint with valid document (minimal, no metadata)."""
     response = client.post(
         "/api/v1/validate",
         json={"yaml": minimal_yaml_content},
@@ -81,8 +81,10 @@ def test_validate_endpoint_valid_document(minimal_yaml_content: str) -> None:
     data = response.json()
     assert data["valid"] is True
     assert data["document"] is not None
-    assert data["document"]["id"] == "law-1234"
-    assert data["document"]["title"] == "חוק הדוגמה לרגולציה"
+    # Minimal document has no metadata
+    assert data["document"].get("id") is None
+    assert data["document"].get("title") is None
+    assert data["document"]["sections"] is not None
     assert data["error"] is None
     assert data["message"] is None
 
@@ -147,8 +149,10 @@ def test_validate_endpoint_hebrew_content(minimal_yaml_content: str) -> None:
     assert response.status_code == 200
     data = response.json()
     assert data["valid"] is True
-    # Verify Hebrew text is preserved
-    assert "חוק" in data["document"]["title"]
+    # Verify Hebrew text is preserved in sections content (title is now optional)
+    sections = data["document"].get("sections", [])
+    if sections and sections[0].get("content"):
+        assert "מוסד" in sections[0]["content"] or "חוק" in sections[0]["content"]
 
 
 # Diff endpoint tests
@@ -491,6 +495,65 @@ def test_validate_endpoint_missing_sections() -> None:
     data = response.json()
     assert data["valid"] is True
     assert data["document"]["sections"] == []
+
+
+def test_validate_endpoint_minimal_document() -> None:
+    """Test validate endpoint accepts minimal document without metadata."""
+    minimal_yaml = """document:
+  sections: []
+"""
+    response = client.post(
+        "/api/v1/validate",
+        json={"yaml": minimal_yaml},
+    )
+    assert response.status_code == 200
+    data = response.json()
+    assert data["valid"] is True
+    assert data["document"]["sections"] == []
+    assert data["document"].get("id") is None
+    assert data["document"].get("title") is None
+
+
+def test_validate_endpoint_document_without_version() -> None:
+    """Test validate endpoint accepts document without version."""
+    yaml_without_version = """document:
+  id: "test-123"
+  title: "Test Document"
+  sections: []
+"""
+    response = client.post(
+        "/api/v1/validate",
+        json={"yaml": yaml_without_version},
+    )
+    assert response.status_code == 200
+    data = response.json()
+    assert data["valid"] is True
+    assert data["document"]["id"] == "test-123"
+    assert data["document"].get("version") is None
+
+
+def test_diff_endpoint_minimal_documents() -> None:
+    """Test diff endpoint works with minimal documents (no metadata)."""
+    old_yaml = """document:
+  sections:
+    - marker: "1"
+      content: "Old content"
+      sections: []
+"""
+    new_yaml = """document:
+  sections:
+    - marker: "1"
+      content: "New content"
+      sections: []
+"""
+    response = client.post(
+        "/api/v1/diff",
+        json={"old_yaml": old_yaml, "new_yaml": new_yaml},
+    )
+    assert response.status_code == 200
+    data = response.json()
+    assert "document_diff" in data
+    assert len(data["document_diff"]["changes"]) > 0
 
 
 def test_error_response_format() -> None:

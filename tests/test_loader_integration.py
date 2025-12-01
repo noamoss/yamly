@@ -17,7 +17,7 @@ def examples_dir() -> Path:
 
 
 def test_load_minimal_example(examples_dir: Path) -> None:
-    """Test loading minimal_document.yaml."""
+    """Test loading minimal_document.yaml (now truly minimal, no metadata)."""
     minimal_file = examples_dir / "minimal_document.yaml"
 
     assert minimal_file.exists(), f"Example file not found: {minimal_file}"
@@ -25,16 +25,16 @@ def test_load_minimal_example(examples_dir: Path) -> None:
     doc = load_document(minimal_file)
 
     assert isinstance(doc, Document)
-    assert doc.id == "law-1234"
-    assert doc.title == "חוק הדוגמה לרגולציה"
-    assert doc.type.value == "law"
-    assert doc.language == "hebrew"
-    assert doc.version.number == "2024-01-01"
-    assert doc.source.url == "https://example.gov.il/law1234"
+    # Minimal document has no metadata fields
+    assert doc.id is None
+    assert doc.title is None
+    assert doc.type is None
+    assert doc.language is None
+    assert doc.version is None
+    assert doc.source is None
+    # But has sections
     assert len(doc.sections) == 1
-    assert doc.sections[0].id == "sec-1"
     assert doc.sections[0].marker == "1"
-    assert doc.sections[0].title == "הגדרות"
 
 
 def test_load_complex_example(examples_dir: Path) -> None:
@@ -48,7 +48,7 @@ def test_load_complex_example(examples_dir: Path) -> None:
     assert isinstance(doc, Document)
     assert doc.id == "reg-BOI-2025-01"
     assert doc.title == "הנחיה למוסדות פיננסיים – ניהול סיכוני סייבר"
-    assert doc.type.value == "regulation"
+    assert doc.type == "regulation"
     assert doc.language == "hebrew"
     assert doc.version.number == "2025-02-01"
     assert doc.version.description == "גרסה ראשונה של ההנחיה"
@@ -62,7 +62,7 @@ def test_load_complex_example(examples_dir: Path) -> None:
 
 
 def test_validate_minimal_example(examples_dir: Path) -> None:
-    """Test validating minimal_document.yaml."""
+    """Test validating minimal_document.yaml (now truly minimal, no metadata)."""
     minimal_file = examples_dir / "minimal_document.yaml"
 
     assert minimal_file.exists(), f"Example file not found: {minimal_file}"
@@ -71,7 +71,9 @@ def test_validate_minimal_example(examples_dir: Path) -> None:
     doc = validate_document(minimal_file)
 
     assert isinstance(doc, Document)
-    assert doc.id == "law-1234"
+    # Minimal document has no metadata
+    assert doc.id is None
+    assert len(doc.sections) == 1
 
 
 def test_validate_complex_example(examples_dir: Path) -> None:
@@ -101,22 +103,24 @@ def test_example_documents_structure(examples_dir: Path) -> None:
 
         doc = load_document(yaml_file)
 
-        # Verify required fields
-        assert doc.id
-        assert doc.title
-        assert doc.type
-        assert doc.language == "hebrew"
-        assert doc.version
-        assert doc.version.number
-        assert doc.source
-        assert doc.source.url
-        assert doc.source.fetched_at
+        # Verify required field (sections)
         assert doc.sections is not None  # Can be empty list
 
         # Verify sections structure
         for section in doc.sections:
-            assert section.id
+            assert section.marker  # Required
             assert isinstance(section.sections, list)
+
+        # For complex document, verify it has metadata (minimal doesn't)
+        if yaml_file.name == "complex_document.yaml":
+            assert doc.id
+            assert doc.title
+            assert doc.type
+            assert doc.language == "hebrew"
+            assert doc.version
+            assert doc.version.number
+            assert doc.source
+            assert doc.source.url
 
 
 def test_example_documents_hebrew_content(examples_dir: Path) -> None:
@@ -130,10 +134,11 @@ def test_example_documents_hebrew_content(examples_dir: Path) -> None:
 
         doc = load_document(yaml_file)
 
-        # Title should contain Hebrew characters
-        assert any(ord(c) >= 0x0590 and ord(c) <= 0x05FF for c in doc.title), (
-            f"Title should contain Hebrew characters: {doc.title}"
-        )
+        # Title should contain Hebrew characters (if title exists)
+        if doc.title:
+            assert any(ord(c) >= 0x0590 and ord(c) <= 0x05FF for c in doc.title), (
+                f"Title should contain Hebrew characters: {doc.title}"
+            )
 
         # Check sections for Hebrew content
         for section in doc.sections:
@@ -182,7 +187,9 @@ class TestFullWorkflowIntegration:
         doc = load_and_validate(minimal_file)
 
         assert isinstance(doc, Document)
-        assert doc.id == "law-1234"
+        # Minimal document has no metadata
+        assert doc.id is None
+        assert len(doc.sections) == 1
 
     def test_diff_files_convenience(self, examples_dir: Path):
         """Test diff_files convenience function."""

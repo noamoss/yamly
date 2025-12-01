@@ -18,7 +18,7 @@ from yaml_diffs.exceptions import (
     YAMLLoadError,
 )
 from yaml_diffs.loader import load_yaml, load_yaml_file
-from yaml_diffs.models import Document, DocumentType, Section, Source, Version
+from yaml_diffs.models import Document, Section, Source, Version
 
 
 class TestEmptyDocuments:
@@ -45,7 +45,7 @@ class TestEmptyDocuments:
         doc = Document(
             id="empty-sections",
             title="מסמך ריק",
-            type=DocumentType.LAW,
+            type="law",
             version=Version(number="1.0"),
             source=Source(url="https://example.com", fetched_at="2025-01-20T09:50:00Z"),
             sections=[],
@@ -841,7 +841,7 @@ class TestEdgeCaseDiffing:
         doc1 = Document(
             id="doc-1",
             title="מסמך 1",
-            type=DocumentType.LAW,
+            type="law",
             version=Version(number="1.0"),
             source=Source(url="https://example.com", fetched_at="2025-01-20T09:50:00Z"),
             sections=[],
@@ -850,7 +850,7 @@ class TestEdgeCaseDiffing:
         doc2 = Document(
             id="doc-2",
             title="מסמך 2",
-            type=DocumentType.LAW,
+            type="law",
             version=Version(number="1.0"),
             source=Source(url="https://example.com", fetched_at="2025-01-20T09:50:00Z"),
             sections=[],
@@ -869,7 +869,7 @@ class TestEdgeCaseDiffing:
         doc = Document(
             id="doc-1",
             title="מסמך",
-            type=DocumentType.LAW,
+            type="law",
             version=Version(number="1.0"),
             source=Source(url="https://example.com", fetched_at="2025-01-20T09:50:00Z"),
             sections=[],
@@ -892,7 +892,7 @@ class TestEdgeCaseDiffing:
         doc = Document(
             id="doc-1",
             title="מסמך",
-            type=DocumentType.LAW,
+            type="law",
             version=Version(number="1.0"),
             source=Source(url="https://example.com", fetched_at="2025-01-20T09:50:00Z"),
             sections=[section1, section2],

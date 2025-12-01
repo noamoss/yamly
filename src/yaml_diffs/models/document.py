@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from datetime import datetime
-from enum import Enum
 from typing import Literal
 from urllib.parse import urlparse
 
@@ -12,27 +11,17 @@ from pydantic import BaseModel, Field, field_validator
 from yaml_diffs.models.section import Section
 
 
-class DocumentType(str, Enum):
-    """Type of legal document."""
-
-    LAW = "law"
-    REGULATION = "regulation"
-    DIRECTIVE = "directive"
-    CIRCULAR = "circular"
-    POLICY = "policy"
-    OTHER = "other"
-
-
 class Version(BaseModel):
     """Document version information.
 
     Attributes:
-        number: Version identifier or date (e.g., "2024-11-01", "v1.0").
+        number: Optional version identifier or date (e.g., "2024-11-01", "v1.0").
         description: Optional version description.
     """
 
-    number: str = Field(
-        description="Version identifier or date (e.g., '2024-11-01', 'v1.0').",
+    number: str | None = Field(
+        default=None,
+        description="Version identifier for tracking document versions (recommended for version control).",
         min_length=1,
     )
     description: str | None = Field(
@@ -45,22 +34,26 @@ class Source(BaseModel):
     """Document source information.
 
     Attributes:
-        url: Original source URL (must be valid URI).
-        fetched_at: ISO 8601 timestamp when document was fetched.
+        url: Optional original source URL (must be valid URI if provided).
+        fetched_at: Optional ISO 8601 timestamp when document was fetched.
     """
 
-    url: str = Field(
-        description="Original source URL (must be valid URI).",
+    url: str | None = Field(
+        default=None,
+        description="Source URL for provenance and attribution (recommended for traceability).",
         min_length=1,
     )
-    fetched_at: str = Field(
-        description="ISO 8601 timestamp when document was fetched.",
+    fetched_at: str | None = Field(
+        default=None,
+        description="Timestamp when document was retrieved (recommended for audit trails).",
     )
 
     @field_validator("url")
     @classmethod
-    def validate_url(cls, v: str) -> str:
+    def validate_url(cls, v: str | None) -> str | None:
         """Validate that url is a valid URI."""
+        if v is None:
+            return v
         try:
             result = urlparse(v)
             if not all([result.scheme, result.netloc]):
@@ -71,8 +64,10 @@ class Source(BaseModel):
 
     @field_validator("fetched_at")
     @classmethod
-    def validate_fetched_at_format(cls, v: str) -> str:
+    def validate_fetched_at_format(cls, v: str | None) -> str | None:
         """Validate that fetched_at is in ISO 8601 format."""
+        if v is None:
+            return v
         try:
             # Handle 'Z' timezone indicator - only replace trailing 'Z'
             # Guard against edge case where v is just "Z"
@@ -94,53 +89,67 @@ class Document(BaseModel):
     A document contains metadata and a list of root sections. Sections can be
     nested recursively to unlimited depth. Matches the JSON Schema structure.
 
+    All metadata fields (id, title, type, language, version, source) are optional.
+    The core diffing functionality only requires the `sections` array and section
+    `marker` fields. Metadata fields are recommended for better document organization
+    and tracking but are not functionally required.
+
     Attributes:
-        id: Stable document identifier (recommended: UUID or canonical ID).
-        title: Document title in Hebrew. Required.
-        type: Type of legal document (law, regulation, directive, etc.). Required.
-        language: Document language (must be 'hebrew'). Required.
-        version: Document version information (object with number and optional description). Required.
-        source: Document source information (object with url and fetched_at). Required.
+        id: Optional stable document identifier (recommended: UUID or canonical ID).
+        title: Optional document title for human readability (recommended for documentation).
+        type: Optional document type classification (recommended for organization and filtering). Accepts any string value.
+        language: Optional document language specification (recommended for multi-language support).
+        version: Optional document version information (recommended for version control).
+        source: Optional document source information (recommended for traceability).
         authors: Optional list of authors, entities, or organizations. Supports Hebrew text.
         published_date: Optional publication date in ISO 8601 format.
         updated_date: Optional last update date in ISO 8601 format.
         sections: Required list of root-level sections in the document (can be empty).
 
     Examples:
+        >>> # Minimal document with only sections
+        >>> doc = Document(sections=[Section(marker="1", content="Introduction")])
+        >>>
+        >>> # Full document with all metadata
         >>> doc = Document(
         ...     id="law-1234",
         ...     title="חוק יסוד: כבוד האדם וחירותו",
-        ...     type=DocumentType.LAW,
+        ...     type="law",
         ...     language="hebrew",
         ...     version=Version(number="1.0"),
         ...     source=Source(url="https://example.com/law", fetched_at="2025-01-20T09:50:00Z"),
         ...     authors=["הכנסת"],
         ...     published_date="1992-03-17",
         ...     updated_date="2024-01-15",
-        ...     sections=[Section(id="sec-1", content="Introduction")]
+        ...     sections=[Section(marker="1", content="Introduction")]
         ... )
     """
 
-    id: str = Field(
-        description="Stable document identifier (recommended: UUID or canonical ID).",
+    id: str | None = Field(
+        default=None,
+        description="Stable document identifier for tracking and reference (recommended: UUID or canonical ID).",
         min_length=1,
     )
-    title: str = Field(
-        description="Document title in Hebrew. Required.",
+    title: str | None = Field(
+        default=None,
+        description="Document title for human readability (recommended for documentation).",
         min_length=1,
     )
-    type: DocumentType = Field(
-        description="Type of legal document (law, regulation, directive, etc.). Required.",
+    type: str | None = Field(
+        default=None,
+        description="Document type classification (recommended for organization and filtering). Accepts any string value.",
     )
-    language: Literal["hebrew"] = Field(
-        default="hebrew",
-        description="Document language (must be 'hebrew'). Required.",
+    language: Literal["hebrew"] | None = Field(
+        default=None,
+        description="Document language specification (recommended for multi-language support).",
     )
-    version: Version = Field(
-        description="Document version information (object with number and optional description). Required.",
+    version: Version | None = Field(
+        default=None,
+        description="Document version information (recommended for version control).",
     )
-    source: Source = Field(
-        description="Document source information (object with url and fetched_at). Required.",
+    source: Source | None = Field(
+        default=None,
+        description="Document source information (recommended for traceability).",
     )
     authors: list[str] | None = Field(
         default=None,

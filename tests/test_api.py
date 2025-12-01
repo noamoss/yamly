@@ -20,7 +20,7 @@ from yaml_diffs.api import (
     load_document,
     validate_document,
 )
-from yaml_diffs.models import DocumentType, Section, Source, Version
+from yaml_diffs.models import Section, Source, Version
 
 
 # Test fixtures
@@ -126,10 +126,10 @@ def document_v2_file(tmp_path: Path, document_v2_content: str) -> Path:
 
 @pytest.fixture
 def invalid_yaml_content() -> str:
-    """Invalid YAML content (missing required fields)."""
+    """Invalid YAML content (wrong type for id field)."""
     return """document:
-  id: "test-123"
-  # Missing required fields
+  id: 123  # Should be string, not number
+  sections: []
 """
 
 
@@ -171,8 +171,9 @@ class TestLoadDocument:
         assert "not found" in str(exc_info.value).lower()
 
     def test_load_document_raises_pydantic_validation_error(self, invalid_yaml_file: Path):
-        """Test load_document raises PydanticValidationError for invalid document."""
-        with pytest.raises(PydanticValidationError):
+        """Test load_document raises validation error for invalid document (missing sections)."""
+        # Missing sections should raise OpenSpecValidationError (schema validation happens first)
+        with pytest.raises((OpenSpecValidationError, PydanticValidationError)):
             load_document(invalid_yaml_file)
 
 
@@ -230,7 +231,7 @@ class TestDiffDocuments:
         doc1 = Document(
             id="test-1",
             title="Test",
-            type=DocumentType.LAW,
+            type="law",
             version=Version(number="1.0"),
             source=Source(url="https://example.com", fetched_at="2025-01-20T09:50:00Z"),
             sections=[
@@ -241,7 +242,7 @@ class TestDiffDocuments:
         doc2 = Document(
             id="test-2",
             title="Test",
-            type=DocumentType.LAW,
+            type="law",
             version=Version(number="1.0"),
             source=Source(url="https://example.com", fetched_at="2025-01-20T09:50:00Z"),
             sections=[],

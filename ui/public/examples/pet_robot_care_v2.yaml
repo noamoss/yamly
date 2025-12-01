@@ -8,158 +8,108 @@ document:
   version:
     number: "2.0"
     description: "Updated care schedule with enhanced protocols"
-  schedule:
-    daily_routine:
-      morning:
-        time: "07:00"
-        activities:
-          - activity: "Battery Check"
-            duration_minutes: 5
-            priority: "high"
-          - activity: "Software Update Check"
-            duration_minutes: 10
-            priority: "medium"
-          - activity: "Cleaning Protocol"
-            duration_minutes: 15
-            priority: "high"
-          # ADDED: New morning activity
-          - activity: "Health Diagnostics"
-            duration_minutes: 8
-            priority: "high"
-        sections:
-          - marker: "morning-1"
-            title: "Battery Maintenance"
-            content: |
-              Check battery levels and charge if below 50%.
-              # MODIFIED: Added temperature monitoring
-              Monitor battery temperature during charging.
-            sections:
-              - marker: "battery-1"
-                title: "Level Check"
-                content: |
-                  Verify current battery percentage.
-                sections:
-                  - marker: "battery-1-a"
-                    title: "Low Battery Protocol"
-                    content: |
-                      If battery below 20%, initiate emergency charging.
-                      # MODIFIED: Added notification requirement
-                      Send alert to owner's device.
-                    sections: []
-                  # ADDED: New nested section
-                  - marker: "battery-1-b"
-                    title: "Charging Safety"
-                    content: |
-                      Ensure charging station is properly ventilated.
-                    sections: []
+  sections:
+    - marker: "morning"
+      title: "Morning Routine"
+      content: |
+        Morning care activities starting at 07:00.
+      sections:
+        - marker: "morning-1"
+          title: "Battery Maintenance"
+          content: |
+            Check battery levels and charge if below 50%.
+            Monitor battery temperature during charging.
+          sections:
+            - marker: "battery-1"
+              title: "Level Check"
+              content: |
+                Verify current battery percentage.
+              sections:
+                - marker: "battery-1-a"
+                  title: "Low Battery Protocol"
+                  content: |
+                    If battery below 20%, initiate emergency charging.
+                    Send alert to owner's device.
+                  sections: []
+                - marker: "battery-1-b"
+                  title: "Charging Safety"
+                  content: |
+                    Ensure charging station is properly ventilated.
+                  sections: []
 
-          # ADDED: New morning section
-          - marker: "morning-2"
-            title: "Health Monitoring"
-            content: |
-              Run comprehensive health diagnostics.
-            sections:
-              - marker: "health-1"
-                title: "System Check"
-                content: |
-                  Verify all systems are functioning normally.
-                sections: []
+        - marker: "morning-2"
+          title: "Health Monitoring"
+          content: |
+            Run comprehensive health diagnostics.
+          sections:
+            - marker: "health-1"
+              title: "System Check"
+              content: |
+                Verify all systems are functioning normally.
+              sections: []
 
-      afternoon:
-        time: "14:00"
-        activities:
-          - activity: "Exercise Routine"
-            duration_minutes: 30
-            priority: "medium"
-          - activity: "Social Interaction"
-            duration_minutes: 20
-            priority: "low"
-          # ADDED: New afternoon activity
-          - activity: "Learning Session"
-            duration_minutes: 25
-            priority: "medium"
-        sections:
-          - marker: "afternoon-1"
-            title: "Physical Activity"
-            content: |
-              Ensure robot gets adequate exercise.
-            sections:
-              - marker: "exercise-1"
-                title: "Walking Protocol"
-                content: |
-                  Take robot for a 30-minute walk.
-                  # MODIFIED: Added weather check
-                  Check weather conditions before walking.
-                sections:
-                  - marker: "walk-1"
-                    title: "Route Planning"
-                    content: |
-                      Plan safe walking routes.
-                      # MODIFIED: Added obstacle avoidance
-                      Avoid construction zones and hazardous areas.
-                    sections: []
-                  # ADDED: New nested section
-                  - marker: "walk-2"
-                    title: "Emergency Procedures"
-                    content: |
-                      Know emergency contact numbers.
-                    sections: []
+    - marker: "afternoon"
+      title: "Afternoon Routine"
+      content: |
+        Afternoon care activities starting at 14:00.
+      sections:
+        - marker: "afternoon-1"
+          title: "Physical Activity"
+          content: |
+            Ensure robot gets adequate exercise.
+          sections:
+            - marker: "exercise-1"
+              title: "Walking Protocol"
+              content: |
+                Take robot for a 30-minute walk.
+                Check weather conditions before walking.
+              sections:
+                - marker: "walk-1"
+                  title: "Route Planning"
+                  content: |
+                    Plan safe walking routes.
+                    Avoid construction zones and hazardous areas.
+                  sections: []
+                - marker: "walk-2"
+                  title: "Emergency Procedures"
+                  content: |
+                    Know emergency contact numbers.
+                  sections: []
 
-          # ADDED: New afternoon section
-          - marker: "afternoon-2"
-            title: "Cognitive Development"
-            content: |
-              Engage robot in learning activities.
-            sections:
-              - marker: "learning-1"
-                title: "Skill Practice"
-                content: |
-                  Practice new commands and behaviors.
-                sections: []
+        - marker: "afternoon-2"
+          title: "Cognitive Development"
+          content: |
+            Engage robot in learning activities.
+          sections:
+            - marker: "learning-1"
+              title: "Skill Practice"
+              content: |
+                Practice new commands and behaviors.
+              sections: []
 
-      evening:
-        time: "19:00"
-        activities:
-          - activity: "Data Backup"
-            duration_minutes: 10
-            priority: "high"
-          - activity: "System Diagnostics"
-            duration_minutes: 15
-            priority: "medium"
-          # ADDED: New evening activity
-          - activity: "Behavioral Analysis"
-            duration_minutes: 12
-            priority: "low"
-        sections:
-          - marker: "evening-1"
-            title: "Maintenance Tasks"
-            content: |
-              Perform end-of-day maintenance.
-            sections:
-              - marker: "maintenance-1"
-                title: "Backup Procedures"
-                content: |
-                  Backup all robot data to cloud storage.
-                  # MODIFIED: Added encryption requirement
-                  Encrypt all sensitive data before backup.
-                sections: []
-              # ADDED: New evening section
-              - marker: "maintenance-2"
-                title: "Performance Review"
-                content: |
-                  Analyze robot's performance metrics.
-                sections:
-                  - marker: "review-1"
-                    title: "Daily Statistics"
-                    content: |
-                      Review activity logs and statistics.
-                    sections: []
-
-  emergency_protocols:
-    - protocol: "Malfunction Detection"
-      response: "Immediate shutdown and diagnostic mode"
-    - protocol: "Battery Failure"
-      response: "Switch to backup power and alert owner"
-    # ADDED: New emergency protocol
-    - protocol: "Network Disconnection"
-      response: "Switch to offline mode and queue data for sync"
+    - marker: "evening"
+      title: "Evening Routine"
+      content: |
+        Evening care activities starting at 19:00.
+      sections:
+        - marker: "evening-1"
+          title: "Maintenance Tasks"
+          content: |
+            Perform end-of-day maintenance.
+          sections:
+            - marker: "maintenance-1"
+              title: "Backup Procedures"
+              content: |
+                Backup all robot data to cloud storage.
+                Encrypt all sensitive data before backup.
+              sections: []
+            - marker: "maintenance-2"
+              title: "Performance Review"
+              content: |
+                Analyze robot's performance metrics.
+              sections:
+                - marker: "review-1"
+                  title: "Daily Statistics"
+                  content: |
+                    Review activity logs and statistics.
+                  sections: []

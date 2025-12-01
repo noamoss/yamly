@@ -37,4 +37,3 @@ features:
   - name: api_v2
     enabled: true
     rollout_percentage: 50
-

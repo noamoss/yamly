@@ -16,7 +16,7 @@ from fastapi.responses import JSONResponse
 
 from yaml_diffs.__version__ import __version__
 from yaml_diffs.api_server.config import configure_logging, settings
-from yaml_diffs.api_server.routers import diff, health, validate
+from yaml_diffs.api_server.routers import diff, health, schema, validate
 from yaml_diffs.exceptions import (
     OpenSpecValidationError,
     PathValidationError,
@@ -231,6 +231,7 @@ async def generic_exception_handler(request: Request, exc: Exception) -> JSONRes
 app.include_router(health.router)
 app.include_router(validate.router)
 app.include_router(diff.router)
+app.include_router(schema.router)
 
 
 @app.get("/", tags=["root"])
