@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import inspect
+import json
 from typing import TYPE_CHECKING
 
 from yaml_diffs.diff_types import ChangeType, DocumentDiff
@@ -120,8 +121,6 @@ def format_generic_diff(
         >>> text_output = format_generic_diff(diff, output_format="text")
         >>> yaml_output = format_generic_diff(diff, output_format="yaml")
     """
-    import json
-
     if output_format == "json":
         return json.dumps(diff.model_dump(), indent=2, ensure_ascii=False)
     elif output_format == "text":

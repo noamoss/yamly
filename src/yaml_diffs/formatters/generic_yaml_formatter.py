@@ -2,14 +2,11 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, cast
+from typing import Any, cast
 
 import yaml  # type: ignore[import-untyped]
 
 from yaml_diffs.generic_diff_types import GenericDiff, GenericDiffResult
-
-if TYPE_CHECKING:
-    pass
 
 
 class GenericYamlFormatter:
