@@ -25,6 +25,7 @@ export async function GET(
       "api/api_server": "docs/api/api_server.md",
       "api/mcp_server": "docs/api/mcp_server.md",
       "developer/api_reference": "docs/developer/api_reference.md",
+      "developer/diffing_algorithms": "docs/developer/diffing_algorithms.md",
       "user/getting_started": "docs/user/getting_started.md",
     };
 

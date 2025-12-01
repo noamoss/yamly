@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import inspect
+import json
 from typing import TYPE_CHECKING
 
 from yaml_diffs.diff_types import ChangeType, DocumentDiff
@@ -13,9 +14,12 @@ from yaml_diffs.formatters._filters import (
     filter_by_section_path,
     format_marker_path,
 )
+from yaml_diffs.formatters.generic_text_formatter import GenericTextFormatter
+from yaml_diffs.formatters.generic_yaml_formatter import GenericYamlFormatter
 from yaml_diffs.formatters.json_formatter import JsonFormatter
 from yaml_diffs.formatters.text_formatter import TextFormatter
 from yaml_diffs.formatters.yaml_formatter import YamlFormatter
+from yaml_diffs.generic_diff_types import GenericDiff
 
 if TYPE_CHECKING:
     from collections.abc import Sequence
@@ -90,14 +94,62 @@ def format_diff(
         raise ValueError(f"Unknown format: {output_format}. Must be one of: json, text, yaml")
 
 
+def format_generic_diff(
+    diff: GenericDiff,
+    output_format: str = "json",
+    **kwargs,
+) -> str:
+    """Format generic diff using the specified formatter.
+
+    Convenience function to format a GenericDiff using any of the
+    available generic formatters.
+
+    Args:
+        diff: GenericDiff to format
+        output_format: Output format ("json", "text", or "yaml", default: "json")
+        **kwargs: Additional formatter-specific options
+
+    Returns:
+        Formatted string representation of the diff
+
+    Raises:
+        ValueError: If output_format is not one of "json", "text", or "yaml"
+
+    Examples:
+        >>> diff = diff_yaml_with_mode(old_yaml, new_yaml, mode="general")
+        >>> json_output = format_generic_diff(diff, output_format="json")
+        >>> text_output = format_generic_diff(diff, output_format="text")
+        >>> yaml_output = format_generic_diff(diff, output_format="yaml")
+    """
+    if output_format == "json":
+        return json.dumps(diff.model_dump(), indent=2, ensure_ascii=False)
+    elif output_format == "text":
+        formatter = GenericTextFormatter()
+        # Get valid parameters for GenericTextFormatter.format()
+        sig = inspect.signature(formatter.format)
+        valid_kwargs = {k: v for k, v in kwargs.items() if k in sig.parameters}
+        return formatter.format(diff, **valid_kwargs)
+    elif output_format == "yaml":
+        yaml_formatter = GenericYamlFormatter()
+        # Get valid parameters for GenericYamlFormatter.format()
+        sig = inspect.signature(yaml_formatter.format)
+        valid_kwargs = {k: v for k, v in kwargs.items() if k in sig.parameters}
+        return yaml_formatter.format(diff, **valid_kwargs)
+    else:
+        raise ValueError(f"Unknown format: {output_format}. Must be one of: json, text, yaml")
+
+
 __all__ = [
     "calculate_summary_counts",
     "diff_result_to_dict",
     "format_marker_path",
     "filter_by_change_type",
     "filter_by_section_path",
+    "GenericTextFormatter",
+    "GenericYamlFormatter",
     "JsonFormatter",
     "TextFormatter",
     "YamlFormatter",
     "format_diff",
+    "format_generic_diff",
 ]

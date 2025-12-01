@@ -297,21 +297,21 @@ def diff_command(
                 filter_section_path=filter_section_path,
             )
         elif isinstance(diff_result, GenericDiff):
-            # Generic mode - simple JSON output for now
-            # TODO: Add generic formatters (text, yaml) similar to document formatters
+            # Generic mode - use appropriate formatter
+            from yaml_diffs.formatters import GenericTextFormatter, GenericYamlFormatter
+
             if output_format.lower() == "json":
                 formatted_output = json.dumps(
                     diff_result.model_dump(), indent=2, ensure_ascii=False
                 )
+            elif output_format.lower() == "text":
+                formatter = GenericTextFormatter()
+                formatted_output = formatter.format(diff_result)
+            elif output_format.lower() == "yaml":
+                yaml_formatter = GenericYamlFormatter()
+                formatted_output = yaml_formatter.format(diff_result)
             else:
-                # For now, only JSON is supported for generic diff
-                click.echo(
-                    f"Warning: Format '{output_format}' not yet supported for generic diff, using JSON",
-                    err=True,
-                )
-                formatted_output = json.dumps(
-                    diff_result.model_dump(), indent=2, ensure_ascii=False
-                )
+                handle_cli_error(ValueError(f"Unknown format: {output_format}"))
         else:
             handle_cli_error(ValueError(f"Unexpected diff result type: {type(diff_result)}"))
 

@@ -40,6 +40,12 @@ const documentationLinks: DocumentationLink[] = [
     description: "Use yaml-diffs in your Python code",
     icon: "🐍",
   },
+  {
+    label: "Diffing Algorithms",
+    url: "developer/diffing_algorithms",
+    description: "How the diffing algorithms work",
+    icon: "🔍",
+  },
 ];
 
 export default function DocumentationLinks({
