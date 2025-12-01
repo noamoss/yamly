@@ -484,6 +484,9 @@ export default function Home() {
           setShowDocModal(false);
           setDocPath(null);
         }}
+        onDocClick={(path) => {
+          setDocPath(path);
+        }}
       />
     </div>
   );
