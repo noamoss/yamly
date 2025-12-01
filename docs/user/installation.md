@@ -31,7 +31,7 @@ If you want to install from the latest source code:
 ```bash
 # Clone the repository
 git clone https://github.com/noamoss/yamly.git
-cd yaml_diffs
+cd yamly
 
 # Install the package
 pip install .
@@ -50,7 +50,7 @@ For development work, install in editable mode with development dependencies:
 ```bash
 # Clone the repository
 git clone https://github.com/noamoss/yamly.git
-cd yaml_diffs
+cd yamly
 
 # Create virtual environment (recommended)
 python -m venv .venv
@@ -65,7 +65,7 @@ Or using uv:
 ```bash
 # Clone the repository
 git clone https://github.com/noamoss/yamly.git
-cd yaml_diffs
+cd yamly
 
 # Create virtual environment and install
 uv venv

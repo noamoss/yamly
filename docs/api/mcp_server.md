@@ -22,7 +22,7 @@ Or install from source:
 
 ```bash
 git clone https://github.com/noamoss/yamly.git
-cd yaml_diffs
+cd yamly
 pip install -e .
 ```
 

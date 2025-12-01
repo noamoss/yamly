@@ -47,7 +47,7 @@ A powerful YAML diffing service that supports both **generic YAML files** and **
 ```bash
 # Clone the repository
 git clone https://github.com/noamoss/yamly.git
-cd yaml_diffs
+cd yamly
 
 # Create virtual environment and install dependencies
 uv venv

@@ -15,7 +15,7 @@ Thank you for your interest in contributing to yaml-diffs! This guide will help 
 ```bash
 # Clone the repository
 git clone https://github.com/noamoss/yamly.git
-cd yaml_diffs
+cd yamly
 
 # Create virtual environment
 uv venv
