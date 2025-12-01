@@ -184,6 +184,8 @@ export default function MarkdownViewer({
   const contentRef = useRef<HTMLDivElement>(null);
   // Component-scoped heading ID counter to handle duplicates
   const headingIdCounterRef = useRef<Map<string, number>>(new Map());
+  // Track active timeouts from onClick handlers for cleanup
+  const activeTimeoutsRef = useRef<Set<NodeJS.Timeout>>(new Set());
 
   useEffect(() => {
     const abortController = new AbortController();
@@ -242,6 +244,14 @@ export default function MarkdownViewer({
   useEffect(() => {
     headingIdCounterRef.current.clear();
   }, [content]);
+
+  // Cleanup active timeouts on unmount
+  useEffect(() => {
+    return () => {
+      activeTimeoutsRef.current.forEach(timeout => clearTimeout(timeout));
+      activeTimeoutsRef.current.clear();
+    };
+  }, []);
 
   // Handle scrolling to anchors when content loads or hash changes
   useEffect(() => {
@@ -436,9 +446,11 @@ export default function MarkdownViewer({
                     const container = contentRef.current?.closest('.overflow-y-auto') as HTMLElement | undefined;
                     if (!scrollToElementInContainer(anchorId, container)) {
                       // Retry with delay if element not found
-                      setTimeout(() => {
+                      const timeout = setTimeout(() => {
                         scrollToElementInContainer(anchorId, container);
+                        activeTimeoutsRef.current.delete(timeout);
                       }, SCROLL_RETRY_DELAY_1);
+                      activeTimeoutsRef.current.add(timeout);
                     }
                   }}
                   className="text-blue-600 hover:text-blue-800 underline"
@@ -473,13 +485,17 @@ export default function MarkdownViewer({
                         onDocClick(resolvedPath);
                         // If there's an anchor, scroll after content loads
                         if (anchorPart) {
-                          setTimeout(() => {
+                          const timeout1 = setTimeout(() => {
                             window.history.pushState(null, '', `#${anchorPart}`);
+                            activeTimeoutsRef.current.delete(timeout1);
                             // Trigger scroll after content loads
-                            setTimeout(() => {
+                            const timeout2 = setTimeout(() => {
                               scrollToElementInContainer(anchorPart, container);
+                              activeTimeoutsRef.current.delete(timeout2);
                             }, ANCHOR_SCROLL_DELAY_2);
+                            activeTimeoutsRef.current.add(timeout2);
                           }, ANCHOR_SCROLL_DELAY);
+                          activeTimeoutsRef.current.add(timeout1);
                         }
                       }}
                       className="text-blue-600 hover:text-blue-800 underline"
