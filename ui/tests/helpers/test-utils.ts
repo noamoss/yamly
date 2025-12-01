@@ -104,10 +104,8 @@ export async function findChangeCardByType(
  * Check if character-level diff highlighting is present
  */
 export async function hasCharDiffHighlighting(page: Page): Promise<boolean> {
-  // Look for spans with character-level diff classes
-  const charDiffElements = page.locator(
-    '.bg-red-200.line-through, .bg-green-200, .char-added, .char-removed'
-  );
+  // Look for spans with character-level diff classes (matching actual CSS classes)
+  const charDiffElements = page.locator('.cm-char-removed, .cm-char-added');
   return (await charDiffElements.count()) > 0;
 }
 

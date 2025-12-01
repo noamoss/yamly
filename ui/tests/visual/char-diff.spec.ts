@@ -21,8 +21,8 @@ test.describe('Character-Level Diff Highlighting (Issue #74)', () => {
     await runDiff(page);
     await waitForDiffView(page);
 
-    // Wait a bit for character diff computation
-    await page.waitForTimeout(1000);
+    // Wait for character diff highlighting to appear
+    await page.waitForSelector('.cm-char-added, .cm-char-removed', { timeout: 5000 });
 
     // Check for character-level diff highlighting
     const hasHighlighting = await hasCharDiffHighlighting(page);
@@ -49,8 +49,8 @@ test.describe('Character-Level Diff Highlighting (Issue #74)', () => {
     await runDiff(page);
     await waitForDiffView(page);
 
-    // Wait for character diff computation
-    await page.waitForTimeout(1000);
+    // Wait for removed character highlighting to appear
+    await page.waitForSelector('.cm-char-removed', { timeout: 5000 });
 
     // Check for removed character highlighting
     const removedChars = page.locator('.cm-char-removed');
@@ -89,8 +89,8 @@ test.describe('Character-Level Diff Highlighting (Issue #74)', () => {
     await runDiff(page);
     await waitForDiffView(page);
 
-    // Wait for character diff computation
-    await page.waitForTimeout(1000);
+    // Wait for added character highlighting to appear
+    await page.waitForSelector('.cm-char-added', { timeout: 5000 });
 
     // Check for added character highlighting
     const addedChars = page.locator('.cm-char-added');
@@ -123,8 +123,8 @@ test.describe('Character-Level Diff Highlighting (Issue #74)', () => {
     await runDiff(page);
     await waitForDiffView(page);
 
-    // Wait for character diff computation
-    await page.waitForTimeout(1000);
+    // Wait for diff view to be ready (whitespace may or may not show highlighting)
+    await page.waitForSelector('[data-testid="split-diff-view"]', { timeout: 5000 });
 
     // Should still show character-level highlighting for whitespace
     const hasHighlighting = await hasCharDiffHighlighting(page);
@@ -148,8 +148,10 @@ test.describe('Character-Level Diff Highlighting (Issue #74)', () => {
     await runDiff(page);
     await waitForDiffView(page);
 
-    // Wait for character diff computation
-    await page.waitForTimeout(2000);
+    // Wait for character diff highlighting to appear (may take longer for large diffs)
+    await page.waitForSelector('.cm-char-added, .cm-char-removed', { timeout: 10000 }).catch(() => {
+      // If no highlighting appears, that's also valid (no changes detected)
+    });
 
     // Should only have character highlighting on changed lines
     const highlightedLines = page.locator('.cm-char-added, .cm-char-removed');
@@ -178,8 +180,8 @@ test.describe('Character-Level Diff Highlighting (Issue #74)', () => {
     await runDiff(page);
     await waitForDiffView(page);
 
-    // Wait for character diff computation
-    await page.waitForTimeout(1000);
+    // Wait for diff view to be ready
+    await page.waitForSelector('[data-testid="split-diff-view"]', { timeout: 5000 });
 
     // Should handle gracefully without errors
     const hasHighlighting = await hasCharDiffHighlighting(page);

@@ -233,6 +233,8 @@ export default function SplitDiffView({ oldYaml, newYaml, diff }: SplitDiffViewP
   const [charDiffs, setCharDiffs] = useState<Map<string, DiffChunk[]>>(new Map());
 
   useEffect(() => {
+    let cancelled = false;
+
     const computeDiffs = async () => {
       const diffs = new Map<string, DiffChunk[]>();
       const oldLines = oldYaml.split('\n');
@@ -240,6 +242,8 @@ export default function SplitDiffView({ oldYaml, newYaml, diff }: SplitDiffViewP
 
       // Find matching old/new line pairs for character-level diff
       for (const change of diff.changes) {
+        if (cancelled) break;
+
         const isUnchanged =
           ('change_type' in change && change.change_type === ChangeType.UNCHANGED) ||
           ('change_type' in change && change.change_type === GenericChangeType.UNCHANGED);
@@ -256,6 +260,8 @@ export default function SplitDiffView({ oldYaml, newYaml, diff }: SplitDiffViewP
           if (oldLineText !== newLineText) {
             try {
               const allChunks = await computeCharDiff(oldLineText, newLineText);
+
+              if (cancelled) break;
 
               // For old side: show removed and unchanged chunks
               const oldChunks: DiffChunk[] = [];
@@ -297,10 +303,16 @@ export default function SplitDiffView({ oldYaml, newYaml, diff }: SplitDiffViewP
         }
       }
 
-      setCharDiffs(diffs);
+      if (!cancelled) {
+        setCharDiffs(diffs);
+      }
     };
 
     computeDiffs();
+
+    return () => {
+      cancelled = true;
+    };
   }, [oldYaml, newYaml, diff.changes]);
 
   // Create decorations for old editor (using API semantic changes + character-level diffs)
@@ -326,24 +338,38 @@ export default function SplitDiffView({ oldYaml, newYaml, diff }: SplitDiffViewP
         const diffKey = `old:${lineNum}`;
         const chunks = charDiffs.get(diffKey);
         if (chunks) {
-          let offset = 0;
-          for (const chunk of chunks) {
-            if (chunk.type === 'removed' && chunk.text.length > 0) {
-              const from = Math.min(line.to, line.from + offset);
-              const to = Math.min(line.to, from + chunk.text.length);
-              if (to > from && from >= line.from) {
-                const charDeco = Decoration.mark({
-                  class: "cm-char-removed",
-                  attributes: {
-                    "data-char-diff": "removed",
-                  },
-                });
-                decorations.push(charDeco.range(from, to));
-              }
-            }
-            // Only increment offset for chunks that appear in the old line
+          // Validate chunk lengths match line content
+          const totalChunkLength = chunks.reduce((sum, chunk) => {
             if (chunk.type === 'removed' || chunk.type === 'unchanged') {
-              offset += chunk.text.length;
+              return sum + chunk.text.length;
+            }
+            return sum;
+          }, 0);
+          const lineLength = line.to - line.from;
+
+          // Only apply decorations if chunk lengths match (within 1 char tolerance for edge cases)
+          if (Math.abs(totalChunkLength - lineLength) <= 1) {
+            let offset = 0;
+            for (const chunk of chunks) {
+              if (chunk.type === 'removed' && chunk.text.length > 0) {
+                const from = Math.min(line.to, line.from + offset);
+                const to = Math.min(line.to, from + chunk.text.length);
+                if (to > from && from >= line.from && to <= line.to) {
+                  const charDeco = Decoration.mark({
+                    class: "cm-char-removed",
+                    attributes: {
+                      "data-char-diff": "removed",
+                    },
+                  });
+                  decorations.push(charDeco.range(from, to));
+                }
+              }
+              // Only increment offset for chunks that appear in the old line
+              if (chunk.type === 'removed' || chunk.type === 'unchanged') {
+                offset += chunk.text.length;
+                // Prevent offset from exceeding line length
+                offset = Math.min(offset, lineLength);
+              }
             }
           }
         }
@@ -376,24 +402,38 @@ export default function SplitDiffView({ oldYaml, newYaml, diff }: SplitDiffViewP
         const diffKey = `new:${lineNum}`;
         const chunks = charDiffs.get(diffKey);
         if (chunks) {
-          let offset = 0;
-          for (const chunk of chunks) {
-            if (chunk.type === 'added' && chunk.text.length > 0) {
-              const from = Math.min(line.to, line.from + offset);
-              const to = Math.min(line.to, from + chunk.text.length);
-              if (to > from && from >= line.from) {
-                const charDeco = Decoration.mark({
-                  class: "cm-char-added",
-                  attributes: {
-                    "data-char-diff": "added",
-                  },
-                });
-                decorations.push(charDeco.range(from, to));
-              }
-            }
-            // Only increment offset for chunks that appear in the new line
+          // Validate chunk lengths match line content
+          const totalChunkLength = chunks.reduce((sum, chunk) => {
             if (chunk.type === 'added' || chunk.type === 'unchanged') {
-              offset += chunk.text.length;
+              return sum + chunk.text.length;
+            }
+            return sum;
+          }, 0);
+          const lineLength = line.to - line.from;
+
+          // Only apply decorations if chunk lengths match (within 1 char tolerance for edge cases)
+          if (Math.abs(totalChunkLength - lineLength) <= 1) {
+            let offset = 0;
+            for (const chunk of chunks) {
+              if (chunk.type === 'added' && chunk.text.length > 0) {
+                const from = Math.min(line.to, line.from + offset);
+                const to = Math.min(line.to, from + chunk.text.length);
+                if (to > from && from >= line.from && to <= line.to) {
+                  const charDeco = Decoration.mark({
+                    class: "cm-char-added",
+                    attributes: {
+                      "data-char-diff": "added",
+                    },
+                  });
+                  decorations.push(charDeco.range(from, to));
+                }
+              }
+              // Only increment offset for chunks that appear in the new line
+              if (chunk.type === 'added' || chunk.type === 'unchanged') {
+                offset += chunk.text.length;
+                // Prevent offset from exceeding line length
+                offset = Math.min(offset, lineLength);
+              }
             }
           }
         }

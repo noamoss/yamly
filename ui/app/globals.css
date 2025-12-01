@@ -232,21 +232,28 @@ a[href^="https://about.thepitz.studio"]:hover {
 }
 
 /* Character-level diff highlighting in CodeMirror */
+:root {
+  --diff-char-removed-bg: #ffd7d9;
+  --diff-char-removed-text: #cf222e;
+  --diff-char-added-bg: #ccfdf3;
+  --diff-char-added-text: #1a7f37;
+}
+
 .cm-char-removed {
-  background-color: #ffd7d9;
+  background-color: var(--diff-char-removed-bg);
   text-decoration: line-through;
-  color: #cf222e;
+  color: var(--diff-char-removed-text);
   border-radius: 2px;
   padding: 0 1px;
 }
 
 .cm-char-added {
-  background-color: #ccfdf3;
-  color: #1a7f37;
+  background-color: var(--diff-char-added-bg);
+  color: var(--diff-char-added-text);
   border-radius: 2px;
   padding: 0 1px;
   font-weight: 500;
   text-decoration: underline;
-  text-decoration-color: #1a7f37;
+  text-decoration-color: var(--diff-char-added-text);
   text-underline-offset: 2px;
 }
