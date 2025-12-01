@@ -1,13 +1,21 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import ReactMarkdown from "react-markdown";
+import ReactMarkdown, { Components } from "react-markdown";
 import remarkGfm from "remark-gfm";
 import MermaidDiagram from "./MermaidDiagram";
 
 interface MarkdownViewerProps {
   docPath: string;
   onClose?: () => void;
+}
+
+interface CodeProps {
+  node?: any;
+  inline?: boolean;
+  className?: string;
+  children?: React.ReactNode;
+  [key: string]: any;
 }
 
 export default function MarkdownViewer({
@@ -141,15 +149,20 @@ export default function MarkdownViewer({
       <ReactMarkdown
         remarkPlugins={[remarkGfm]}
         components={{
-          code(props: any) {
+          code(props: CodeProps) {
             const { node, inline, className, children, ...rest } = props;
             const match = /language-(\w+)/.exec(className || "");
             const language = match ? match[1] : "";
-            const codeString = String(children).replace(/\n$/, "");
+
+            // Handle children array properly - ReactMarkdown may pass children as array
+            const codeString = Array.isArray(children)
+              ? children.map(String).join("")
+              : String(children);
+            const trimmedCode = codeString.replace(/\n$/, "");
 
             // Render Mermaid diagrams for non-inline mermaid code blocks
             if (language === "mermaid" && !inline) {
-              return <MermaidDiagram code={codeString} />;
+              return <MermaidDiagram code={trimmedCode} />;
             }
 
             // Default code rendering (inline or non-mermaid blocks)

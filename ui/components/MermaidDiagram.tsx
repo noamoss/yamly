@@ -7,8 +7,32 @@ interface MermaidDiagramProps {
   code: string;
 }
 
-// Initialize Mermaid once
+// Initialize Mermaid once using a singleton pattern
 let mermaidInitialized = false;
+const initMermaid = () => {
+  if (!mermaidInitialized) {
+    mermaid.initialize({
+      startOnLoad: false,
+      theme: "default",
+      // Use "strict" security level - documentation content is trusted but we should
+      // still follow security best practices. Mermaid diagrams are from our own docs,
+      // not user-provided content, but using strict mode is safer.
+      securityLevel: "strict",
+      flowchart: {
+        useMaxWidth: false, // Allow diagrams to be larger
+        htmlLabels: true,
+        curve: "basis",
+      },
+      themeVariables: {
+        fontSize: "16px", // Larger default font
+      },
+    });
+    mermaidInitialized = true;
+  }
+};
+
+// Counter for unique ID generation
+let idCounter = 0;
 
 export default function MermaidDiagram({ code }: MermaidDiagramProps) {
   const [error, setError] = useState<string | null>(null);
@@ -19,45 +43,56 @@ export default function MermaidDiagram({ code }: MermaidDiagramProps) {
   const diagramRef = useRef<HTMLDivElement>(null);
   const expandedRef = useRef<HTMLDivElement>(null);
   const idRef = useRef<string>(
-    `mermaid-${Math.random().toString(36).substring(2, 9)}`
+    `mermaid-${Date.now()}-${++idCounter}`
   );
 
   useEffect(() => {
-    // Initialize Mermaid once
-    if (!mermaidInitialized) {
-      mermaid.initialize({
-        startOnLoad: false,
-        theme: "default",
-        securityLevel: "loose",
-        flowchart: {
-          useMaxWidth: false, // Allow diagrams to be larger
-          htmlLabels: true,
-          curve: "basis",
-        },
-        themeVariables: {
-          fontSize: "16px", // Larger default font
-        },
-      });
-      mermaidInitialized = true;
-    }
+    // Initialize Mermaid using singleton
+    initMermaid();
 
     // Clear previous state
     setError(null);
     setSvg("");
+
+    // Track if component is still mounted
+    let cancelled = false;
 
     // Render the diagram
     const diagramId = idRef.current;
     mermaid
       .render(diagramId, code)
       .then((result) => {
-        setSvg(result.svg);
-        setError(null);
+        if (!cancelled) {
+          setSvg(result.svg);
+          setError(null);
+        }
       })
       .catch((err) => {
-        console.error("Mermaid rendering error:", err);
-        setError(err.message || "Failed to render diagram");
+        if (!cancelled) {
+          console.error("Mermaid rendering error:", err);
+          setError(err.message || "Failed to render diagram");
+        }
       });
+
+    // Cleanup function to prevent state updates on unmounted component
+    return () => {
+      cancelled = true;
+    };
   }, [code]);
+
+  // Handle keyboard accessibility for modal
+  useEffect(() => {
+    if (!isExpanded) return;
+
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setIsExpanded(false);
+      }
+    };
+
+    document.addEventListener("keydown", handleEscape);
+    return () => document.removeEventListener("keydown", handleEscape);
+  }, [isExpanded]);
 
   // Handle zoom controls for inline view
   const handleInlineZoomIn = () => setInlineZoom((prev) => Math.min(prev + 0.25, 3));
@@ -159,6 +194,7 @@ export default function MermaidDiagram({ code }: MermaidDiagramProps) {
                   onClick={handleExpandedZoomOut}
                   className="px-3 py-1 bg-gray-100 border border-gray-300 rounded text-sm hover:bg-gray-200"
                   title="Zoom out"
+                  aria-label="Zoom out"
                 >
                   −
                 </button>
@@ -166,6 +202,7 @@ export default function MermaidDiagram({ code }: MermaidDiagramProps) {
                   onClick={handleExpandedResetZoom}
                   className="px-3 py-1 bg-gray-100 border border-gray-300 rounded text-sm hover:bg-gray-200"
                   title="Reset zoom"
+                  aria-label="Reset zoom"
                 >
                   {Math.round(expandedZoom * 100)}%
                 </button>
@@ -173,6 +210,7 @@ export default function MermaidDiagram({ code }: MermaidDiagramProps) {
                   onClick={handleExpandedZoomIn}
                   className="px-3 py-1 bg-gray-100 border border-gray-300 rounded text-sm hover:bg-gray-200"
                   title="Zoom in"
+                  aria-label="Zoom in"
                 >
                   +
                 </button>
