@@ -74,7 +74,7 @@ jobs:
           python -c "from yamly.schema import load_schema; schema = load_schema(); assert schema is not None; assert 'version' in schema or 'info' in schema; print('Schema file accessible and loadable!')"
 
       - name: Upload build artifacts
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         with:
           name: dist
