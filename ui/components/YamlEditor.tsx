@@ -68,18 +68,21 @@ export default function YamlEditor({
         "&": {
           height: "100%",
           fontSize: "14px",
+          backgroundColor: "var(--brand-background)",
         },
         ".cm-content": {
           padding: "12px",
           minHeight: "400px",
           fontFamily: "var(--font-mono), 'Fira Code', monospace",
+          backgroundColor: "var(--brand-background)",
         },
         ".cm-scroller": {
           overflow: "auto",
+          backgroundColor: "var(--brand-background)",
         },
         ".cm-gutters": {
-          backgroundColor: "#f6f8fa",
-          borderRight: "1px solid #e1e4e8",
+          backgroundColor: "var(--code-bg)",
+          borderRight: "1px solid var(--prose-border)",
         },
         ".cm-lineNumbers .cm-gutterElement": {
           padding: "0 8px",
@@ -124,7 +127,7 @@ export default function YamlEditor({
   }, [value]);
 
   return (
-    <div className={`border border-gray-300 rounded-lg overflow-hidden ${className}`}>
+    <div className={`border border-[var(--brand-secondary)]/30 rounded-lg overflow-hidden bg-[var(--brand-background)] ${className}`}>
       <div ref={editorRef} className="h-full" />
     </div>
   );

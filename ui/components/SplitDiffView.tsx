@@ -456,17 +456,20 @@ export default function SplitDiffView({ oldYaml, newYaml, diff }: SplitDiffViewP
         "&": {
           height: "100%",
           fontSize: "14px",
+          backgroundColor: "var(--brand-background)",
         },
         ".cm-content": {
           padding: "12px",
           fontFamily: "var(--font-mono), 'Fira Code', monospace",
+          backgroundColor: "var(--brand-background)",
         },
         ".cm-scroller": {
           overflow: "auto",
+          backgroundColor: "var(--brand-background)",
         },
         ".cm-gutters": {
-          backgroundColor: "#f6f8fa",
-          borderRight: "1px solid #e1e4e8",
+          backgroundColor: "var(--code-bg)",
+          borderRight: "1px solid var(--prose-border)",
         },
         ".cm-line": {
           position: "relative",
@@ -595,17 +598,20 @@ export default function SplitDiffView({ oldYaml, newYaml, diff }: SplitDiffViewP
         "&": {
           height: "100%",
           fontSize: "14px",
+          backgroundColor: "var(--brand-background)",
         },
         ".cm-content": {
           padding: "12px",
           fontFamily: "var(--font-mono), 'Fira Code', monospace",
+          backgroundColor: "var(--brand-background)",
         },
         ".cm-scroller": {
           overflow: "auto",
+          backgroundColor: "var(--brand-background)",
         },
         ".cm-gutters": {
-          backgroundColor: "#f6f8fa",
-          borderRight: "1px solid #e1e4e8",
+          backgroundColor: "var(--code-bg)",
+          borderRight: "1px solid var(--prose-border)",
         },
         ".cm-line": {
           position: "relative",

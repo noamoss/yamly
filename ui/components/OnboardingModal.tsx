@@ -65,7 +65,7 @@ export default function OnboardingModal({
       aria-labelledby="onboarding-title"
     >
       <div
-        className={`bg-[var(--brand-background)] rounded-lg shadow-[0_4px_12px_rgba(0,0,0,0.08)] max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto transform transition-all ${
+        className={`bg-[var(--background)] rounded-lg shadow-[0_4px_12px_rgba(0,0,0,0.08)] max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto transform transition-all ${
           isClosing ? "scale-95 opacity-0" : "scale-100 opacity-100"
         }`}
         onClick={(e) => e.stopPropagation()}
@@ -75,8 +75,7 @@ export default function OnboardingModal({
           <div className="flex items-center justify-between mb-4">
             <h2
               id="onboarding-title"
-              className="text-2xl font-normal text-[var(--foreground)]"
-              style={{ fontFamily: "var(--font-serif), serif" }}
+              className="text-2xl font-serif font-normal text-[var(--foreground)]"
             >
               Welcome to yamly
             </h2>
@@ -108,8 +107,8 @@ export default function OnboardingModal({
               updates in legal docs, configuration files, and more.
             </p>
 
-            <div className="bg-[var(--brand-accent)]/10 border border-[var(--brand-accent)]/40 rounded-lg p-4">
-              <h3 className="font-medium text-[var(--foreground)] mb-2" style={{ fontFamily: "var(--font-serif), serif" }}>
+            <div className="bg-[var(--brand-background)] border border-[var(--brand-secondary)]/20 rounded-lg p-4 shadow-[0_4px_12px_rgba(0,0,0,0.08)]">
+              <h3 className="font-serif font-medium text-[var(--foreground)] mb-2">
                 Try Example Documents
               </h3>
               <p className="text-sm text-[var(--brand-secondary)]">
@@ -119,7 +118,7 @@ export default function OnboardingModal({
             </div>
 
             <div>
-              <h3 className="font-medium text-[var(--foreground)] mb-2" style={{ fontFamily: "var(--font-serif), serif" }}>
+              <h3 className="font-serif font-medium text-[var(--foreground)] mb-2">
                 Key Features:
               </h3>
               <ul className="space-y-2 text-sm">
@@ -185,7 +184,7 @@ export default function OnboardingModal({
             </div>
 
             <div>
-              <h3 className="font-medium text-[var(--foreground)] mb-2" style={{ fontFamily: "var(--font-serif), serif" }}>
+              <h3 className="font-serif font-medium text-[var(--foreground)] mb-2">
                 Coming Soon
               </h3>
               <ul className="space-y-2 text-sm">
@@ -268,7 +267,7 @@ export default function OnboardingModal({
               </ul>
             </div>
 
-            <div className="bg-[var(--brand-accent)]/10 border border-[var(--brand-secondary)]/20 rounded-lg p-4">
+            <div className="bg-[var(--brand-background)] border border-[var(--brand-secondary)]/20 rounded-lg p-4 shadow-[0_4px_12px_rgba(0,0,0,0.08)]">
               <p className="text-sm text-[var(--brand-secondary)]">
                 <strong className="text-[var(--foreground)]">Get started:</strong> Load two YAML documents and click{" "}
                 <strong>Run diff →</strong> to see the changes.
