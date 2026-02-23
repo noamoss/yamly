@@ -14,9 +14,9 @@ export default function DiffSummary({ diff }: DiffSummaryProps) {
   if (isDocumentDiff(diff)) {
     // Document diff summary
     return (
-      <div className="bg-gray-50 border-b border-gray-200 px-4 sm:px-6 py-4">
+      <div className="bg-[var(--brand-background)] border-b border-[var(--brand-secondary)]/30 px-4 sm:px-6 py-4">
         <div className="flex flex-wrap items-center gap-3 sm:gap-6 text-sm">
-          <span className="font-semibold text-gray-700">Changes Summary:</span>
+          <span className="font-semibold text-[var(--foreground)]">Changes Summary:</span>
           <div className="flex items-center gap-2">
             <span className="text-green-600 font-medium">
               +{diff.added_count} added
@@ -37,7 +37,7 @@ export default function DiffSummary({ diff }: DiffSummaryProps) {
               ↔{diff.moved_count} moved
             </span>
           </div>
-          <div className="ml-auto text-gray-500">
+          <div className="ml-auto text-[var(--brand-secondary)]">
             Total: {diff.added_count + diff.deleted_count + diff.modified_count + diff.moved_count} changes
           </div>
         </div>
@@ -58,9 +58,9 @@ export default function DiffSummary({ diff }: DiffSummaryProps) {
       diff.type_changed_count;
 
     return (
-      <div className="bg-gray-50 border-b border-gray-200 px-4 sm:px-6 py-4">
+      <div className="bg-[var(--brand-background)] border-b border-[var(--brand-secondary)]/30 px-4 sm:px-6 py-4">
         <div className="flex flex-wrap items-center gap-3 sm:gap-6 text-sm">
-          <span className="font-semibold text-gray-700">Changes Summary:</span>
+          <span className="font-semibold text-[var(--foreground)]">Changes Summary:</span>
           {diff.value_changed_count > 0 && (
             <div className="flex items-center gap-2">
               <span className="text-yellow-600 font-medium">
@@ -131,7 +131,7 @@ export default function DiffSummary({ diff }: DiffSummaryProps) {
               </span>
             </div>
           )}
-          <div className="ml-auto text-gray-500">
+          <div className="ml-auto text-[var(--brand-secondary)]">
             Total: {totalChanges} changes
           </div>
         </div>

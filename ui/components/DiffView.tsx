@@ -42,7 +42,7 @@ export default function DiffView({ diff, oldYaml, newYaml }: DiffViewProps) {
   if (diff.changes.length === 0) {
     return (
       <div className="text-center py-12">
-        <p className="text-gray-500 text-lg">No changes detected between the two versions.</p>
+        <p className="text-[var(--brand-secondary)] text-lg">No changes detected between the two versions.</p>
       </div>
     );
   }
@@ -52,7 +52,7 @@ export default function DiffView({ diff, oldYaml, newYaml }: DiffViewProps) {
       <DiffSummary diff={diff} />
 
       {/* View toggle */}
-      <div className="border-b border-gray-200 bg-white">
+      <div className="border-b border-[var(--brand-secondary)]/30 bg-[var(--brand-background)] rounded-lg shadow-[0_4px_12px_rgba(0,0,0,0.08)]">
         <div className="px-4 sm:px-6">
           <nav className="flex space-x-8">
             <Tooltip content="Side-by-side comparison of old and new versions">
@@ -60,8 +60,8 @@ export default function DiffView({ diff, oldYaml, newYaml }: DiffViewProps) {
                 onClick={() => handleViewChange("split")}
                 className={`py-3 px-1 border-b-2 font-medium text-sm transition-colors ${
                   viewType === "split"
-                    ? "border-blue-500 text-blue-600"
-                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                    ? "border-[var(--brand-cta-bg)] text-[var(--foreground)]"
+                    : "border-transparent text-[var(--brand-secondary)] hover:text-[var(--foreground)] hover:border-[var(--brand-secondary)]/40"
                 }`}
                 aria-label="Switch to split view"
               >
@@ -73,8 +73,8 @@ export default function DiffView({ diff, oldYaml, newYaml }: DiffViewProps) {
                 onClick={() => handleViewChange("cards")}
                 className={`py-3 px-1 border-b-2 font-medium text-sm transition-colors ${
                   viewType === "cards"
-                    ? "border-blue-500 text-blue-600"
-                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                    ? "border-[var(--brand-cta-bg)] text-[var(--foreground)]"
+                    : "border-transparent text-[var(--brand-secondary)] hover:text-[var(--foreground)] hover:border-[var(--brand-secondary)]/40"
                 }`}
                 aria-label="Switch to cards view"
               >

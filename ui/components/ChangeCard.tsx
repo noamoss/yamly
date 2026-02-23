@@ -42,7 +42,7 @@ function getChangeTypeStyles(changeType: ChangeType) {
       };
     default:
       return {
-        badge: "bg-gray-100 text-gray-800 border-gray-300",
+        badge: "bg-gray-100 text-[var(--foreground)] border-[var(--brand-secondary)]/40",
         bg: "bg-gray-50",
       };
   }
@@ -136,7 +136,7 @@ function DiffContent({ oldContent, newContent }: DiffContentProps) {
     return (
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="bg-red-50 border border-red-200 rounded p-3">
-          <div className="text-sm text-gray-500 italic font-mono">(empty)</div>
+          <div className="text-sm text-[var(--brand-secondary)] italic font-mono">(empty)</div>
         </div>
         <div className="bg-green-50 border border-green-200 rounded p-3 overflow-x-auto">
           <pre className="whitespace-pre-wrap text-sm font-mono">
@@ -157,7 +157,7 @@ function DiffContent({ oldContent, newContent }: DiffContentProps) {
           </pre>
         </div>
         <div className="bg-green-50 border border-green-200 rounded p-3">
-          <div className="text-sm text-gray-500 italic font-mono">(empty)</div>
+          <div className="text-sm text-[var(--brand-secondary)] italic font-mono">(empty)</div>
         </div>
       </div>
     );
@@ -326,25 +326,25 @@ export default function ChangeCard({ change, index, oldYaml, newYaml }: ChangeCa
       oldSectionYaml === newSectionYaml);
 
   return (
-    <div className={`border rounded-lg ${styles.bg} ${isExpanded ? "" : "overflow-hidden"}`} data-testid="change-card">
+    <div className={`border border-[var(--brand-secondary)]/20 rounded-lg bg-[var(--brand-background)] shadow-[0_4px_12px_rgba(0,0,0,0.08)] ${isExpanded ? "" : "overflow-hidden"}`} data-testid="change-card">
       <div
         className="px-3 sm:px-4 py-3 cursor-pointer hover:bg-opacity-80 transition-colors"
         onClick={() => setIsExpanded(!isExpanded)}
       >
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
           <div className="flex flex-wrap items-center gap-2 sm:gap-3">
-            <span className="text-sm font-medium text-gray-500">#{index + 1}</span>
+            <span className="text-sm font-medium text-[var(--brand-secondary)]">#{index + 1}</span>
             <span
               className={`px-2 py-1 text-xs font-semibold rounded border ${styles.badge}`}
             >
               {formatChangeType(change.change_type)}
             </span>
-            <span className="text-sm font-mono text-gray-700">
+            <span className="text-sm font-mono text-[var(--foreground)]">
               Marker: {change.marker}
             </span>
             {hasPathChange && change.change_type === ChangeType.SECTION_MOVED && (
               <div
-                className="flex items-center gap-2 text-xs text-gray-700 bg-purple-50 px-2 py-1 rounded border border-purple-200"
+                className="flex items-center gap-2 text-xs text-[var(--foreground)] bg-purple-50 px-2 py-1 rounded border border-purple-200"
                 data-testid="movement-indicator"
                 role="status"
                 aria-label={`Section moved from ${formatMarkerPath(change.old_marker_path)} to ${formatMarkerPath(change.new_marker_path)}`}
@@ -382,13 +382,13 @@ export default function ChangeCard({ change, index, oldYaml, newYaml }: ChangeCa
           </div>
           <div className="flex items-center gap-2">
             {discussion && discussion.comments.length > 0 && (
-              <span className="text-xs text-gray-500">
+              <span className="text-xs text-[var(--brand-secondary)]">
                 {discussion.comments.length} comment
                 {discussion.comments.length !== 1 ? "s" : ""}
               </span>
             )}
             <svg
-              className={`w-5 h-5 text-gray-400 transition-transform ${
+              className={`w-5 h-5 text-[var(--brand-secondary)] transition-transform ${
                 isExpanded ? "rotate-180" : ""
               }`}
               fill="none"
@@ -410,21 +410,21 @@ export default function ChangeCard({ change, index, oldYaml, newYaml }: ChangeCa
         <div className="px-4 pb-4 space-y-4">
           {isMetadataChange && (
             <div>
-              <h4 className="text-sm font-semibold text-gray-700 mb-2">
+              <h4 className="text-sm font-semibold text-[var(--foreground)] mb-2">
                 Metadata Change: {metadataFieldPath}
               </h4>
               <div className="grid grid-cols-2 gap-4">
                 <div className="bg-red-50 border border-red-200 rounded p-3">
-                  <div className="text-xs font-semibold text-gray-600 mb-1">Old Value:</div>
-                  <div className="text-sm font-mono text-gray-800">
+                  <div className="text-xs font-semibold text-[var(--brand-secondary)] mb-1">Old Value:</div>
+                  <div className="text-sm font-mono text-[var(--foreground)]">
                     {change.old_content !== null && change.old_content !== undefined
                       ? String(change.old_content)
                       : "(empty)"}
                   </div>
                 </div>
                 <div className="bg-green-50 border border-green-200 rounded p-3">
-                  <div className="text-xs font-semibold text-gray-600 mb-1">New Value:</div>
-                  <div className="text-sm font-mono text-gray-800">
+                  <div className="text-xs font-semibold text-[var(--brand-secondary)] mb-1">New Value:</div>
+                  <div className="text-sm font-mono text-[var(--foreground)]">
                     {change.new_content !== null && change.new_content !== undefined
                       ? String(change.new_content)
                       : "(empty)"}
@@ -436,7 +436,7 @@ export default function ChangeCard({ change, index, oldYaml, newYaml }: ChangeCa
 
           {hasTitleChange && (
             <div>
-              <h4 className="text-sm font-semibold text-gray-700 mb-2">Title Change:</h4>
+              <h4 className="text-sm font-semibold text-[var(--foreground)] mb-2">Title Change:</h4>
               <div className="grid grid-cols-2 gap-4">
                 <div className="bg-red-50 border border-red-200 rounded p-3">
                   <div className="text-sm font-mono">
@@ -454,7 +454,7 @@ export default function ChangeCard({ change, index, oldYaml, newYaml }: ChangeCa
 
           {hasContentChange && (
             <div>
-              <h4 className="text-sm font-semibold text-gray-700 mb-2">Content Change:</h4>
+              <h4 className="text-sm font-semibold text-[var(--foreground)] mb-2">Content Change:</h4>
               <div className="overflow-x-auto">
                 <DiffContent
                   oldContent={change.old_content}
@@ -471,7 +471,7 @@ export default function ChangeCard({ change, index, oldYaml, newYaml }: ChangeCa
                 e.stopPropagation();
                 setShowFullSection(!showFullSection);
               }}
-              className="flex items-center gap-2 text-sm font-semibold text-gray-700 mb-2 hover:text-gray-900"
+              className="flex items-center gap-2 text-sm font-semibold text-[var(--foreground)] mb-2 hover:text-[var(--foreground)]"
             >
               <svg
                 className={`w-4 h-4 transition-transform ${
@@ -496,9 +496,9 @@ export default function ChangeCard({ change, index, oldYaml, newYaml }: ChangeCa
                   isSectionUnchanged ? (
                     // Unchanged section: show once with grey background
                     <div>
-                      <h5 className="text-xs font-semibold text-gray-600 mb-1">Both Versions:</h5>
-                      <div className="bg-gray-50 border border-gray-200 rounded p-3 overflow-x-auto">
-                        <pre className="whitespace-pre-wrap text-xs font-mono text-gray-800">
+                      <h5 className="text-xs font-semibold text-[var(--brand-secondary)] mb-1">Both Versions:</h5>
+                      <div className="bg-[var(--brand-secondary)]/10 border border-[var(--brand-secondary)]/20 rounded p-3 overflow-x-auto">
+                        <pre className="whitespace-pre-wrap text-xs font-mono text-[var(--foreground)]">
                           {(() => {
                             const sectionYaml = oldSectionYaml || newSectionYaml;
                             if (!sectionYaml) return "";
@@ -518,10 +518,10 @@ export default function ChangeCard({ change, index, oldYaml, newYaml }: ChangeCa
                     // Changed section: show side-by-side (old left, new right)
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div>
-                        <h5 className="text-xs font-semibold text-gray-600 mb-1">Old Version:</h5>
+                        <h5 className="text-xs font-semibold text-[var(--brand-secondary)] mb-1">Old Version:</h5>
                         <div className="bg-red-50 border border-red-200 rounded p-3 overflow-x-auto">
                           {oldSectionYaml ? (
-                            <pre className="whitespace-pre-wrap text-xs font-mono text-gray-800">
+                            <pre className="whitespace-pre-wrap text-xs font-mono text-[var(--foreground)]">
                               {oldSectionYaml
                                 .split("\n")
                                 .map((line, idx) => {
@@ -531,15 +531,15 @@ export default function ChangeCard({ change, index, oldYaml, newYaml }: ChangeCa
                                 .join("\n")}
                             </pre>
                           ) : (
-                            <div className="text-xs text-gray-500 italic font-mono">(empty)</div>
+                            <div className="text-xs text-[var(--brand-secondary)] italic font-mono">(empty)</div>
                           )}
                         </div>
                       </div>
                       <div>
-                        <h5 className="text-xs font-semibold text-gray-600 mb-1">New Version:</h5>
+                        <h5 className="text-xs font-semibold text-[var(--brand-secondary)] mb-1">New Version:</h5>
                         <div className="bg-green-50 border border-green-200 rounded p-3 overflow-x-auto">
                           {newSectionYaml ? (
-                            <pre className="whitespace-pre-wrap text-xs font-mono text-gray-800">
+                            <pre className="whitespace-pre-wrap text-xs font-mono text-[var(--foreground)]">
                               {newSectionYaml
                                 .split("\n")
                                 .map((line, idx) => {
@@ -549,7 +549,7 @@ export default function ChangeCard({ change, index, oldYaml, newYaml }: ChangeCa
                                 .join("\n")}
                             </pre>
                           ) : (
-                            <div className="text-xs text-gray-500 italic font-mono">(empty)</div>
+                            <div className="text-xs text-[var(--brand-secondary)] italic font-mono">(empty)</div>
                           )}
                         </div>
                       </div>
@@ -591,7 +591,7 @@ export default function ChangeCard({ change, index, oldYaml, newYaml }: ChangeCa
             )}
           </div>
 
-          <div className="border-t border-gray-200 pt-4">
+          <div className="border-t border-[var(--brand-secondary)]/30 pt-4">
             <button
               onClick={(e) => {
                 e.stopPropagation();
@@ -600,9 +600,9 @@ export default function ChangeCard({ change, index, oldYaml, newYaml }: ChangeCa
                   addDiscussion(changeId);
                 }
               }}
-              className="text-sm text-blue-600 hover:text-blue-800 font-medium"
+              className="text-sm text-[var(--brand-accent)] hover:underline font-medium"
             >
-              {showDiscussion ? "Hide" : "Add"} Comment
+              {showDiscussion ? "Hide" : "Add"} Comment →
             </button>
 
             {showDiscussion && (
@@ -615,7 +615,7 @@ export default function ChangeCard({ change, index, oldYaml, newYaml }: ChangeCa
                       handleAddComment();
                     }
                   }}
-                  className="w-full p-2 border border-gray-300 rounded resize-none"
+                  className="w-full p-2 border border-[var(--brand-secondary)]/40 rounded resize-none bg-[var(--brand-background)]"
                   rows={3}
                   placeholder="Add a comment about this change... (Cmd/Ctrl+Enter to submit)"
                 />
@@ -623,7 +623,7 @@ export default function ChangeCard({ change, index, oldYaml, newYaml }: ChangeCa
                   <button
                     onClick={handleAddComment}
                     disabled={!commentText.trim()}
-                    className="px-3 py-1 bg-blue-600 text-white rounded text-sm hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed"
+                    className="px-3 py-1 bg-[var(--brand-cta-bg)] text-[var(--brand-cta-text)] rounded text-sm hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     Comment
                   </button>

@@ -20,11 +20,11 @@ export default function Tooltip({
       <TooltipPrimitive.Portal>
         <TooltipPrimitive.Content
           side={side}
-          className="bg-gray-900 text-white text-sm px-3 py-2 rounded-lg shadow-lg z-50 max-w-xs"
+          className="bg-[var(--foreground)] text-[var(--brand-background)] text-sm px-3 py-2 rounded-lg shadow-[0_4px_12px_rgba(0,0,0,0.08)] z-50 max-w-xs"
           sideOffset={5}
         >
           {content}
-          <TooltipPrimitive.Arrow className="fill-gray-900" />
+          <TooltipPrimitive.Arrow className="fill-[var(--foreground)]" />
         </TooltipPrimitive.Content>
       </TooltipPrimitive.Portal>
     </TooltipPrimitive.Root>

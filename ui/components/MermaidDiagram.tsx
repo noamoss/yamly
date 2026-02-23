@@ -106,7 +106,7 @@ export default function MermaidDiagram({ code }: MermaidDiagramProps) {
     const handleTab = (e: KeyboardEvent) => {
       if (e.key !== "Tab") return;
 
-      const modal = expandedRef.current?.closest(".bg-white");
+      const modal = expandedRef.current?.closest("[data-mermaid-modal]");
       if (!modal) return;
 
       const focusableElements = modal.querySelectorAll<HTMLElement>(
@@ -138,7 +138,7 @@ export default function MermaidDiagram({ code }: MermaidDiagramProps) {
 
     // Focus first interactive element in modal
     setTimeout(() => {
-      const modal = expandedRef.current?.closest(".bg-white");
+      const modal = expandedRef.current?.closest("[data-mermaid-modal]");
       const firstButton = modal?.querySelector<HTMLElement>("button");
       firstButton?.focus();
     }, 0);
@@ -180,7 +180,7 @@ export default function MermaidDiagram({ code }: MermaidDiagramProps) {
         <div className="absolute top-2 right-2 z-10 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
           <button
             onClick={handleInlineZoomOut}
-            className="px-2 py-1 bg-gray-800 text-white border border-gray-700 rounded text-xs hover:bg-gray-700 shadow-lg font-medium"
+            className="px-2 py-1 bg-[var(--brand-cta-bg)] text-[var(--brand-cta-text)] border border-[var(--foreground)]/30 rounded text-xs hover:opacity-90 shadow-lg font-medium"
             title="Zoom out"
             aria-label="Zoom out"
           >
@@ -188,7 +188,7 @@ export default function MermaidDiagram({ code }: MermaidDiagramProps) {
           </button>
           <button
             onClick={handleInlineResetZoom}
-            className="px-2 py-1 bg-gray-800 text-white border border-gray-700 rounded text-xs hover:bg-gray-700 shadow-lg font-medium"
+            className="px-2 py-1 bg-[var(--brand-cta-bg)] text-[var(--brand-cta-text)] border border-[var(--foreground)]/30 rounded text-xs hover:opacity-90 shadow-lg font-medium"
             title="Reset zoom"
             aria-label="Reset zoom"
           >
@@ -196,7 +196,7 @@ export default function MermaidDiagram({ code }: MermaidDiagramProps) {
           </button>
           <button
             onClick={handleInlineZoomIn}
-            className="px-2 py-1 bg-gray-800 text-white border border-gray-700 rounded text-xs hover:bg-gray-700 shadow-lg font-medium"
+            className="px-2 py-1 bg-[var(--brand-cta-bg)] text-[var(--brand-cta-text)] border border-[var(--foreground)]/30 rounded text-xs hover:opacity-90 shadow-lg font-medium"
             title="Zoom in"
             aria-label="Zoom in"
           >
@@ -205,7 +205,7 @@ export default function MermaidDiagram({ code }: MermaidDiagramProps) {
           <button
             ref={expandButtonRef}
             onClick={() => setIsExpanded(true)}
-            className="px-2 py-1 bg-gray-800 text-white border border-gray-700 rounded text-xs hover:bg-gray-700 shadow-lg font-medium"
+            className="px-2 py-1 bg-[var(--brand-cta-bg)] text-[var(--brand-cta-text)] border border-[var(--foreground)]/30 rounded text-xs hover:opacity-90 shadow-lg font-medium"
             title="Expand to full screen"
             aria-label="Expand diagram"
           >
@@ -214,7 +214,7 @@ export default function MermaidDiagram({ code }: MermaidDiagramProps) {
         </div>
 
         {/* Diagram container with zoom */}
-        <div className="flex justify-center overflow-x-auto overflow-y-auto max-h-[600px] bg-gray-50 rounded-lg p-4">
+        <div className="flex justify-center overflow-x-auto overflow-y-auto max-h-[600px] bg-[var(--brand-background)] rounded-lg p-4 shadow-[0_4px_12px_rgba(0,0,0,0.08)]">
           <div
             ref={diagramRef}
             className="mermaid-diagram"
@@ -238,17 +238,18 @@ export default function MermaidDiagram({ code }: MermaidDiagramProps) {
           aria-label="Expanded diagram"
         >
           <div
-            className="bg-white rounded-lg shadow-xl max-w-[95vw] max-h-[95vh] w-full mx-4 flex flex-col"
+            data-mermaid-modal
+            className="bg-[var(--brand-background)] rounded-lg shadow-[0_4px_12px_rgba(0,0,0,0.08)] max-w-[95vw] max-h-[95vh] w-full mx-4 flex flex-col"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="p-4 border-b border-gray-200 flex items-center justify-between">
-              <h3 className="text-lg font-semibold text-gray-900">
+            <div className="p-4 border-b border-[var(--brand-secondary)]/30 flex items-center justify-between">
+              <h3 className="text-lg font-normal text-[var(--foreground)]" style={{ fontFamily: "var(--font-serif), serif" }}>
                 Diagram (Click outside to close)
               </h3>
               <div className="flex gap-2 items-center">
                 <button
                   onClick={handleExpandedZoomOut}
-                  className="px-3 py-1 bg-gray-100 border border-gray-300 rounded text-sm hover:bg-gray-200"
+                  className="px-3 py-1 bg-[var(--brand-secondary)]/15 border border-[var(--brand-secondary)]/40 rounded text-sm hover:bg-[var(--brand-accent)]/10"
                   title="Zoom out"
                   aria-label="Zoom out"
                 >
@@ -256,7 +257,7 @@ export default function MermaidDiagram({ code }: MermaidDiagramProps) {
                 </button>
                 <button
                   onClick={handleExpandedResetZoom}
-                  className="px-3 py-1 bg-gray-100 border border-gray-300 rounded text-sm hover:bg-gray-200"
+                  className="px-3 py-1 bg-[var(--brand-secondary)]/15 border border-[var(--brand-secondary)]/40 rounded text-sm hover:bg-[var(--brand-accent)]/10"
                   title="Reset zoom"
                   aria-label="Reset zoom"
                 >
@@ -264,7 +265,7 @@ export default function MermaidDiagram({ code }: MermaidDiagramProps) {
                 </button>
                 <button
                   onClick={handleExpandedZoomIn}
-                  className="px-3 py-1 bg-gray-100 border border-gray-300 rounded text-sm hover:bg-gray-200"
+                  className="px-3 py-1 bg-[var(--brand-secondary)]/15 border border-[var(--brand-secondary)]/40 rounded text-sm hover:bg-[var(--brand-accent)]/10"
                   title="Zoom in"
                   aria-label="Zoom in"
                 >
@@ -272,7 +273,7 @@ export default function MermaidDiagram({ code }: MermaidDiagramProps) {
                 </button>
                 <button
                   onClick={() => setIsExpanded(false)}
-                  className="ml-2 text-gray-400 hover:text-gray-600 transition-colors"
+                  className="ml-2 text-[var(--brand-secondary)] hover:text-[var(--foreground)] transition-colors"
                   aria-label="Close"
                 >
                   <svg
@@ -291,7 +292,7 @@ export default function MermaidDiagram({ code }: MermaidDiagramProps) {
                 </button>
               </div>
             </div>
-            <div className="flex-1 overflow-auto p-8 bg-gray-50">
+            <div className="flex-1 overflow-auto p-8 bg-[var(--brand-accent)]/5">
               <div
                 ref={expandedRef}
                 className="mermaid-diagram flex justify-center"

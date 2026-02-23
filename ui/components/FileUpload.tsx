@@ -74,7 +74,7 @@ export default function FileUpload({
 
   return (
     <div className={className}>
-      <label className="block text-sm font-medium text-gray-700 mb-2">
+      <label className="block text-sm font-medium text-[var(--foreground)] mb-2">
         {label}
       </label>
       <div
@@ -83,11 +83,11 @@ export default function FileUpload({
         onDrop={handleDrop}
         className={`
           border-2 border-dashed rounded-lg p-6 text-center cursor-pointer
-          transition-colors
+          transition-colors bg-[var(--brand-background)] shadow-[0_4px_12px_rgba(0,0,0,0.08)]
           ${
             isDragging
-              ? "border-blue-500 bg-blue-50"
-              : "border-gray-300 hover:border-gray-400"
+              ? "border-[var(--brand-accent)] bg-[var(--brand-accent)]/10"
+              : "border-[var(--brand-secondary)]/40 hover:border-[var(--brand-secondary)]/60"
           }
         `}
       >
@@ -103,7 +103,7 @@ export default function FileUpload({
           className="cursor-pointer block"
         >
           <svg
-            className="mx-auto h-12 w-12 text-gray-400"
+            className="mx-auto h-12 w-12 text-[var(--brand-secondary)]"
             stroke="currentColor"
             fill="none"
             viewBox="0 0 48 48"
@@ -115,10 +115,10 @@ export default function FileUpload({
               strokeLinejoin="round"
             />
           </svg>
-          <span className="mt-2 block text-sm text-gray-600">
-            {isDragging ? "Drop file here" : "Drag and drop or click to upload"}
+          <span className="mt-2 block text-sm text-[var(--foreground)]">
+            {isDragging ? "Drop file here" : "Drag and drop or click to upload →"}
           </span>
-          <span className="mt-1 block text-xs text-gray-500">
+          <span className="mt-1 block text-xs text-[var(--brand-secondary)]">
             {accept}
           </span>
         </label>

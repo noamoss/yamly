@@ -26,19 +26,20 @@ export default function DocumentationModal({
       aria-labelledby="documentation-title"
     >
       <div
-        className="bg-white rounded-lg shadow-xl max-w-4xl w-full mx-4 max-h-[90vh] overflow-hidden flex flex-col"
+        className="bg-[var(--brand-background)] rounded-lg shadow-[0_4px_12px_rgba(0,0,0,0.08)] max-w-4xl w-full mx-4 max-h-[90vh] overflow-hidden flex flex-col"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="p-6 border-b border-gray-200 flex items-center justify-between">
+        <div className="p-6 border-b border-[var(--brand-secondary)]/30 flex items-center justify-between">
           <h2
             id="documentation-title"
-            className="text-xl font-semibold text-gray-900"
+            className="text-xl font-normal text-[var(--foreground)]"
+            style={{ fontFamily: "var(--font-serif), serif" }}
           >
             Documentation
           </h2>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 transition-colors"
+            className="text-[var(--brand-secondary)] hover:text-[var(--foreground)] transition-colors"
             aria-label="Close"
           >
             <svg

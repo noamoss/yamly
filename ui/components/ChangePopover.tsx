@@ -32,7 +32,7 @@ function getChangeTypeStyles(changeType: ChangeType) {
     case ChangeType.SECTION_MOVED:
       return "bg-purple-100 text-purple-800 border-purple-300";
     default:
-      return "bg-gray-100 text-gray-800 border-gray-300";
+      return "bg-[var(--brand-secondary)]/20 text-[var(--foreground)] border-[var(--brand-secondary)]/40";
   }
 }
 
@@ -127,12 +127,12 @@ export default function ChangePopover({ change, position, onClose }: ChangePopov
   return (
     <div
       ref={popoverRef}
-      className="fixed z-50 bg-white border border-gray-300 rounded-lg shadow-xl w-96 max-w-[calc(100vw-2rem)] max-h-[600px] overflow-y-auto"
+      className="fixed z-50 bg-[var(--brand-background)] border border-[var(--brand-secondary)]/40 rounded-lg shadow-[0_4px_12px_rgba(0,0,0,0.08)] w-96 max-w-[calc(100vw-2rem)] max-h-[600px] overflow-y-auto"
       style={{ left: position.x, top: position.y }}
     >
       <div className="p-4 space-y-3">
         {/* Header */}
-        <div className="flex items-start justify-between border-b border-gray-200 pb-3">
+        <div className="flex items-start justify-between border-b border-[var(--brand-secondary)]/30 pb-3">
           <div className="flex-1">
             <div className="flex items-center gap-2 mb-2">
               <span
@@ -145,13 +145,13 @@ export default function ChangePopover({ change, position, onClose }: ChangePopov
             </div>
             <div className="text-sm space-y-1">
               <div>
-                <span className="font-medium text-gray-700">Marker:</span>{" "}
-                <span className="font-mono text-gray-900">{change.marker}</span>
+                <span className="font-medium text-[var(--foreground)]">Marker:</span>{" "}
+                <span className="font-mono text-[var(--foreground)]">{change.marker}</span>
               </div>
               {hasPathChange && (
                 <div>
-                  <span className="font-medium text-gray-700">Path:</span>{" "}
-                  <span className="text-gray-600">
+                  <span className="font-medium text-[var(--foreground)]">Path:</span>{" "}
+                  <span className="text-[var(--brand-secondary)]">
                     {formatMarkerPath(change.old_marker_path)} →{" "}
                     {formatMarkerPath(change.new_marker_path)}
                   </span>
@@ -161,7 +161,7 @@ export default function ChangePopover({ change, position, onClose }: ChangePopov
           </div>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 transition-colors"
+            className="text-[var(--brand-secondary)] hover:text-[var(--foreground)] transition-colors"
             aria-label="Close"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -177,31 +177,31 @@ export default function ChangePopover({ change, position, onClose }: ChangePopov
 
         {/* Change details */}
         {(hasTitleChange || hasContentChange) && (
-          <div className="border-b border-gray-200 pb-3 space-y-2">
+          <div className="border-b border-[var(--brand-secondary)]/30 pb-3 space-y-2">
             {hasTitleChange && (
               <div>
-                <h4 className="text-xs font-semibold text-gray-700 mb-1">Title Change:</h4>
+                <h4 className="text-xs font-semibold text-[var(--foreground)] mb-1">Title Change:</h4>
                 <div className="grid grid-cols-2 gap-2 text-xs">
                   <div className="bg-red-50 border border-red-200 rounded p-2">
-                    <div className="font-mono text-gray-800">{change.old_title || "(empty)"}</div>
+                    <div className="font-mono text-[var(--foreground)]">{change.old_title || "(empty)"}</div>
                   </div>
                   <div className="bg-green-50 border border-green-200 rounded p-2">
-                    <div className="font-mono text-gray-800">{change.new_title || "(empty)"}</div>
+                    <div className="font-mono text-[var(--foreground)]">{change.new_title || "(empty)"}</div>
                   </div>
                 </div>
               </div>
             )}
             {hasContentChange && (
               <div>
-                <h4 className="text-xs font-semibold text-gray-700 mb-1">Content Change:</h4>
+                <h4 className="text-xs font-semibold text-[var(--foreground)] mb-1">Content Change:</h4>
                 <div className="grid grid-cols-2 gap-2 text-xs max-h-32 overflow-y-auto">
                   <div className="bg-red-50 border border-red-200 rounded p-2">
-                    <pre className="whitespace-pre-wrap font-mono text-gray-800 text-xs">
+                    <pre className="whitespace-pre-wrap font-mono text-[var(--foreground)] text-xs">
                       {change.old_content || "(empty)"}
                     </pre>
                   </div>
                   <div className="bg-green-50 border border-green-200 rounded p-2">
-                    <pre className="whitespace-pre-wrap font-mono text-gray-800 text-xs">
+                    <pre className="whitespace-pre-wrap font-mono text-[var(--foreground)] text-xs">
                       {change.new_content || "(empty)"}
                     </pre>
                   </div>
@@ -213,7 +213,7 @@ export default function ChangePopover({ change, position, onClose }: ChangePopov
 
         {/* Discussion */}
         <div className="space-y-2">
-          <h4 className="text-sm font-semibold text-gray-700">Discussion</h4>
+          <h4 className="text-sm font-semibold text-[var(--foreground)]">Discussion</h4>
           <textarea
             value={commentText}
             onChange={(e) => setCommentText(e.target.value)}
@@ -222,14 +222,14 @@ export default function ChangePopover({ change, position, onClose }: ChangePopov
                 handleAddComment();
               }
             }}
-            className="w-full p-2 border border-gray-300 rounded resize-none text-sm"
+            className="w-full p-2 border border-[var(--brand-secondary)]/40 rounded resize-none text-sm bg-[var(--brand-background)]"
             rows={3}
             placeholder="Add a comment about this change... (Cmd/Ctrl+Enter to submit)"
           />
           <button
             onClick={handleAddComment}
             disabled={!commentText.trim()}
-            className="px-3 py-1 bg-blue-600 text-white rounded text-sm hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed"
+            className="px-3 py-1 bg-[var(--brand-cta-bg)] text-[var(--brand-cta-text)] rounded text-sm hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Comment
           </button>

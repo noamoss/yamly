@@ -24,7 +24,7 @@ export default function HelpModal({
       aria-labelledby="help-title"
     >
       <div
-        className="bg-white rounded-lg shadow-xl max-w-3xl w-full mx-4 max-h-[90vh] overflow-y-auto"
+        className="bg-[var(--brand-background)] rounded-lg shadow-[0_4px_12px_rgba(0,0,0,0.08)] max-w-3xl w-full mx-4 max-h-[90vh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="p-6">
@@ -32,13 +32,14 @@ export default function HelpModal({
           <div className="flex items-center justify-between mb-6">
             <h2
               id="help-title"
-              className="text-2xl font-semibold text-gray-900"
+              className="text-2xl font-normal text-[var(--foreground)]"
+              style={{ fontFamily: "var(--font-serif), serif" }}
             >
               Help & Documentation
             </h2>
             <button
               onClick={onClose}
-              className="text-gray-400 hover:text-gray-600 transition-colors"
+              className="text-[var(--brand-secondary)] hover:text-[var(--foreground)] transition-colors"
               aria-label="Close"
             >
               <svg
@@ -58,10 +59,10 @@ export default function HelpModal({
           </div>
 
           {/* Content */}
-          <div className="space-y-6 text-gray-700">
+          <div className="space-y-6 text-[var(--brand-secondary)]">
             {/* What is yamly */}
             <section>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">
+              <h3 className="text-lg font-normal text-[var(--foreground)] mb-2" style={{ fontFamily: "var(--font-serif), serif" }}>
                 What is yamly?
               </h3>
               <p className="text-sm leading-relaxed">
@@ -71,7 +72,7 @@ export default function HelpModal({
 
             {/* How to Use */}
             <section>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">
+              <h3 className="text-lg font-normal text-[var(--foreground)] mb-2" style={{ fontFamily: "var(--font-serif), serif" }}>
                 How to Use
               </h3>
               <ol className="list-decimal list-inside space-y-2 text-sm">
@@ -101,28 +102,28 @@ export default function HelpModal({
 
             {/* Document Format */}
             <section>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">
+              <h3 className="text-lg font-normal text-[var(--foreground)] mb-2" style={{ fontFamily: "var(--font-serif), serif" }}>
                 Document Format Requirements
               </h3>
-              <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 space-y-2 text-sm">
+              <div className="bg-[var(--brand-accent)]/10 border border-[var(--brand-secondary)]/20 rounded-lg p-4 space-y-2 text-sm">
                 <p>
-                  <strong>Top-level key:</strong> Documents must have{" "}
-                  <code className="bg-gray-200 px-1 rounded">document:</code> as
+                  <strong className="text-[var(--foreground)]">Top-level key:</strong> Documents must have{" "}
+                  <code className="bg-[var(--brand-secondary)]/20 px-1 rounded">document:</code> as
                   the top-level key.
                 </p>
                 <p>
-                  <strong>Section markers:</strong> All sections require a{" "}
-                  <code className="bg-gray-200 px-1 rounded">marker</code>{" "}
+                  <strong className="text-[var(--foreground)]">Section markers:</strong> All sections require a{" "}
+                  <code className="bg-[var(--brand-secondary)]/20 px-1 rounded">marker</code>{" "}
                   field, which serves as a unique identifier within the same
                   nesting level.
                 </p>
                 <p>
-                  <strong>Nesting:</strong> Supports unlimited nesting levels for
+                  <strong className="text-[var(--foreground)]">Nesting:</strong> Supports unlimited nesting levels for
                   complex document structures.
                 </p>
                 <p>
-                  <strong>Content:</strong> Each section can have a{" "}
-                  <code className="bg-gray-200 px-1 rounded">content</code>{" "}
+                  <strong className="text-[var(--foreground)]">Content:</strong> Each section can have a{" "}
+                  <code className="bg-[var(--brand-secondary)]/20 px-1 rounded">content</code>{" "}
                   field containing text for that section level.
                 </p>
               </div>
@@ -130,7 +131,7 @@ export default function HelpModal({
 
             {/* Common Use Cases */}
             <section>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">
+              <h3 className="text-lg font-normal text-[var(--foreground)] mb-2" style={{ fontFamily: "var(--font-serif), serif" }}>
                 Common Use Cases
               </h3>
               <ul className="list-disc list-inside space-y-2 text-sm">
@@ -144,25 +145,25 @@ export default function HelpModal({
 
             {/* FAQ */}
             <section>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">
+              <h3 className="text-lg font-normal text-[var(--foreground)] mb-2" style={{ fontFamily: "var(--font-serif), serif" }}>
                 Frequently Asked Questions
               </h3>
               <div className="space-y-4 text-sm">
                 <div>
-                  <h4 className="font-semibold text-gray-800 mb-1">
+                  <h4 className="font-medium text-[var(--foreground)] mb-1">
                     What file formats are supported?
                   </h4>
-                  <p className="text-gray-600">
-                    Currently, only YAML files (<code className="bg-gray-200 px-1 rounded">.yaml</code> or{" "}
-                    <code className="bg-gray-200 px-1 rounded">.yml</code>) are
+                  <p className="text-[var(--brand-secondary)]">
+                    Currently, only YAML files (<code className="bg-[var(--brand-secondary)]/20 px-1 rounded">.yaml</code> or{" "}
+                    <code className="bg-[var(--brand-secondary)]/20 px-1 rounded">.yml</code>) are
                     supported.
                   </p>
                 </div>
                 <div>
-                  <h4 className="font-semibold text-gray-800 mb-1">
+                  <h4 className="font-medium text-[var(--foreground)] mb-1">
                     What do the different change types mean?
                   </h4>
-                  <ul className="list-disc list-inside space-y-1 text-gray-600 ml-2">
+                  <ul className="list-disc list-inside space-y-1 text-[var(--brand-secondary)] ml-2">
                     <li>
                       <strong>SECTION_ADDED:</strong> A new section was added in
                       the new version
@@ -186,21 +187,21 @@ export default function HelpModal({
                   </ul>
                 </div>
                 <div>
-                  <h4 className="font-semibold text-gray-800 mb-1">
+                  <h4 className="font-medium text-[var(--foreground)] mb-1">
                     How do I handle validation errors?
                   </h4>
-                  <p className="text-gray-600">
-                    Ensure your YAML has <code className="bg-gray-200 px-1 rounded">document:</code> as the
-                    top-level key and all sections have <code className="bg-gray-200 px-1 rounded">marker</code> fields.
+                  <p className="text-[var(--brand-secondary)]">
+                    Ensure your YAML has <code className="bg-[var(--brand-secondary)]/20 px-1 rounded">document:</code> as the
+                    top-level key and all sections have <code className="bg-[var(--brand-secondary)]/20 px-1 rounded">marker</code> fields.
                     Check the error message for specific details about what's
                     missing.
                   </p>
                 </div>
                 <div>
-                  <h4 className="font-semibold text-gray-800 mb-1">
+                  <h4 className="font-medium text-[var(--foreground)] mb-1">
                     Can I use this with Hebrew content?
                   </h4>
-                  <p className="text-gray-600">
+                  <p className="text-[var(--brand-secondary)]">
                     Yes! yamly fully supports Hebrew content and RTL
                     (right-to-left) text. The tool was designed with Hebrew
                     legal documents in mind.
@@ -211,10 +212,10 @@ export default function HelpModal({
 
             {/* Documentation Links */}
             <section>
-              <h3 className="text-lg font-semibold text-gray-900 mb-3">
+              <h3 className="text-lg font-normal text-[var(--foreground)] mb-3" style={{ fontFamily: "var(--font-serif), serif" }}>
                 Learn More
               </h3>
-              <p className="text-sm text-gray-600 mb-3">
+              <p className="text-sm text-[var(--brand-secondary)] mb-3">
                 Explore additional ways to use yamly:
               </p>
               <DocumentationLinks variant="list" onDocClick={onDocClick} />
@@ -225,9 +226,9 @@ export default function HelpModal({
           <div className="mt-6 flex justify-end">
             <button
               onClick={onClose}
-              className="px-4 py-2 bg-[var(--brand-primary)] text-white rounded-lg hover:opacity-90 transition-opacity text-sm font-medium"
+              className="px-6 py-2 bg-[var(--brand-cta-bg)] text-[var(--brand-cta-text)] rounded-lg hover:opacity-90 transition-opacity text-sm font-medium uppercase"
             >
-              Close
+              Close →
             </button>
           </div>
         </div>
