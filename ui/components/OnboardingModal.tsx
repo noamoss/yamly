@@ -81,7 +81,7 @@ export default function OnboardingModal({
             </h2>
             <button
               onClick={handleClose}
-              className="text-[var(--brand-secondary)] hover:text-[var(--foreground)] transition-colors"
+              className="p-2 -m-2 sm:p-0 sm:m-0 text-[var(--brand-secondary)] hover:text-[var(--foreground)] transition-colors touch-manipulation rounded-lg hover:bg-[var(--brand-secondary)]/10 active:bg-[var(--brand-secondary)]/20"
               aria-label="Close"
             >
               <svg

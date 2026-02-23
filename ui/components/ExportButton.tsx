@@ -37,7 +37,7 @@ export default function ExportButton({ diff, disabled }: ExportButtonProps) {
     <button
       onClick={handleExport}
       disabled={disabled || !diff}
-      className="px-3 sm:px-4 py-2 bg-[var(--brand-secondary)]/30 text-[var(--foreground)] rounded-lg hover:bg-[var(--brand-secondary)]/40 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm sm:text-base border border-[var(--brand-secondary)]/40"
+      className="px-3 sm:px-4 py-2.5 sm:py-2 bg-[var(--brand-secondary)]/30 text-[var(--foreground)] rounded-lg hover:bg-[var(--brand-secondary)]/40 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm sm:text-base border border-[var(--brand-secondary)]/40 touch-manipulation"
     >
       <span className="hidden sm:inline">Export JSON</span>
       <span className="sm:hidden">Export</span>

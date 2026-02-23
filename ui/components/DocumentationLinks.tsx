@@ -63,7 +63,7 @@ export default function DocumentationLinks({
         onMouseLeave={() => setIsOpen(false)}
       >
         <button
-          className="px-3 sm:px-4 py-2 bg-[var(--brand-secondary)]/15 text-[var(--foreground)] rounded-lg hover:bg-[var(--brand-secondary)]/25 transition-colors text-sm border border-[var(--brand-secondary)]/20 flex items-center gap-2"
+          className="px-3 sm:px-4 py-2.5 sm:py-2 bg-[var(--brand-secondary)]/15 text-[var(--foreground)] rounded-lg hover:bg-[var(--brand-secondary)]/25 transition-colors text-sm border border-[var(--brand-secondary)]/20 flex items-center gap-2 touch-manipulation"
           aria-label="Documentation menu"
           aria-expanded={isOpen}
           onClick={() => setIsOpen(!isOpen)}
@@ -92,7 +92,7 @@ export default function DocumentationLinks({
           </svg>
         </button>
         <div
-          className={`absolute right-0 mt-2 w-64 bg-[var(--brand-background)] rounded-lg shadow-[0_4px_12px_rgba(0,0,0,0.08)] border border-[var(--brand-secondary)]/20 transition-all duration-200 z-50 ${
+          className={`fixed left-4 right-4 top-24 z-50 sm:absolute sm:left-auto sm:right-0 sm:top-auto sm:mt-2 sm:w-64 bg-[var(--brand-background)] rounded-lg shadow-[0_4px_12px_rgba(0,0,0,0.08)] border border-[var(--brand-secondary)]/20 transition-all duration-200 ${
             isOpen ? "opacity-100 visible" : "opacity-0 invisible"
           }`}
         >

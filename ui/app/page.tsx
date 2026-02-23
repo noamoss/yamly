@@ -156,12 +156,12 @@ export default function Home() {
       <header className="border-b border-[var(--brand-secondary)]/30 bg-[var(--brand-background)] sticky top-0 z-10 shadow-[0_4px_12px_rgba(0,0,0,0.08)]">
         <div className="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between h-auto sm:h-16 py-3 sm:py-0 gap-3 sm:gap-0">
-            <div className="flex items-center gap-4">
+            <div className="flex min-w-0 flex-1 sm:flex-initial items-center gap-2 sm:gap-4">
               <a
                 href="https://about.thepitz.studio/"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-2 text-[var(--brand-text)] text-sm sm:text-base font-normal hover:opacity-80 transition-opacity"
+                className="flex flex-shrink-0 items-center gap-2 text-[var(--brand-text)] text-sm sm:text-base font-normal hover:opacity-80 transition-opacity"
                 aria-label="The Pitz Studio"
               >
                 <Image
@@ -174,15 +174,15 @@ export default function Home() {
                 <span>the pitz studio</span>
               </a>
               <span className="text-[var(--brand-secondary)]/50 hidden sm:inline">|</span>
-              <h1 className="text-xl font-serif font-normal text-[var(--foreground)]">
+              <h1 className="text-lg sm:text-xl font-serif font-normal text-[var(--foreground)] truncate min-w-0">
                 YAML Diff Viewer
               </h1>
             </div>
-            <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
+            <div className="flex flex-wrap items-center gap-2 sm:flex-nowrap sm:gap-3 w-full sm:w-auto">
               <Tooltip content="Check if the API server is reachable and responding">
                 <button
                   onClick={handleTestApi}
-                  className="px-3 sm:px-4 py-2 bg-[var(--brand-secondary)]/20 text-[var(--foreground)] rounded-lg hover:bg-[var(--brand-secondary)]/30 transition-colors text-sm sm:text-base border border-[var(--brand-secondary)]/30"
+                  className="px-3 sm:px-4 py-2.5 sm:py-2 bg-[var(--brand-secondary)]/20 text-[var(--foreground)] rounded-lg hover:bg-[var(--brand-secondary)]/30 transition-colors text-sm sm:text-base border border-[var(--brand-secondary)]/30 touch-manipulation"
                   aria-label="Test API connection"
                 >
                   Test API
@@ -197,7 +197,7 @@ export default function Home() {
                 <button
                   onClick={handleRunDiff}
                   disabled={diffMutation.isPending || !oldYaml.trim() || !newYaml.trim()}
-                  className={`px-4 py-2 rounded-lg hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-all text-sm font-medium flex-1 sm:flex-initial uppercase ${
+                  className={`w-full sm:w-auto px-4 py-2.5 sm:py-2 rounded-lg hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-all text-sm font-medium flex-1 sm:flex-initial uppercase touch-manipulation ${
                     diffMutation.isPending || !oldYaml.trim() || !newYaml.trim()
                       ? "bg-[var(--brand-secondary)]/40 text-[var(--brand-cta-text)]"
                       : "bg-[var(--brand-cta-bg)] text-[var(--brand-cta-text)]"
@@ -237,7 +237,7 @@ export default function Home() {
               <Tooltip content="Open help and documentation">
                 <button
                   onClick={() => setShowHelp(true)}
-                  className="px-3 sm:px-4 py-2 bg-[var(--brand-secondary)]/15 text-[var(--foreground)] rounded-lg hover:bg-[var(--brand-secondary)]/25 transition-colors text-sm sm:text-base border border-[var(--brand-secondary)]/20"
+                  className="px-3 sm:px-4 py-2.5 sm:py-2 bg-[var(--brand-secondary)]/15 text-[var(--foreground)] rounded-lg hover:bg-[var(--brand-secondary)]/25 transition-colors text-sm sm:text-base border border-[var(--brand-secondary)]/20 touch-manipulation"
                   aria-label="Open help"
                 >
                   Help
