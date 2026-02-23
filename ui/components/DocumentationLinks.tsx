@@ -63,7 +63,7 @@ export default function DocumentationLinks({
         onMouseLeave={() => setIsOpen(false)}
       >
         <button
-          className="px-3 sm:px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-sm sm:text-base flex items-center gap-2"
+          className="px-3 sm:px-4 py-2.5 sm:py-2 bg-[var(--brand-secondary)]/15 text-[var(--foreground)] rounded-lg hover:bg-[var(--brand-secondary)]/25 transition-colors text-sm border border-[var(--brand-secondary)]/20 flex items-center gap-2 touch-manipulation"
           aria-label="Documentation menu"
           aria-expanded={isOpen}
           onClick={() => setIsOpen(!isOpen)}
@@ -92,7 +92,7 @@ export default function DocumentationLinks({
           </svg>
         </button>
         <div
-          className={`absolute right-0 mt-2 w-64 bg-white rounded-lg shadow-lg border border-gray-200 transition-all duration-200 z-50 ${
+          className={`fixed left-4 right-4 top-24 z-50 sm:absolute sm:left-auto sm:right-0 sm:top-auto sm:mt-2 sm:w-64 bg-[var(--brand-background)] rounded-lg shadow-[0_4px_12px_rgba(0,0,0,0.08)] border border-[var(--brand-secondary)]/20 transition-all duration-200 ${
             isOpen ? "opacity-100 visible" : "opacity-0 invisible"
           }`}
         >
@@ -101,20 +101,20 @@ export default function DocumentationLinks({
               <button
                 key={link.label}
                 onClick={() => onDocClick?.(link.url)}
-                className="w-full text-left block px-4 py-3 hover:bg-gray-50 transition-colors"
+                className="w-full text-left block px-4 py-3 hover:bg-[var(--brand-accent)]/10 transition-colors"
               >
                 <div className="flex items-start gap-3">
                   <span className="text-xl flex-shrink-0">{link.icon}</span>
                   <div className="flex-1 min-w-0">
-                    <div className="font-medium text-gray-900 text-sm">
-                      {link.label}
+                    <div className="font-medium text-[var(--foreground)] text-sm">
+                      {link.label} →
                     </div>
-                    <div className="text-xs text-gray-600 mt-0.5">
+                    <div className="text-xs text-[var(--brand-secondary)] mt-0.5">
                       {link.description}
                     </div>
                   </div>
                   <svg
-                    className="h-4 w-4 text-gray-400 flex-shrink-0 mt-0.5"
+                    className="h-4 w-4 text-[var(--brand-secondary)] flex-shrink-0 mt-0.5"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
@@ -142,20 +142,20 @@ export default function DocumentationLinks({
         <button
           key={link.label}
           onClick={() => onDocClick?.(link.url)}
-          className="w-full text-left block p-3 border border-gray-200 rounded-lg hover:border-[var(--brand-primary)] hover:bg-blue-50 transition-all group"
+          className="w-full text-left block p-3 border border-[var(--brand-secondary)]/30 rounded-lg hover:border-[var(--brand-accent)] hover:bg-[var(--brand-accent)]/10 transition-all group bg-[var(--brand-background)] shadow-[0_4px_12px_rgba(0,0,0,0.08)]"
         >
           <div className="flex items-start gap-3">
             <span className="text-xl flex-shrink-0">{link.icon}</span>
             <div className="flex-1 min-w-0">
-              <div className="font-semibold text-gray-900 text-sm group-hover:text-[var(--brand-primary)] transition-colors">
-                {link.label}
+              <div className="font-semibold text-[var(--foreground)] text-sm group-hover:text-[var(--foreground)] transition-colors">
+                {link.label} →
               </div>
-              <div className="text-xs text-gray-600 mt-1">
+              <div className="text-xs text-[var(--brand-secondary)] mt-1">
                 {link.description}
               </div>
             </div>
             <svg
-              className="h-4 w-4 text-gray-400 group-hover:text-[var(--brand-primary)] flex-shrink-0 mt-0.5 transition-colors"
+              className="h-4 w-4 text-[var(--brand-secondary)] group-hover:text-[var(--brand-accent)] flex-shrink-0 mt-0.5 transition-colors"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"

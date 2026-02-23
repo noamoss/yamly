@@ -90,24 +90,24 @@ function ExampleButton({ example, isSelected, isLoading, onClick, disabled }: Ex
       onClick={onClick}
       disabled={disabled}
       className={`
-        p-3 rounded-lg border-2 text-left transition-all
+        p-3 rounded-lg border-2 text-left transition-all shadow-[0_4px_12px_rgba(0,0,0,0.08)]
         ${
           isSelected
-            ? "border-[var(--brand-primary)] bg-blue-50"
-            : "border-gray-200 bg-white hover:border-gray-300 hover:shadow-md"
+            ? "border-[var(--brand-accent)] bg-[var(--brand-accent)]/10"
+            : "border-[var(--brand-secondary)]/30 bg-[var(--brand-background)] hover:border-[var(--brand-secondary)]/50 hover:shadow-md"
         }
         ${disabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}
-        focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)] focus:ring-offset-2
+        focus:outline-none focus:ring-2 focus:ring-[var(--brand-accent)] focus:ring-offset-2
       `}
       aria-label={`Load ${example.name} example`}
     >
       <div className="flex items-start justify-between mb-1.5">
-        <h4 className="font-semibold text-gray-900 text-sm">
+        <h4 className="font-normal text-[var(--foreground)] text-sm" style={{ fontFamily: "var(--font-serif), serif" }}>
           {example.name}
         </h4>
         {isLoading && (
           <svg
-            className="animate-spin h-4 w-4 text-[var(--brand-primary)]"
+            className="animate-spin h-4 w-4 text-[var(--brand-accent)]"
             xmlns="http://www.w3.org/2000/svg"
             fill="none"
             viewBox="0 0 24 24"
@@ -128,14 +128,14 @@ function ExampleButton({ example, isSelected, isLoading, onClick, disabled }: Ex
           </svg>
         )}
       </div>
-      <p className="text-xs text-gray-600 mb-2">
+      <p className="text-xs text-[var(--brand-secondary)] mb-2">
         {example.description}
       </p>
       <div className="flex flex-wrap gap-1">
         {example.diffTypes.map((type) => (
           <span
             key={type}
-            className="inline-block px-1.5 py-0.5 text-xs bg-gray-100 text-gray-700 rounded"
+            className="inline-block px-1.5 py-0.5 text-xs bg-[var(--brand-secondary)]/15 text-[var(--foreground)] rounded"
           >
             {type}
           </span>
@@ -241,20 +241,20 @@ export default function DemoSection({
   };
 
   return (
-    <div className="bg-gray-50 border-b border-gray-200 py-4">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="bg-[var(--brand-background)] border-b border-[var(--brand-secondary)]/30 py-6 shadow-[0_4px_12px_rgba(0,0,0,0.08)]">
+      <div className="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8">
         {/* Service Explanation - Always visible, compact */}
         <div className="mb-4">
-          <h2 className="text-xl font-semibold text-gray-900 mb-2">
+          <h2 className="text-xl font-normal text-[var(--foreground)] mb-2" style={{ fontFamily: "var(--font-serif), serif" }}>
             What is yamly?
           </h2>
-          <p className="text-gray-700 text-sm leading-relaxed">
+          <p className="text-[var(--brand-secondary)] text-sm leading-relaxed">
             <strong>yamly</strong> reads YAML as structured data rather than plain text. It highlights meaningful changes and filters out noise, making it easier to review config updates, infrastructure changes, and YAML produced or rewritten by LLM-powered tools.
           </p>
         </div>
 
         {/* Mode Selector - At the top */}
-        <div className="mb-4 bg-white rounded-lg p-4 border border-gray-200">
+        <div className="mb-4 bg-[var(--brand-background)] rounded-lg p-4 border border-[var(--brand-secondary)]/30 shadow-[0_4px_12px_rgba(0,0,0,0.08)]">
           <ModeSelector
             mode={mode}
             onModeChange={onModeChange}
@@ -264,7 +264,7 @@ export default function DemoSection({
           />
           {isModeLocked && (
             <div className="mt-3 flex items-center justify-between">
-              <p className="text-xs text-gray-600">
+              <p className="text-xs text-[var(--brand-secondary)]">
                 Mode is locked to match the selected example. Clear the example to change mode.
               </p>
               <button
@@ -274,9 +274,9 @@ export default function DemoSection({
                   setSelectedExample(null);
                   onClearExample();
                 }}
-                className="text-xs text-[var(--brand-primary)] hover:underline"
+                className="text-xs text-[var(--brand-accent)] hover:underline"
               >
-                Clear & Unlock
+                Clear & Unlock →
               </button>
             </div>
           )}
@@ -285,15 +285,15 @@ export default function DemoSection({
         {/* Accordion Sections */}
         <div className="space-y-2">
           {/* Input Requirements Accordion */}
-          <div className="border border-gray-200 rounded-lg bg-white overflow-hidden">
+          <div className="border border-[var(--brand-secondary)]/30 rounded-lg bg-[var(--brand-background)] overflow-hidden shadow-[0_4px_12px_rgba(0,0,0,0.08)]">
             <button
               onClick={() => toggleSection("requirements")}
-              className="w-full px-4 py-3 flex items-center justify-between hover:bg-gray-50 transition-colors text-left"
+              className="w-full px-4 py-3 flex items-center justify-between hover:bg-[var(--brand-accent)]/10 transition-colors text-left"
               aria-expanded={expandedSection === "requirements"}
             >
               <div className="flex items-center gap-2">
                 <svg
-                  className="h-5 w-5 text-blue-600 flex-shrink-0"
+                  className="h-5 w-5 text-[var(--brand-accent)] flex-shrink-0"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -305,12 +305,12 @@ export default function DemoSection({
                     d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
                   />
                 </svg>
-                <span className="font-medium text-gray-900">
+                <span className="font-medium text-[var(--foreground)]">
                   Input Requirements
                 </span>
               </div>
               <svg
-                className={`h-5 w-5 text-gray-500 transition-transform ${
+                className={`h-5 w-5 text-[var(--brand-secondary)] transition-transform ${
                   expandedSection === "requirements" ? "rotate-180" : ""
                 }`}
                 fill="none"
@@ -326,52 +326,52 @@ export default function DemoSection({
               </svg>
             </button>
             {expandedSection === "requirements" && (
-              <div className="px-4 pb-4 border-t border-gray-200 bg-blue-50">
+              <div className="px-4 pb-4 border-t border-[var(--brand-secondary)]/30 bg-[var(--brand-accent)]/10">
                 {mode === "auto" ? (
                   // Show both modes when auto-detect
                   <div className="mt-3 grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <h4 className="font-semibold text-blue-900 mb-2 text-sm">General YAML Mode</h4>
-                      <ul className="text-sm text-blue-800 space-y-1.5">
+                      <h4 className="font-semibold text-[var(--foreground)] mb-2 text-sm">General YAML Mode</h4>
+                      <ul className="text-sm text-[var(--foreground)] space-y-1.5">
                         <li className="flex items-start gap-2">
-                          <span className="text-blue-600 mt-0.5">•</span>
+                          <span className="text-[var(--brand-accent)] mt-0.5">•</span>
                           <span>Any valid YAML file works</span>
                         </li>
                         <li className="flex items-start gap-2">
-                          <span className="text-blue-600 mt-0.5">•</span>
+                          <span className="text-[var(--brand-accent)] mt-0.5">•</span>
                           <span>Uses path-based change tracking</span>
                         </li>
                         <li className="flex items-start gap-2">
-                          <span className="text-blue-600 mt-0.5">•</span>
+                          <span className="text-[var(--brand-accent)] mt-0.5">•</span>
                           <span>Auto-detects array item identity</span>
                         </li>
                         <li className="flex items-start gap-2">
-                          <span className="text-blue-600 mt-0.5">•</span>
+                          <span className="text-[var(--brand-accent)] mt-0.5">•</span>
                           <span>Great for configs, K8s manifests</span>
                         </li>
                       </ul>
                     </div>
                     <div>
-                      <h4 className="font-semibold text-blue-900 mb-2 text-sm">Legal Document Mode</h4>
-                      <ul className="text-sm text-blue-800 space-y-1.5">
+                      <h4 className="font-semibold text-[var(--foreground)] mb-2 text-sm">Legal Document Mode</h4>
+                      <ul className="text-sm text-[var(--foreground)] space-y-1.5">
                         <li className="flex items-start gap-2">
-                          <span className="text-blue-600 mt-0.5">•</span>
+                          <span className="text-[var(--brand-accent)] mt-0.5">•</span>
                           <span>
-                            Requires <code className="bg-blue-100 px-1 rounded text-xs">document:</code> top-level key
+                            Requires <code className="bg-[var(--brand-accent)]/10 px-1 rounded text-xs">document:</code> top-level key
                           </span>
                         </li>
                         <li className="flex items-start gap-2">
-                          <span className="text-blue-600 mt-0.5">•</span>
+                          <span className="text-[var(--brand-accent)] mt-0.5">•</span>
                           <span>
-                            Sections need <code className="bg-blue-100 px-1 rounded text-xs">marker</code> field
+                            Sections need <code className="bg-[var(--brand-accent)]/10 px-1 rounded text-xs">marker</code> field
                           </span>
                         </li>
                         <li className="flex items-start gap-2">
-                          <span className="text-blue-600 mt-0.5">•</span>
+                          <span className="text-[var(--brand-accent)] mt-0.5">•</span>
                           <span>Schema validation built-in</span>
                         </li>
                         <li className="flex items-start gap-2">
-                          <span className="text-blue-600 mt-0.5">•</span>
+                          <span className="text-[var(--brand-accent)] mt-0.5">•</span>
                           <span>Hebrew legal documents</span>
                         </li>
                       </ul>
@@ -380,22 +380,22 @@ export default function DemoSection({
                 ) : mode === "general" ? (
                   // Show only General YAML mode
                   <div className="mt-3">
-                    <h4 className="font-semibold text-blue-900 mb-2 text-sm">General YAML Mode Requirements</h4>
-                    <ul className="text-sm text-blue-800 space-y-1.5">
+                    <h4 className="font-semibold text-[var(--foreground)] mb-2 text-sm">General YAML Mode Requirements</h4>
+                    <ul className="text-sm text-[var(--foreground)] space-y-1.5">
                       <li className="flex items-start gap-2">
-                        <span className="text-blue-600 mt-0.5">•</span>
+                        <span className="text-[var(--brand-accent)] mt-0.5">•</span>
                         <span>Any valid YAML file works - no specific structure required</span>
                       </li>
                       <li className="flex items-start gap-2">
-                        <span className="text-blue-600 mt-0.5">•</span>
-                        <span>Uses path-based change tracking (e.g., <code className="bg-blue-100 px-1 rounded text-xs">spec.replicas</code>)</span>
+                        <span className="text-[var(--brand-accent)] mt-0.5">•</span>
+                        <span>Uses path-based change tracking (e.g., <code className="bg-[var(--brand-accent)]/10 px-1 rounded text-xs">spec.replicas</code>)</span>
                       </li>
                       <li className="flex items-start gap-2">
-                        <span className="text-blue-600 mt-0.5">•</span>
-                        <span>Auto-detects array item identity by common fields (<code className="bg-blue-100 px-1 rounded text-xs">id</code>, <code className="bg-blue-100 px-1 rounded text-xs">name</code>, <code className="bg-blue-100 px-1 rounded text-xs">key</code>)</span>
+                        <span className="text-[var(--brand-accent)] mt-0.5">•</span>
+                        <span>Auto-detects array item identity by common fields (<code className="bg-[var(--brand-accent)]/10 px-1 rounded text-xs">id</code>, <code className="bg-[var(--brand-accent)]/10 px-1 rounded text-xs">name</code>, <code className="bg-[var(--brand-accent)]/10 px-1 rounded text-xs">key</code>)</span>
                       </li>
                       <li className="flex items-start gap-2">
-                        <span className="text-blue-600 mt-0.5">•</span>
+                        <span className="text-[var(--brand-accent)] mt-0.5">•</span>
                         <span>Perfect for config files, Kubernetes manifests, CI/CD pipelines, and more</span>
                       </li>
                     </ul>
@@ -403,84 +403,84 @@ export default function DemoSection({
                 ) : (
                   // Show only Legal Document mode with schema reference
                   <div className="mt-3">
-                    <h4 className="font-semibold text-blue-900 mb-2 text-sm">Legal Document Mode - Schema Requirements</h4>
+                    <h4 className="font-semibold text-[var(--foreground)] mb-2 text-sm">Legal Document Mode - Schema Requirements</h4>
 
                     <div className="space-y-3">
                       <div>
-                        <h5 className="text-xs font-semibold text-blue-800 mb-1.5">Document (recommended fields):</h5>
-                        <p className="text-xs text-blue-700 mb-2 italic">Note: Only <code className="bg-blue-100 px-1 rounded text-xs">sections</code> is required. All metadata fields are optional but recommended.</p>
-                        <ul className="text-sm text-blue-800 space-y-1">
+                        <h5 className="text-xs font-semibold text-[var(--foreground)] mb-1.5">Document (recommended fields):</h5>
+                        <p className="text-xs text-[var(--brand-secondary)] mb-2 italic">Note: Only <code className="bg-[var(--brand-accent)]/10 px-1 rounded text-xs">sections</code> is required. All metadata fields are optional but recommended.</p>
+                        <ul className="text-sm text-[var(--foreground)] space-y-1">
                           <li className="flex items-start gap-2">
-                            <span className="text-blue-600 mt-0.5">•</span>
+                            <span className="text-[var(--brand-accent)] mt-0.5">•</span>
                             <span>
-                              <code className="bg-blue-100 px-1 rounded text-xs">id</code>: <span className="text-blue-600">(Optional)</span> String identifier for tracking (UUID or custom)
+                              <code className="bg-[var(--brand-accent)]/10 px-1 rounded text-xs">id</code>: <span className="text-[var(--brand-accent)]">(Optional)</span> String identifier for tracking (UUID or custom)
                             </span>
                           </li>
                           <li className="flex items-start gap-2">
-                            <span className="text-blue-600 mt-0.5">•</span>
+                            <span className="text-[var(--brand-accent)] mt-0.5">•</span>
                             <span>
-                              <code className="bg-blue-100 px-1 rounded text-xs">title</code>: <span className="text-blue-600">(Optional)</span> Document title for human readability
+                              <code className="bg-[var(--brand-accent)]/10 px-1 rounded text-xs">title</code>: <span className="text-[var(--brand-accent)]">(Optional)</span> Document title for human readability
                             </span>
                           </li>
                           <li className="flex items-start gap-2">
-                            <span className="text-blue-600 mt-0.5">•</span>
+                            <span className="text-[var(--brand-accent)] mt-0.5">•</span>
                             <span>
-                              <code className="bg-blue-100 px-1 rounded text-xs">type</code>: <span className="text-blue-600">(Optional)</span> Any string value (recommended for organization and filtering). Common examples: <code className="bg-blue-100 px-0.5 rounded text-xs">'law'</code>, <code className="bg-blue-100 px-0.5 rounded text-xs">'regulation'</code>, <code className="bg-blue-100 px-0.5 rounded text-xs">'directive'</code>, <code className="bg-blue-100 px-0.5 rounded text-xs">'circular'</code>, <code className="bg-blue-100 px-0.5 rounded text-xs">'policy'</code>, <code className="bg-blue-100 px-0.5 rounded text-xs">'other'</code>
+                              <code className="bg-[var(--brand-accent)]/10 px-1 rounded text-xs">type</code>: <span className="text-[var(--brand-accent)]">(Optional)</span> Any string value (recommended for organization and filtering). Common examples: <code className="bg-[var(--brand-accent)]/10 px-0.5 rounded text-xs">'law'</code>, <code className="bg-[var(--brand-accent)]/10 px-0.5 rounded text-xs">'regulation'</code>, <code className="bg-[var(--brand-accent)]/10 px-0.5 rounded text-xs">'directive'</code>, <code className="bg-[var(--brand-accent)]/10 px-0.5 rounded text-xs">'circular'</code>, <code className="bg-[var(--brand-accent)]/10 px-0.5 rounded text-xs">'policy'</code>, <code className="bg-[var(--brand-accent)]/10 px-0.5 rounded text-xs">'other'</code>
                             </span>
                           </li>
                           <li className="flex items-start gap-2">
-                            <span className="text-blue-600 mt-0.5">•</span>
+                            <span className="text-[var(--brand-accent)] mt-0.5">•</span>
                             <span>
-                              <code className="bg-blue-100 px-1 rounded text-xs">language</code>: <span className="text-blue-600">(Optional)</span> Must be <code className="bg-blue-100 px-0.5 rounded text-xs">'hebrew'</code> if provided
+                              <code className="bg-[var(--brand-accent)]/10 px-1 rounded text-xs">language</code>: <span className="text-[var(--brand-accent)]">(Optional)</span> Must be <code className="bg-[var(--brand-accent)]/10 px-0.5 rounded text-xs">'hebrew'</code> if provided
                             </span>
                           </li>
                           <li className="flex items-start gap-2">
-                            <span className="text-blue-600 mt-0.5">•</span>
+                            <span className="text-[var(--brand-accent)] mt-0.5">•</span>
                             <span>
-                              <code className="bg-blue-100 px-1 rounded text-xs">version</code>: <span className="text-blue-600">(Optional)</span> Object with optional <code className="bg-blue-100 px-0.5 rounded text-xs">number</code> field
+                              <code className="bg-[var(--brand-accent)]/10 px-1 rounded text-xs">version</code>: <span className="text-[var(--brand-accent)]">(Optional)</span> Object with optional <code className="bg-[var(--brand-accent)]/10 px-0.5 rounded text-xs">number</code> field
                             </span>
                           </li>
                           <li className="flex items-start gap-2">
-                            <span className="text-blue-600 mt-0.5">•</span>
+                            <span className="text-[var(--brand-accent)] mt-0.5">•</span>
                             <span>
-                              <code className="bg-blue-100 px-1 rounded text-xs">source</code>: <span className="text-blue-600">(Optional)</span> Object with optional <code className="bg-blue-100 px-0.5 rounded text-xs">url</code> and <code className="bg-blue-100 px-0.5 rounded text-xs">fetched_at</code> fields
+                              <code className="bg-[var(--brand-accent)]/10 px-1 rounded text-xs">source</code>: <span className="text-[var(--brand-accent)]">(Optional)</span> Object with optional <code className="bg-[var(--brand-accent)]/10 px-0.5 rounded text-xs">url</code> and <code className="bg-[var(--brand-accent)]/10 px-0.5 rounded text-xs">fetched_at</code> fields
                             </span>
                           </li>
                           <li className="flex items-start gap-2">
-                            <span className="text-blue-600 mt-0.5">•</span>
+                            <span className="text-[var(--brand-accent)] mt-0.5">•</span>
                             <span>
-                              <code className="bg-blue-100 px-1 rounded text-xs font-semibold">sections</code>: <span className="text-blue-700 font-semibold">(Required)</span> Array of section objects
+                              <code className="bg-[var(--brand-accent)]/10 px-1 rounded text-xs font-semibold">sections</code>: <span className="text-[var(--brand-secondary)] font-semibold">(Required)</span> Array of section objects
                             </span>
                           </li>
                         </ul>
                       </div>
 
                       <div>
-                        <h5 className="text-xs font-semibold text-blue-800 mb-1.5">Section (required fields):</h5>
-                        <ul className="text-sm text-blue-800 space-y-1">
+                        <h5 className="text-xs font-semibold text-[var(--foreground)] mb-1.5">Section (required fields):</h5>
+                        <ul className="text-sm text-[var(--foreground)] space-y-1">
                           <li className="flex items-start gap-2">
-                            <span className="text-blue-600 mt-0.5">•</span>
+                            <span className="text-[var(--brand-accent)] mt-0.5">•</span>
                             <span>
-                              <code className="bg-blue-100 px-1 rounded text-xs">marker</code>: Unique structural marker (e.g., "1", "1.א", "(b)") - must be unique at same nesting level
+                              <code className="bg-[var(--brand-accent)]/10 px-1 rounded text-xs">marker</code>: Unique structural marker (e.g., "1", "1.א", "(b)") - must be unique at same nesting level
                             </span>
                           </li>
                           <li className="flex items-start gap-2">
-                            <span className="text-blue-600 mt-0.5">•</span>
+                            <span className="text-[var(--brand-accent)] mt-0.5">•</span>
                             <span>
-                              <code className="bg-blue-100 px-1 rounded text-xs">sections</code>: Array of nested sections (can be empty)
+                              <code className="bg-[var(--brand-accent)]/10 px-1 rounded text-xs">sections</code>: Array of nested sections (can be empty)
                             </span>
                           </li>
                         </ul>
-                        <p className="text-xs text-blue-700 mt-1.5 italic">
-                          Optional: <code className="bg-blue-100 px-0.5 rounded text-xs">id</code> (auto-generated if not provided), <code className="bg-blue-100 px-0.5 rounded text-xs">title</code>, <code className="bg-blue-100 px-0.5 rounded text-xs">content</code>
+                        <p className="text-xs text-[var(--brand-secondary)] mt-1.5 italic">
+                          Optional: <code className="bg-[var(--brand-accent)]/10 px-0.5 rounded text-xs">id</code> (auto-generated if not provided), <code className="bg-[var(--brand-accent)]/10 px-0.5 rounded text-xs">title</code>, <code className="bg-[var(--brand-accent)]/10 px-0.5 rounded text-xs">content</code>
                         </p>
                       </div>
                     </div>
 
                     {/* Schema Reference Box */}
-                    <div className="mt-4 p-4 bg-white border border-blue-200 rounded-lg">
+                    <div className="mt-4 p-4 bg-[var(--brand-background)] border border-[var(--brand-accent)]/50 rounded-lg shadow-[0_4px_12px_rgba(0,0,0,0.08)]">
                       <div className="flex items-center justify-between mb-2">
-                        <h5 className="font-semibold text-blue-900 text-sm flex items-center gap-2">
+                        <h5 className="font-semibold text-[var(--foreground)] text-sm flex items-center gap-2">
                           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                           </svg>
@@ -488,13 +488,13 @@ export default function DemoSection({
                         </h5>
                         <button
                           onClick={() => setShowSchema(true)}
-                          className="text-xs text-[var(--brand-primary)] hover:underline flex items-center gap-1"
+                          className="text-xs text-[var(--brand-accent)] hover:underline flex items-center gap-1"
                         >
                           View Full Schema →
                         </button>
                       </div>
-                      <p className="text-xs text-blue-800">
-                        Legal documents must follow the OpenSpec schema with recursive sections. Each section contains a <code className="bg-blue-100 px-1 rounded">marker</code> (required), optional <code className="bg-blue-100 px-1 rounded">title</code>, <code className="bg-blue-100 px-1 rounded">content</code>, and nested <code className="bg-blue-100 px-1 rounded">sections</code>.
+                      <p className="text-xs text-[var(--foreground)]">
+                        Legal documents must follow the OpenSpec schema with recursive sections. Each section contains a <code className="bg-[var(--brand-accent)]/10 px-1 rounded">marker</code> (required), optional <code className="bg-[var(--brand-accent)]/10 px-1 rounded">title</code>, <code className="bg-[var(--brand-accent)]/10 px-1 rounded">content</code>, and nested <code className="bg-[var(--brand-accent)]/10 px-1 rounded">sections</code>.
                       </p>
                     </div>
                   </div>
@@ -504,15 +504,15 @@ export default function DemoSection({
           </div>
 
           {/* Example Documents Accordion */}
-          <div className="border border-gray-200 rounded-lg bg-white overflow-hidden">
+          <div className="border border-[var(--brand-secondary)]/30 rounded-lg bg-[var(--brand-background)] overflow-hidden shadow-[0_4px_12px_rgba(0,0,0,0.08)]">
             <button
               onClick={() => toggleSection("examples")}
-              className="w-full px-4 py-3 flex items-center justify-between hover:bg-gray-50 transition-colors text-left"
+              className="w-full px-4 py-3 flex items-center justify-between hover:bg-[var(--brand-accent)]/10 transition-colors text-left"
               aria-expanded={expandedSection === "examples"}
             >
               <div className="flex items-center gap-2">
                 <svg
-                  className="h-5 w-5 text-[var(--brand-primary)] flex-shrink-0"
+                  className="h-5 w-5 text-[var(--brand-accent)] flex-shrink-0"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -524,12 +524,12 @@ export default function DemoSection({
                     d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
                   />
                 </svg>
-                <span className="font-medium text-gray-900">
-                  Try Example Documents
+                <span className="font-medium text-[var(--foreground)]">
+                  Try Example Documents →
                 </span>
               </div>
               <svg
-                className={`h-5 w-5 text-gray-500 transition-transform ${
+                className={`h-5 w-5 text-[var(--brand-secondary)] transition-transform ${
                   expandedSection === "examples" ? "rotate-180" : ""
                 }`}
                 fill="none"
@@ -545,7 +545,7 @@ export default function DemoSection({
               </svg>
             </button>
             {expandedSection === "examples" && (
-              <div className="px-4 pb-4 border-t border-gray-200">
+              <div className="px-4 pb-4 border-t border-[var(--brand-secondary)]/30">
                 {filteredExamples.length === 0 ? (
                   <div className="mt-3 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
                     <p className="text-sm text-yellow-800">
@@ -558,7 +558,7 @@ export default function DemoSection({
                       // Show both categories when in auto mode
                       <>
                         <div className="mb-4">
-                          <h4 className="text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
+                          <h4 className="text-sm font-medium text-[var(--foreground)] mb-2 flex items-center gap-2">
                             <span className="w-2 h-2 rounded-full bg-green-500"></span>
                             Generic YAML
                           </h4>
@@ -576,7 +576,7 @@ export default function DemoSection({
                           </div>
                         </div>
                         <div>
-                          <h4 className="text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
+                          <h4 className="text-sm font-medium text-[var(--foreground)] mb-2 flex items-center gap-2">
                             <span className="w-2 h-2 rounded-full bg-purple-500"></span>
                             Legal Documents
                           </h4>

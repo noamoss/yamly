@@ -151,17 +151,17 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-[var(--background)]">
       {/* Header */}
-      <header className="border-b border-gray-200 bg-white sticky top-0 z-10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <header className="border-b border-[var(--brand-secondary)]/30 bg-[var(--brand-background)] sticky top-0 z-10 shadow-[0_4px_12px_rgba(0,0,0,0.08)]">
+        <div className="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between h-auto sm:h-16 py-3 sm:py-0 gap-3 sm:gap-0">
-            <div className="flex items-center gap-4">
+            <div className="flex min-w-0 flex-1 sm:flex-initial items-center gap-2 sm:gap-4">
               <a
                 href="https://about.thepitz.studio/"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-2 text-[var(--brand-text)] font-sans text-sm sm:text-base font-normal hover:opacity-80 transition-opacity"
+                className="flex flex-shrink-0 items-center gap-2 text-[var(--brand-text)] text-sm sm:text-base font-normal hover:opacity-80 transition-opacity"
                 aria-label="The Pitz Studio"
               >
                 <Image
@@ -173,16 +173,16 @@ export default function Home() {
                 />
                 <span>the pitz studio</span>
               </a>
-              <span className="text-gray-300 hidden sm:inline">|</span>
-              <h1 className="text-xl font-semibold text-gray-900">
+              <span className="text-[var(--brand-secondary)]/50 hidden sm:inline">|</span>
+              <h1 className="text-lg sm:text-xl font-serif font-normal text-[var(--foreground)] truncate min-w-0">
                 YAML Diff Viewer
               </h1>
             </div>
-            <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
+            <div className="flex flex-wrap items-center gap-2 sm:flex-nowrap sm:gap-3 w-full sm:w-auto">
               <Tooltip content="Check if the API server is reachable and responding">
                 <button
                   onClick={handleTestApi}
-                  className="px-3 sm:px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors text-sm sm:text-base"
+                  className="px-3 sm:px-4 py-2.5 sm:py-2 bg-[var(--brand-secondary)]/20 text-[var(--foreground)] rounded-lg hover:bg-[var(--brand-secondary)]/30 transition-colors text-sm sm:text-base border border-[var(--brand-secondary)]/30 touch-manipulation"
                   aria-label="Test API connection"
                 >
                   Test API
@@ -197,11 +197,11 @@ export default function Home() {
                 <button
                   onClick={handleRunDiff}
                   disabled={diffMutation.isPending || !oldYaml.trim() || !newYaml.trim()}
-                  className={`px-3 sm:px-4 py-2 rounded-lg hover:opacity-90 disabled:bg-gray-300 disabled:cursor-not-allowed transition-all text-sm sm:text-base flex-1 sm:flex-initial ${
+                  className={`w-full sm:w-auto px-4 py-2.5 sm:py-2 rounded-lg hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-all text-sm font-medium flex-1 sm:flex-initial uppercase touch-manipulation ${
                     diffMutation.isPending || !oldYaml.trim() || !newYaml.trim()
-                      ? 'bg-gray-300'
-                      : 'bg-[var(--brand-primary)]'
-                  } text-white`}
+                      ? "bg-[var(--brand-secondary)]/40 text-[var(--brand-cta-text)]"
+                      : "bg-[var(--brand-cta-bg)] text-[var(--brand-cta-text)]"
+                  }`}
                   aria-label="Run diff to compare documents"
                 >
                   {diffMutation.isPending ? (
@@ -230,14 +230,14 @@ export default function Home() {
                       <span className="sm:hidden">...</span>
                     </span>
                   ) : (
-                    "Run Diff"
+                    "Run diff →"
                   )}
                 </button>
               </Tooltip>
               <Tooltip content="Open help and documentation">
                 <button
                   onClick={() => setShowHelp(true)}
-                  className="px-3 sm:px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-sm sm:text-base"
+                  className="px-3 sm:px-4 py-2.5 sm:py-2 bg-[var(--brand-secondary)]/15 text-[var(--foreground)] rounded-lg hover:bg-[var(--brand-secondary)]/25 transition-colors text-sm sm:text-base border border-[var(--brand-secondary)]/20 touch-manipulation"
                   aria-label="Open help"
                 >
                   Help
@@ -256,15 +256,15 @@ export default function Home() {
       </header>
 
       {/* Tabs */}
-      <div className="border-b border-gray-200 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="border-b border-[var(--brand-secondary)]/30 bg-[var(--brand-background)]">
+        <div className="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8">
           <nav className="flex space-x-8">
             <button
               onClick={() => setViewMode("editor")}
               className={`py-4 px-1 border-b-2 font-medium text-sm ${
                 viewMode === "editor"
-                  ? "text-[var(--brand-primary)] border-[var(--brand-primary)]"
-                  : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                  ? "text-[var(--foreground)] border-[var(--brand-cta-bg)]"
+                  : "border-transparent text-[var(--brand-secondary)] hover:text-[var(--foreground)] hover:border-[var(--brand-secondary)]/40"
               }`}
             >
               Editor
@@ -275,8 +275,8 @@ export default function Home() {
                 disabled={!diff}
                 className={`py-4 px-1 border-b-2 font-medium text-sm ${
                   viewMode === "diff"
-                    ? "text-[var(--brand-primary)] border-[var(--brand-primary)]"
-                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                    ? "text-[var(--foreground)] border-[var(--brand-cta-bg)]"
+                    : "border-transparent text-[var(--brand-secondary)] hover:text-[var(--foreground)] hover:border-[var(--brand-secondary)]/40 disabled:opacity-50 disabled:cursor-not-allowed"
                 }`}
                 aria-label="View diff results"
               >
@@ -300,38 +300,30 @@ export default function Home() {
       />
 
       {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <main className="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
         {apiTestResult && (
-          <div className={`mb-4 border rounded-lg p-4 ${
+          <div className={`mb-4 border rounded-lg p-4 bg-[var(--brand-background)] shadow-[0_4px_12px_rgba(0,0,0,0.08)] ${
             apiTestResult.includes("reachable") || apiTestResult.includes("OK")
-              ? "bg-green-50 border-green-200"
-              : "bg-yellow-50 border-yellow-200"
+              ? "border-green-300"
+              : "border-amber-300"
           }`}>
             <div className="flex items-start">
               <div className="flex-shrink-0">
                 {apiTestResult.includes("reachable") || apiTestResult.includes("OK") ? (
-                  <svg className="h-5 w-5 text-green-400" viewBox="0 0 20 20" fill="currentColor">
+                  <svg className="h-5 w-5 text-green-600" viewBox="0 0 20 20" fill="currentColor">
                     <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                   </svg>
                 ) : (
-                  <svg className="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
+                  <svg className="h-5 w-5 text-amber-600" viewBox="0 0 20 20" fill="currentColor">
                     <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
                   </svg>
                 )}
               </div>
               <div className="ml-3">
-                <h3 className={`text-sm font-medium ${
-                  apiTestResult.includes("reachable") || apiTestResult.includes("OK")
-                    ? "text-green-800"
-                    : "text-yellow-800"
-                }`}>
+                <h3 className="text-sm font-medium text-[var(--foreground)]">
                   API Connection Test
                 </h3>
-                <div className={`mt-2 text-sm ${
-                  apiTestResult.includes("reachable") || apiTestResult.includes("OK")
-                    ? "text-green-700"
-                    : "text-yellow-700"
-                }`}>
+                <div className="mt-2 text-sm text-[var(--brand-secondary)]">
                   <p>{apiTestResult}</p>
                 </div>
               </div>
@@ -339,11 +331,11 @@ export default function Home() {
           </div>
         )}
         {error && (
-          <div className="mb-4 bg-red-50 border border-red-200 rounded-lg p-4">
+          <div className="mb-4 bg-[var(--brand-background)] border border-red-300 rounded-lg p-4 shadow-[0_4px_12px_rgba(0,0,0,0.08)]">
             <div className="flex">
               <div className="flex-shrink-0">
                 <svg
-                  className="h-5 w-5 text-red-400"
+                  className="h-5 w-5 text-red-500"
                   viewBox="0 0 20 20"
                   fill="currentColor"
                 >
@@ -355,18 +347,18 @@ export default function Home() {
                 </svg>
               </div>
               <div className="ml-3 flex-1">
-                <h3 className="text-sm font-medium text-red-800">Error</h3>
-                <div className="mt-2 text-sm text-red-700">
-                  <pre className="whitespace-pre-wrap font-sans">{error}</pre>
+                <h3 className="text-sm font-medium text-[var(--foreground)]">Error</h3>
+                <div className="mt-2 text-sm text-[var(--brand-secondary)]">
+                  <pre className="whitespace-pre-wrap">{error}</pre>
                 </div>
                 {error.includes("document:") && (
-                  <div className="mt-3 p-3 bg-red-100 rounded border border-red-300">
-                    <p className="text-xs text-red-800 font-medium mb-1">
+                  <div className="mt-3 p-3 bg-red-50 rounded border border-red-200">
+                    <p className="text-xs text-[var(--foreground)] font-medium mb-1">
                       How to fix:
                     </p>
-                    <ul className="text-xs text-red-700 list-disc list-inside space-y-1">
-                      <li>Ensure your YAML has <code className="bg-red-200 px-1 rounded">document:</code> as the top-level key</li>
-                      <li>All sections must have a <code className="bg-red-200 px-1 rounded">marker</code> field</li>
+                    <ul className="text-xs text-[var(--brand-secondary)] list-disc list-inside space-y-1">
+                      <li>Ensure your YAML has <code className="bg-red-100 px-1 rounded">document:</code> as the top-level key</li>
+                      <li>All sections must have a <code className="bg-red-100 px-1 rounded">marker</code> field</li>
                       <li>Check that your YAML syntax is valid</li>
                       <li>Try using one of the demo examples above as a reference</li>
                     </ul>
@@ -380,10 +372,10 @@ export default function Home() {
         {viewMode === "editor" ? (
           <div className="space-y-6">
             {!oldYaml && !newYaml && (
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+              <div className="bg-[var(--brand-background)] border border-[var(--brand-accent)]/50 rounded-lg p-4 shadow-[0_4px_12px_rgba(0,0,0,0.08)]">
                 <div className="flex items-start gap-3">
                   <svg
-                    className="h-5 w-5 text-blue-600 mt-0.5 flex-shrink-0"
+                    className="h-5 w-5 text-[var(--brand-accent)] mt-0.5 flex-shrink-0"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
@@ -396,11 +388,11 @@ export default function Home() {
                     />
                   </svg>
                   <div className="flex-1">
-                    <p className="text-sm text-blue-800">
+                    <p className="text-sm text-[var(--foreground)]">
                       <strong>Get started:</strong> Upload or paste two YAML
                       documents, or try an example from the demo section above.
                       {diffMode === "legal_document" && (
-                        <> Make sure your documents have <code className="bg-blue-100 px-1 rounded">document:</code> as the top-level key.</>
+                        <> Make sure your documents have <code className="bg-[var(--brand-accent)]/20 px-1 rounded">document:</code> as the top-level key.</>
                       )}
                     </p>
                   </div>
@@ -450,7 +442,7 @@ export default function Home() {
               <DiffView diff={diff} oldYaml={oldYaml} newYaml={newYaml} />
             ) : (
               <div className="text-center py-12">
-                <p className="text-gray-500">
+                <p className="text-[var(--brand-secondary)]">
                   Run a diff to see changes here.
                 </p>
               </div>

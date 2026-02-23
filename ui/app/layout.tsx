@@ -1,10 +1,16 @@
 import type { Metadata } from "next";
-import { Inter, JetBrains_Mono } from "next/font/google";
+import { Instrument_Serif, Work_Sans, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import Providers from "./providers";
 import BrandingBubble from "@/components/BrandingBubble";
 
-const inter = Inter({
+const instrumentSerif = Instrument_Serif({
+  weight: "400",
+  variable: "--font-serif",
+  subsets: ["latin"],
+});
+
+const workSans = Work_Sans({
   variable: "--font-sans",
   subsets: ["latin"],
 });
@@ -31,7 +37,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${inter.variable} ${jetbrainsMono.variable} antialiased`}
+        className={`${instrumentSerif.variable} ${workSans.variable} ${jetbrainsMono.variable} antialiased`}
       >
         <Providers>{children}</Providers>
         <BrandingBubble />

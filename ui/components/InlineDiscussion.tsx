@@ -32,7 +32,7 @@ function getChangeTypeStyles(changeType: ChangeType) {
     case ChangeType.SECTION_MOVED:
       return "bg-purple-100 text-purple-800 border-purple-300";
     default:
-      return "bg-gray-100 text-gray-800 border-gray-300";
+      return "bg-[var(--brand-secondary)]/20 text-[var(--foreground)] border-[var(--brand-secondary)]/40";
   }
 }
 
@@ -80,9 +80,9 @@ export default function InlineDiscussion({ change, lineNumber, side }: InlineDis
     (change.old_content !== null && change.new_content === null);
 
   return (
-    <div className="bg-white border border-gray-300 rounded-lg shadow-sm p-3 w-80 max-w-full">
+    <div className="bg-[var(--brand-background)] border border-[var(--brand-secondary)]/40 rounded-lg shadow-[0_4px_12px_rgba(0,0,0,0.08)] p-3 w-80 max-w-full">
       {/* Header */}
-      <div className="mb-3 pb-2 border-b border-gray-200">
+      <div className="mb-3 pb-2 border-b border-[var(--brand-secondary)]/30">
         <div className="flex items-center gap-2 mb-2">
           <span
             className={`px-2 py-1 text-xs font-semibold rounded border ${getChangeTypeStyles(
@@ -94,8 +94,8 @@ export default function InlineDiscussion({ change, lineNumber, side }: InlineDis
         </div>
         <div className="text-xs space-y-1">
           <div>
-            <span className="font-medium text-gray-700">Marker:</span>{" "}
-            <span className="font-mono text-gray-900">{change.marker}</span>
+            <span className="font-medium text-[var(--foreground)]">Marker:</span>{" "}
+            <span className="font-mono text-[var(--foreground)]">{change.marker}</span>
           </div>
           {hasPathChange && change.change_type === ChangeType.SECTION_MOVED && (
             <div className="flex items-center gap-2 text-xs text-purple-700 bg-purple-50 px-2 py-1 rounded border border-purple-200 mt-2">
@@ -134,31 +134,31 @@ export default function InlineDiscussion({ change, lineNumber, side }: InlineDis
 
       {/* Change details */}
       {(hasTitleChange || hasContentChange) && (
-        <div className="mb-3 pb-2 border-b border-gray-200 space-y-2">
+        <div className="mb-3 pb-2 border-b border-[var(--brand-secondary)]/30 space-y-2">
           {hasTitleChange && (
             <div>
-              <h5 className="text-xs font-semibold text-gray-700 mb-1">Title Change:</h5>
+              <h5 className="text-xs font-semibold text-[var(--foreground)] mb-1">Title Change:</h5>
               <div className="grid grid-cols-2 gap-2 text-xs">
                 <div className="bg-red-50 border border-red-200 rounded p-2">
-                  <div className="font-mono text-gray-800">{change.old_title || "(empty)"}</div>
+                  <div className="font-mono text-[var(--foreground)]">{change.old_title || "(empty)"}</div>
                 </div>
                 <div className="bg-green-50 border border-green-200 rounded p-2">
-                  <div className="font-mono text-gray-800">{change.new_title || "(empty)"}</div>
+                  <div className="font-mono text-[var(--foreground)]">{change.new_title || "(empty)"}</div>
                 </div>
               </div>
             </div>
           )}
           {hasContentChange && (
             <div>
-              <h5 className="text-xs font-semibold text-gray-700 mb-1">Content Change:</h5>
+              <h5 className="text-xs font-semibold text-[var(--foreground)] mb-1">Content Change:</h5>
               <div className="grid grid-cols-2 gap-2 text-xs max-h-32 overflow-y-auto">
                 <div className="bg-red-50 border border-red-200 rounded p-2">
-                  <pre className="whitespace-pre-wrap font-mono text-gray-800 text-xs">
+                  <pre className="whitespace-pre-wrap font-mono text-[var(--foreground)] text-xs">
                     {change.old_content || "(empty)"}
                   </pre>
                 </div>
                 <div className="bg-green-50 border border-green-200 rounded p-2">
-                  <pre className="whitespace-pre-wrap font-mono text-gray-800 text-xs">
+                  <pre className="whitespace-pre-wrap font-mono text-[var(--foreground)] text-xs">
                     {change.new_content || "(empty)"}
                   </pre>
                 </div>
@@ -170,7 +170,7 @@ export default function InlineDiscussion({ change, lineNumber, side }: InlineDis
 
       {/* Discussion */}
       <div className="space-y-2">
-        <h5 className="text-xs font-semibold text-gray-700">Discussion</h5>
+        <h5 className="text-xs font-semibold text-[var(--foreground)]">Discussion</h5>
         <textarea
           value={commentText}
           onChange={(e) => setCommentText(e.target.value)}
@@ -179,14 +179,14 @@ export default function InlineDiscussion({ change, lineNumber, side }: InlineDis
               handleAddComment();
             }
           }}
-          className="w-full p-2 border border-gray-300 rounded resize-none text-xs"
+          className="w-full p-2 border border-[var(--brand-secondary)]/40 rounded resize-none text-xs bg-[var(--brand-background)]"
           rows={3}
           placeholder="Add a comment... (Cmd/Ctrl+Enter to submit)"
         />
         <button
           onClick={handleAddComment}
           disabled={!commentText.trim()}
-          className="px-3 py-1 bg-blue-600 text-white rounded text-xs hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed"
+          className="px-3 py-1 bg-[var(--brand-cta-bg)] text-[var(--brand-cta-text)] rounded text-xs hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           Comment
         </button>

@@ -53,8 +53,8 @@ function getChangeTypeStyles(changeType: GenericChangeType) {
       };
     default:
       return {
-        badge: "bg-gray-100 text-gray-800 border-gray-300",
-        bg: "bg-gray-50",
+        badge: "bg-[var(--brand-secondary)]/20 text-[var(--foreground)] border-[var(--brand-secondary)]/40",
+        bg: "bg-[var(--brand-background)]",
         icon: "•",
       };
   }
@@ -137,7 +137,7 @@ function ValueDisplay({
 
   return (
     <div className={`rounded ${className} ${className.includes('p-') ? '' : 'p-3'}`}>
-      {label && <div className="text-xs font-semibold text-gray-600 mb-1">{label}:</div>}
+      {label && <div className="text-xs font-semibold text-[var(--brand-secondary)] mb-1">{label}:</div>}
       {useDiff ? (
         // Use character-level diff highlighting
         renderDiffedText(diffChunks, diffType)
@@ -191,31 +191,31 @@ export default function GenericChangeCard({ change, index }: GenericChangeCardPr
                          change.change_type === GenericChangeType.ITEM_MOVED;
 
   return (
-    <div className={`border rounded-lg ${styles.bg} ${isExpanded ? "" : "overflow-hidden"}`}>
+    <div className={`border border-[var(--brand-secondary)]/20 rounded-lg bg-[var(--brand-background)] shadow-[0_4px_12px_rgba(0,0,0,0.08)] ${isExpanded ? "" : "overflow-hidden"}`}>
       <div
         className="px-3 sm:px-4 py-3 cursor-pointer hover:bg-opacity-80 transition-colors"
         onClick={() => setIsExpanded(!isExpanded)}
       >
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
           <div className="flex flex-wrap items-center gap-2 sm:gap-3">
-            <span className="text-sm font-medium text-gray-500">#{index + 1}</span>
+            <span className="text-sm font-medium text-[var(--brand-secondary)]">#{index + 1}</span>
             <span
               className={`px-2 py-1 text-xs font-semibold rounded border ${styles.badge}`}
             >
               {styles.icon} {formatChangeType(change.change_type)}
             </span>
-            <span className="text-sm font-mono text-gray-700 break-all">
+            <span className="text-sm font-mono text-[var(--foreground)] break-all">
               {change.path}
             </span>
           </div>
           <div className="flex items-center gap-2">
             {(change.old_line_number || change.new_line_number) && (
-              <span className="text-xs text-gray-500">
+              <span className="text-xs text-[var(--brand-secondary)]">
                 Line {change.old_line_number || change.new_line_number}
               </span>
             )}
             <svg
-              className={`w-5 h-5 text-gray-400 transition-transform ${
+              className={`w-5 h-5 text-[var(--brand-secondary)] transition-transform ${
                 isExpanded ? "rotate-180" : ""
               }`}
               fill="none"
@@ -238,15 +238,15 @@ export default function GenericChangeCard({ change, index }: GenericChangeCardPr
           {/* Key rename info */}
           {showKeyChange && change.old_key && change.new_key && (
             <div>
-              <h4 className="text-sm font-semibold text-gray-700 mb-2">Key Renamed:</h4>
+              <h4 className="text-sm font-semibold text-[var(--foreground)] mb-2">Key Renamed:</h4>
               <div className="grid grid-cols-2 gap-4">
                 <div className="bg-red-50 border border-red-200 rounded p-3">
-                  <div className="text-xs font-semibold text-gray-600 mb-1">Old Key:</div>
-                  <div className="text-sm font-mono text-gray-800">{change.old_key}</div>
+                  <div className="text-xs font-semibold text-[var(--brand-secondary)] mb-1">Old Key:</div>
+                  <div className="text-sm font-mono text-[var(--foreground)]">{change.old_key}</div>
                 </div>
                 <div className="bg-green-50 border border-green-200 rounded p-3">
-                  <div className="text-xs font-semibold text-gray-600 mb-1">New Key:</div>
-                  <div className="text-sm font-mono text-gray-800">{change.new_key}</div>
+                  <div className="text-xs font-semibold text-[var(--brand-secondary)] mb-1">New Key:</div>
+                  <div className="text-sm font-mono text-[var(--foreground)]">{change.new_key}</div>
                 </div>
               </div>
             </div>
@@ -255,15 +255,15 @@ export default function GenericChangeCard({ change, index }: GenericChangeCardPr
           {/* Path change info */}
           {showPathChange && change.old_path && change.new_path && (
             <div>
-              <h4 className="text-sm font-semibold text-gray-700 mb-2">Moved From → To:</h4>
+              <h4 className="text-sm font-semibold text-[var(--foreground)] mb-2">Moved From → To:</h4>
               <div className="grid grid-cols-2 gap-4">
                 <div className="bg-red-50 border border-red-200 rounded p-3">
-                  <div className="text-xs font-semibold text-gray-600 mb-1">Old Path:</div>
-                  <div className="text-sm font-mono text-gray-800 break-all">{change.old_path}</div>
+                  <div className="text-xs font-semibold text-[var(--brand-secondary)] mb-1">Old Path:</div>
+                  <div className="text-sm font-mono text-[var(--foreground)] break-all">{change.old_path}</div>
                 </div>
                 <div className="bg-green-50 border border-green-200 rounded p-3">
-                  <div className="text-xs font-semibold text-gray-600 mb-1">New Path:</div>
-                  <div className="text-sm font-mono text-gray-800 break-all">{change.new_path}</div>
+                  <div className="text-xs font-semibold text-[var(--brand-secondary)] mb-1">New Path:</div>
+                  <div className="text-sm font-mono text-[var(--foreground)] break-all">{change.new_path}</div>
                 </div>
               </div>
             </div>
@@ -272,14 +272,14 @@ export default function GenericChangeCard({ change, index }: GenericChangeCardPr
           {/* Value changes */}
           {(showOldValue || showNewValue) && (
             <div>
-              <h4 className="text-sm font-semibold text-gray-700 mb-2">
+              <h4 className="text-sm font-semibold text-[var(--foreground)] mb-2">
                 {change.change_type === GenericChangeType.TYPE_CHANGED ? "Type Change:" : "Value:"}
               </h4>
               {isUnchanged ? (
                 // Unchanged content: show single gray column
                 <div>
-                  <div className="bg-gray-50 border border-gray-200 rounded p-3">
-                    <div className="text-xs font-semibold text-gray-600 mb-1">Content (unchanged):</div>
+                  <div className="bg-[var(--brand-secondary)]/10 border border-[var(--brand-secondary)]/20 rounded p-3">
+                    <div className="text-xs font-semibold text-[var(--brand-secondary)] mb-1">Content (unchanged):</div>
                     <ValueDisplay
                       value={change.old_value ?? change.new_value}
                       label=""
@@ -299,8 +299,8 @@ export default function GenericChangeCard({ change, index }: GenericChangeCardPr
                       diffType="old"
                     />
                   ) : (
-                    <div className="bg-gray-100 border border-gray-200 rounded p-3">
-                      <div className="text-xs text-gray-500 italic">(not applicable)</div>
+                    <div className="bg-[var(--brand-secondary)]/15 border border-[var(--brand-secondary)]/20 rounded p-3">
+                      <div className="text-xs text-[var(--brand-secondary)] italic">(not applicable)</div>
                     </div>
                   )}
                   {showNewValue ? (
@@ -312,8 +312,8 @@ export default function GenericChangeCard({ change, index }: GenericChangeCardPr
                       diffType="new"
                     />
                   ) : (
-                    <div className="bg-gray-100 border border-gray-200 rounded p-3">
-                      <div className="text-xs text-gray-500 italic">(not applicable)</div>
+                    <div className="bg-[var(--brand-secondary)]/15 border border-[var(--brand-secondary)]/20 rounded p-3">
+                      <div className="text-xs text-[var(--brand-secondary)] italic">(not applicable)</div>
                     </div>
                   )}
                 </div>
@@ -323,7 +323,7 @@ export default function GenericChangeCard({ change, index }: GenericChangeCardPr
 
           {/* Line numbers */}
           {(change.old_line_number || change.new_line_number) && (
-            <div className="text-xs text-gray-500 flex gap-4">
+            <div className="text-xs text-[var(--brand-secondary)] flex gap-4">
               {change.old_line_number && (
                 <span>Old line: {change.old_line_number}</span>
               )}

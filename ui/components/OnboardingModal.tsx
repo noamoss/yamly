@@ -65,7 +65,7 @@ export default function OnboardingModal({
       aria-labelledby="onboarding-title"
     >
       <div
-        className={`bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto transform transition-all ${
+        className={`bg-[var(--background)] rounded-lg shadow-[0_4px_12px_rgba(0,0,0,0.08)] max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto transform transition-all ${
           isClosing ? "scale-95 opacity-0" : "scale-100 opacity-100"
         }`}
         onClick={(e) => e.stopPropagation()}
@@ -75,13 +75,13 @@ export default function OnboardingModal({
           <div className="flex items-center justify-between mb-4">
             <h2
               id="onboarding-title"
-              className="text-2xl font-semibold text-gray-900"
+              className="text-2xl font-serif font-normal text-[var(--foreground)]"
             >
               Welcome to yamly
             </h2>
             <button
               onClick={handleClose}
-              className="text-gray-400 hover:text-gray-600 transition-colors"
+              className="p-2 -m-2 sm:p-0 sm:m-0 text-[var(--brand-secondary)] hover:text-[var(--foreground)] transition-colors touch-manipulation rounded-lg hover:bg-[var(--brand-secondary)]/10 active:bg-[var(--brand-secondary)]/20"
               aria-label="Close"
             >
               <svg
@@ -101,30 +101,30 @@ export default function OnboardingModal({
           </div>
 
           {/* Content */}
-          <div className="space-y-4 text-gray-700">
+          <div className="space-y-4 text-[var(--brand-secondary)]">
             <p className="text-base leading-relaxed">
               Compare and review changes in YAML documents. Ideal for tracking
               updates in legal docs, configuration files, and more.
             </p>
 
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-              <h3 className="font-semibold text-blue-900 mb-2">
+            <div className="bg-[var(--brand-background)] border border-[var(--brand-secondary)]/20 rounded-lg p-4 shadow-[0_4px_12px_rgba(0,0,0,0.08)]">
+              <h3 className="font-serif font-medium text-[var(--foreground)] mb-2">
                 Try Example Documents
               </h3>
-              <p className="text-sm text-blue-800">
+              <p className="text-sm text-[var(--brand-secondary)]">
                 Scroll up to explore sample documents that show how diffing
                 works. Click any example to load it into the editors.
               </p>
             </div>
 
             <div>
-              <h3 className="font-semibold text-gray-900 mb-2">
+              <h3 className="font-serif font-medium text-[var(--foreground)] mb-2">
                 Key Features:
               </h3>
               <ul className="space-y-2 text-sm">
                 <li className="flex items-start gap-2">
                   <svg
-                    className="h-5 w-5 text-[var(--brand-primary)] mt-0.5 flex-shrink-0"
+                    className="h-5 w-5 text-[var(--brand-accent)] mt-0.5 flex-shrink-0"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
@@ -143,7 +143,7 @@ export default function OnboardingModal({
                 </li>
                 <li className="flex items-start gap-2">
                   <svg
-                    className="h-5 w-5 text-[var(--brand-primary)] mt-0.5 flex-shrink-0"
+                    className="h-5 w-5 text-[var(--brand-accent)] mt-0.5 flex-shrink-0"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
@@ -162,7 +162,7 @@ export default function OnboardingModal({
                 </li>
                 <li className="flex items-start gap-2">
                   <svg
-                    className="h-5 w-5 text-[var(--brand-primary)] mt-0.5 flex-shrink-0"
+                    className="h-5 w-5 text-[var(--brand-accent)] mt-0.5 flex-shrink-0"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
@@ -184,13 +184,13 @@ export default function OnboardingModal({
             </div>
 
             <div>
-              <h3 className="font-semibold text-gray-900 mb-2">
+              <h3 className="font-serif font-medium text-[var(--foreground)] mb-2">
                 Coming Soon
               </h3>
               <ul className="space-y-2 text-sm">
                 <li className="flex items-start gap-2">
                   <svg
-                    className="h-5 w-5 text-[var(--brand-primary)] mt-0.5 flex-shrink-0"
+                    className="h-5 w-5 text-[var(--brand-accent)] mt-0.5 flex-shrink-0"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
@@ -209,7 +209,7 @@ export default function OnboardingModal({
                 </li>
                 <li className="flex items-start gap-2">
                   <svg
-                    className="h-5 w-5 text-[var(--brand-primary)] mt-0.5 flex-shrink-0"
+                    className="h-5 w-5 text-[var(--brand-accent)] mt-0.5 flex-shrink-0"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
@@ -228,7 +228,7 @@ export default function OnboardingModal({
                 </li>
                 <li className="flex items-start gap-2">
                   <svg
-                    className="h-5 w-5 text-[var(--brand-primary)] mt-0.5 flex-shrink-0"
+                    className="h-5 w-5 text-[var(--brand-accent)] mt-0.5 flex-shrink-0"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
@@ -247,7 +247,7 @@ export default function OnboardingModal({
                 </li>
                 <li className="flex items-start gap-2">
                   <svg
-                    className="h-5 w-5 text-[var(--brand-primary)] mt-0.5 flex-shrink-0"
+                    className="h-5 w-5 text-[var(--brand-accent)] mt-0.5 flex-shrink-0"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
@@ -267,10 +267,10 @@ export default function OnboardingModal({
               </ul>
             </div>
 
-            <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
-              <p className="text-sm text-gray-700">
-                <strong>Get started:</strong> Load two YAML documents and click{" "}
-                <strong>Run Diff</strong> to see the changes.
+            <div className="bg-[var(--brand-background)] border border-[var(--brand-secondary)]/20 rounded-lg p-4 shadow-[0_4px_12px_rgba(0,0,0,0.08)]">
+              <p className="text-sm text-[var(--brand-secondary)]">
+                <strong className="text-[var(--foreground)]">Get started:</strong> Load two YAML documents and click{" "}
+                <strong>Run diff →</strong> to see the changes.
               </p>
             </div>
           </div>
@@ -279,15 +279,15 @@ export default function OnboardingModal({
           <div className="mt-6 flex flex-col sm:flex-row gap-3 justify-end">
             <button
               onClick={handleDontShowAgain}
-              className="px-4 py-2 text-sm text-gray-600 hover:text-gray-800 transition-colors"
+              className="px-4 py-2 text-sm text-[var(--brand-secondary)] hover:text-[var(--foreground)] transition-colors"
             >
               Don't show again
             </button>
             <button
               onClick={handleClose}
-              className="px-4 py-2 bg-[var(--brand-primary)] text-white rounded-lg hover:opacity-90 transition-opacity text-sm font-medium"
+              className="px-6 py-2 bg-[var(--brand-cta-bg)] text-[var(--brand-cta-text)] rounded-lg hover:opacity-90 transition-opacity text-sm font-medium uppercase"
             >
-              Get Started
+              Get Started →
             </button>
           </div>
         </div>

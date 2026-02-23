@@ -456,17 +456,20 @@ export default function SplitDiffView({ oldYaml, newYaml, diff }: SplitDiffViewP
         "&": {
           height: "100%",
           fontSize: "14px",
+          backgroundColor: "var(--brand-background)",
         },
         ".cm-content": {
           padding: "12px",
           fontFamily: "var(--font-mono), 'Fira Code', monospace",
+          backgroundColor: "var(--brand-background)",
         },
         ".cm-scroller": {
           overflow: "auto",
+          backgroundColor: "var(--brand-background)",
         },
         ".cm-gutters": {
-          backgroundColor: "#f6f8fa",
-          borderRight: "1px solid #e1e4e8",
+          backgroundColor: "var(--code-bg)",
+          borderRight: "1px solid var(--prose-border)",
         },
         ".cm-line": {
           position: "relative",
@@ -595,17 +598,20 @@ export default function SplitDiffView({ oldYaml, newYaml, diff }: SplitDiffViewP
         "&": {
           height: "100%",
           fontSize: "14px",
+          backgroundColor: "var(--brand-background)",
         },
         ".cm-content": {
           padding: "12px",
           fontFamily: "var(--font-mono), 'Fira Code', monospace",
+          backgroundColor: "var(--brand-background)",
         },
         ".cm-scroller": {
           overflow: "auto",
+          backgroundColor: "var(--brand-background)",
         },
         ".cm-gutters": {
-          backgroundColor: "#f6f8fa",
-          borderRight: "1px solid #e1e4e8",
+          backgroundColor: "var(--code-bg)",
+          borderRight: "1px solid var(--prose-border)",
         },
         ".cm-line": {
           position: "relative",
@@ -731,36 +737,36 @@ export default function SplitDiffView({ oldYaml, newYaml, diff }: SplitDiffViewP
   return (
     <div className="w-full" data-testid="split-diff-view">
       {/* Header */}
-      <div className="border-b border-gray-200 bg-gray-50 flex">
-        <div className="flex-1 border-r border-gray-200 px-4 py-2">
-          <span className="text-sm font-medium text-gray-700">Old Version</span>
+      <div className="border-b border-[var(--brand-secondary)]/30 bg-[var(--brand-background)] flex">
+        <div className="flex-1 border-r border-[var(--brand-secondary)]/30 px-4 py-2">
+          <span className="text-sm font-medium text-[var(--foreground)]">Old Version</span>
         </div>
-        <div className="flex-1 border-r border-gray-200 px-4 py-2">
-          <span className="text-sm font-medium text-gray-700">New Version</span>
+        <div className="flex-1 border-r border-[var(--brand-secondary)]/30 px-4 py-2">
+          <span className="text-sm font-medium text-[var(--foreground)]">New Version</span>
         </div>
         <div className="w-80 px-4 py-2">
-          <span className="text-sm font-medium text-gray-700">Changes</span>
+          <span className="text-sm font-medium text-[var(--foreground)]">Changes</span>
         </div>
       </div>
 
       {/* Split view with discussions sidebar */}
-      <div className="border-b border-gray-200" style={{ minHeight: "400px", height: "600px" }}>
+      <div className="border-b border-[var(--brand-secondary)]/30" style={{ minHeight: "400px", height: "600px" }}>
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_1fr_320px] h-full">
           {/* Old version editor */}
-          <div className="border-r border-gray-200 overflow-hidden bg-white">
+          <div className="border-r border-[var(--brand-secondary)]/30 overflow-hidden bg-[var(--brand-background)]">
             <div ref={oldEditorRef} className="h-full" />
           </div>
 
           {/* New version editor */}
-          <div className="border-r border-gray-200 overflow-hidden bg-white">
+          <div className="border-r border-[var(--brand-secondary)]/30 overflow-hidden bg-[var(--brand-background)]">
             <div ref={newEditorRef} className="h-full" />
           </div>
 
           {/* Changes sidebar */}
-          <div className="overflow-y-auto bg-gray-50 border-l border-gray-200">
+          <div className="overflow-y-auto bg-[var(--brand-background)] border-l border-[var(--brand-secondary)]/30">
             <div className="p-4 space-y-4">
               {changesWithPositions.length === 0 ? (
-                <p className="text-sm text-gray-500 italic">No changes found.</p>
+                <p className="text-sm text-[var(--brand-secondary)] italic">No changes found.</p>
               ) : (
                 changesWithPositions.map(({ change, oldLine, newLine }) => {
                   const lineNumber = newLine || oldLine;
@@ -778,7 +784,7 @@ export default function SplitDiffView({ oldYaml, newYaml, diff }: SplitDiffViewP
                           discussionRefs.current.delete(change.id);
                         }
                       }}
-                      className="bg-white border border-gray-300 rounded-lg shadow-sm cursor-pointer hover:shadow-md transition-shadow"
+                      className="bg-[var(--brand-background)] border border-[var(--brand-secondary)]/40 rounded-lg shadow-[0_4px_12px_rgba(0,0,0,0.08)] cursor-pointer hover:shadow-md transition-shadow"
                       onClick={() => {
                         // Scroll to line in editors using EditorView.scrollIntoView
                         // Add defensive checks to prevent CodeMirror errors
@@ -870,20 +876,20 @@ export default function SplitDiffView({ oldYaml, newYaml, diff }: SplitDiffViewP
                         });
                       }}
                     >
-                      <div className="w-full flex items-center justify-between p-3 border-b border-gray-200">
+                      <div className="w-full flex items-center justify-between p-3 border-b border-[var(--brand-secondary)]/30">
                         <div className="flex flex-col gap-2 flex-1 min-w-0">
                           <div className="flex items-center gap-2 flex-wrap">
                             {lineNumber ? (
                               <>
-                                <span className="text-xs font-semibold text-gray-700">
+                                <span className="text-xs font-semibold text-[var(--foreground)]">
                                   Line {lineNumber}
                                 </span>
-                                <span className="text-xs text-gray-500">
+                                <span className="text-xs text-[var(--brand-secondary)]">
                                   ({side === "new" ? "New" : "Old"} version)
                                 </span>
                               </>
                             ) : (
-                              <span className="text-xs font-semibold text-gray-700">
+                              <span className="text-xs font-semibold text-[var(--foreground)]">
                                 Change (no line mapping)
                               </span>
                             )}
@@ -904,7 +910,7 @@ export default function SplitDiffView({ oldYaml, newYaml, diff }: SplitDiffViewP
                                   ? 'bg-yellow-100 text-yellow-800 border-yellow-300'
                                   : change.change_type === ChangeType.TITLE_CHANGED
                                   ? 'bg-blue-100 text-blue-800 border-blue-300'
-                                  : 'bg-gray-100 text-gray-800 border-gray-300'
+                                  : 'bg-[var(--brand-secondary)]/20 text-[var(--foreground)] border-[var(--brand-secondary)]/40'
                               }`}>
                                 {change.change_type.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')}
                               </span>
@@ -917,7 +923,7 @@ export default function SplitDiffView({ oldYaml, newYaml, diff }: SplitDiffViewP
                           </div>
                         </div>
                         <svg
-                          className={`w-4 h-4 text-gray-400 transition-transform flex-shrink-0 ${
+                          className={`w-4 h-4 text-[var(--brand-secondary)] transition-transform flex-shrink-0 ${
                             isExpanded ? "rotate-180" : ""
                           }`}
                           fill="none"
@@ -943,48 +949,48 @@ export default function SplitDiffView({ oldYaml, newYaml, diff }: SplitDiffViewP
                       )}
                       {isExpanded && !isDocumentDiffResult(change) && (
                         <div className="p-3 space-y-3">
-                          <div className="text-sm text-gray-700">
+                          <div className="text-sm text-[var(--foreground)]">
                             <div className="font-semibold mb-2">
                               {('change_type' in change ? change.change_type : 'unknown').split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')}
                             </div>
                             <div className="space-y-1.5 text-xs">
                               {('path' in change && change.path) && (
-                                <div className="text-gray-600">
+                                <div className="text-[var(--brand-secondary)]">
                                   <span className="font-semibold">Path:</span>{' '}
-                                  <span className="font-mono bg-gray-100 px-1 rounded">{change.path}</span>
+                                  <span className="font-mono bg-[var(--brand-secondary)]/15 px-1 rounded">{change.path}</span>
                                 </div>
                               )}
                               {('old_path' in change && change.old_path && change.old_path !== change.path) && (
-                                <div className="text-gray-600">
+                                <div className="text-[var(--brand-secondary)]">
                                   <span className="font-semibold">Old Path:</span>{' '}
-                                  <span className="font-mono bg-gray-100 px-1 rounded">{change.old_path}</span>
+                                  <span className="font-mono bg-[var(--brand-secondary)]/15 px-1 rounded">{change.old_path}</span>
                                 </div>
                               )}
                               {('new_path' in change && change.new_path && change.new_path !== change.path) && (
-                                <div className="text-gray-600">
+                                <div className="text-[var(--brand-secondary)]">
                                   <span className="font-semibold">New Path:</span>{' '}
-                                  <span className="font-mono bg-gray-100 px-1 rounded">{change.new_path}</span>
+                                  <span className="font-mono bg-[var(--brand-secondary)]/15 px-1 rounded">{change.new_path}</span>
                                 </div>
                               )}
                               {('old_key' in change && change.old_key) && (
-                                <div className="text-gray-600">
+                                <div className="text-[var(--brand-secondary)]">
                                   <span className="font-semibold">Old Key:</span>{' '}
-                                  <span className="font-mono bg-gray-100 px-1 rounded">{change.old_key}</span>
+                                  <span className="font-mono bg-[var(--brand-secondary)]/15 px-1 rounded">{change.old_key}</span>
                                 </div>
                               )}
                               {('new_key' in change && change.new_key) && (
-                                <div className="text-gray-600">
+                                <div className="text-[var(--brand-secondary)]">
                                   <span className="font-semibold">New Key:</span>{' '}
-                                  <span className="font-mono bg-gray-100 px-1 rounded">{change.new_key}</span>
+                                  <span className="font-mono bg-[var(--brand-secondary)]/15 px-1 rounded">{change.new_key}</span>
                                 </div>
                               )}
                             </div>
                           </div>
                           {/* Show old/new values if available */}
                           {('old_value' in change && change.old_value !== undefined) && (
-                            <div className="border-t border-gray-200 pt-2">
-                              <div className="text-xs font-semibold text-gray-600 mb-1">Old Value:</div>
-                              <div className="text-xs font-mono bg-red-50 border border-red-200 rounded p-2 text-gray-800 break-all">
+                            <div className="border-t border-[var(--brand-secondary)]/30 pt-2">
+                              <div className="text-xs font-semibold text-[var(--brand-secondary)] mb-1">Old Value:</div>
+                              <div className="text-xs font-mono bg-red-50 border border-red-200 rounded p-2 text-[var(--foreground)] break-all">
                                 {typeof change.old_value === 'object'
                                   ? JSON.stringify(change.old_value, null, 2)
                                   : String(change.old_value)}
@@ -992,9 +998,9 @@ export default function SplitDiffView({ oldYaml, newYaml, diff }: SplitDiffViewP
                             </div>
                           )}
                           {('new_value' in change && change.new_value !== undefined) && (
-                            <div className="border-t border-gray-200 pt-2">
-                              <div className="text-xs font-semibold text-gray-600 mb-1">New Value:</div>
-                              <div className="text-xs font-mono bg-green-50 border border-green-200 rounded p-2 text-gray-800 break-all">
+                            <div className="border-t border-[var(--brand-secondary)]/30 pt-2">
+                              <div className="text-xs font-semibold text-[var(--brand-secondary)] mb-1">New Value:</div>
+                              <div className="text-xs font-mono bg-green-50 border border-green-200 rounded p-2 text-[var(--foreground)] break-all">
                                 {typeof change.new_value === 'object'
                                   ? JSON.stringify(change.new_value, null, 2)
                                   : String(change.new_value)}

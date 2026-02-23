@@ -49,15 +49,15 @@ export default function DiscussionThread({
     return (
       <div
         key={comment.id}
-        className={`${depth > 0 ? "ml-8 mt-3 border-l-2 border-gray-200 pl-4" : ""}`}
+        className={`${depth > 0 ? "ml-8 mt-3 border-l-2 border-[var(--brand-secondary)]/30 pl-4" : ""}`}
       >
-        <div className="bg-white border border-gray-200 rounded-lg p-3">
+        <div className="bg-[var(--brand-background)] border border-[var(--brand-secondary)]/30 rounded-lg p-3 shadow-[0_4px_12px_rgba(0,0,0,0.08)]">
           {isEditing ? (
             <div>
               <textarea
                 value={editText}
                 onChange={(e) => setEditText(e.target.value)}
-                className="w-full p-2 border border-gray-300 rounded resize-none"
+                className="w-full p-2 border border-[var(--brand-secondary)]/40 rounded resize-none bg-[var(--brand-background)]"
                 rows={3}
                 autoFocus
               />
@@ -73,7 +73,7 @@ export default function DiscussionThread({
                     setEditingId(null);
                     setEditText("");
                   }}
-                  className="px-3 py-1 bg-gray-200 text-gray-700 rounded text-sm hover:bg-gray-300"
+                  className="px-3 py-1 bg-[var(--brand-secondary)]/20 text-[var(--foreground)] rounded text-sm hover:bg-[var(--brand-secondary)]/30"
                 >
                   Cancel
                 </button>
@@ -82,13 +82,13 @@ export default function DiscussionThread({
           ) : (
             <>
               <div className="flex items-start justify-between">
-                <p className="text-sm text-gray-800 whitespace-pre-wrap">
+                <p className="text-sm text-[var(--foreground)] whitespace-pre-wrap">
                   {comment.text}
                 </p>
                 <div className="flex gap-2 ml-2">
                   <button
                     onClick={() => startEdit(comment)}
-                    className="text-xs text-gray-500 hover:text-gray-700"
+                    className="text-xs text-[var(--brand-secondary)] hover:text-[var(--foreground)]"
                   >
                     Edit
                   </button>
@@ -101,7 +101,7 @@ export default function DiscussionThread({
                 </div>
               </div>
               <div className="mt-2 flex items-center justify-between">
-                <span className="text-xs text-gray-500">
+                <span className="text-xs text-[var(--brand-secondary)]">
                   {new Date(comment.timestamp).toLocaleString()}
                 </span>
                 {depth === 0 && (
@@ -162,7 +162,7 @@ export default function DiscussionThread({
   return (
     <div className="mt-4 space-y-3">
       {comments.length === 0 ? (
-        <p className="text-sm text-gray-500 italic">No comments yet.</p>
+        <p className="text-sm text-[var(--brand-secondary)] italic">No comments yet.</p>
       ) : (
         comments.map((comment) => renderComment(comment))
       )}
