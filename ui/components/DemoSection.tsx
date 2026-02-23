@@ -331,47 +331,47 @@ export default function DemoSection({
                   // Show both modes when auto-detect
                   <div className="mt-3 grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <h4 className="font-semibold text-blue-900 mb-2 text-sm">General YAML Mode</h4>
-                      <ul className="text-sm text-blue-800 space-y-1.5">
+                      <h4 className="font-semibold text-[var(--foreground)] mb-2 text-sm">General YAML Mode</h4>
+                      <ul className="text-sm text-[var(--foreground)] space-y-1.5">
                         <li className="flex items-start gap-2">
-                          <span className="text-blue-600 mt-0.5">•</span>
+                          <span className="text-[var(--brand-accent)] mt-0.5">•</span>
                           <span>Any valid YAML file works</span>
                         </li>
                         <li className="flex items-start gap-2">
-                          <span className="text-blue-600 mt-0.5">•</span>
+                          <span className="text-[var(--brand-accent)] mt-0.5">•</span>
                           <span>Uses path-based change tracking</span>
                         </li>
                         <li className="flex items-start gap-2">
-                          <span className="text-blue-600 mt-0.5">•</span>
+                          <span className="text-[var(--brand-accent)] mt-0.5">•</span>
                           <span>Auto-detects array item identity</span>
                         </li>
                         <li className="flex items-start gap-2">
-                          <span className="text-blue-600 mt-0.5">•</span>
+                          <span className="text-[var(--brand-accent)] mt-0.5">•</span>
                           <span>Great for configs, K8s manifests</span>
                         </li>
                       </ul>
                     </div>
                     <div>
-                      <h4 className="font-semibold text-blue-900 mb-2 text-sm">Legal Document Mode</h4>
-                      <ul className="text-sm text-blue-800 space-y-1.5">
+                      <h4 className="font-semibold text-[var(--foreground)] mb-2 text-sm">Legal Document Mode</h4>
+                      <ul className="text-sm text-[var(--foreground)] space-y-1.5">
                         <li className="flex items-start gap-2">
-                          <span className="text-blue-600 mt-0.5">•</span>
+                          <span className="text-[var(--brand-accent)] mt-0.5">•</span>
                           <span>
-                            Requires <code className="bg-blue-100 px-1 rounded text-xs">document:</code> top-level key
+                            Requires <code className="bg-[var(--brand-accent)]/10 px-1 rounded text-xs">document:</code> top-level key
                           </span>
                         </li>
                         <li className="flex items-start gap-2">
-                          <span className="text-blue-600 mt-0.5">•</span>
+                          <span className="text-[var(--brand-accent)] mt-0.5">•</span>
                           <span>
-                            Sections need <code className="bg-blue-100 px-1 rounded text-xs">marker</code> field
+                            Sections need <code className="bg-[var(--brand-accent)]/10 px-1 rounded text-xs">marker</code> field
                           </span>
                         </li>
                         <li className="flex items-start gap-2">
-                          <span className="text-blue-600 mt-0.5">•</span>
+                          <span className="text-[var(--brand-accent)] mt-0.5">•</span>
                           <span>Schema validation built-in</span>
                         </li>
                         <li className="flex items-start gap-2">
-                          <span className="text-blue-600 mt-0.5">•</span>
+                          <span className="text-[var(--brand-accent)] mt-0.5">•</span>
                           <span>Hebrew legal documents</span>
                         </li>
                       </ul>
@@ -380,22 +380,22 @@ export default function DemoSection({
                 ) : mode === "general" ? (
                   // Show only General YAML mode
                   <div className="mt-3">
-                    <h4 className="font-semibold text-blue-900 mb-2 text-sm">General YAML Mode Requirements</h4>
-                    <ul className="text-sm text-blue-800 space-y-1.5">
+                    <h4 className="font-semibold text-[var(--foreground)] mb-2 text-sm">General YAML Mode Requirements</h4>
+                    <ul className="text-sm text-[var(--foreground)] space-y-1.5">
                       <li className="flex items-start gap-2">
-                        <span className="text-blue-600 mt-0.5">•</span>
+                        <span className="text-[var(--brand-accent)] mt-0.5">•</span>
                         <span>Any valid YAML file works - no specific structure required</span>
                       </li>
                       <li className="flex items-start gap-2">
-                        <span className="text-blue-600 mt-0.5">•</span>
-                        <span>Uses path-based change tracking (e.g., <code className="bg-blue-100 px-1 rounded text-xs">spec.replicas</code>)</span>
+                        <span className="text-[var(--brand-accent)] mt-0.5">•</span>
+                        <span>Uses path-based change tracking (e.g., <code className="bg-[var(--brand-accent)]/10 px-1 rounded text-xs">spec.replicas</code>)</span>
                       </li>
                       <li className="flex items-start gap-2">
-                        <span className="text-blue-600 mt-0.5">•</span>
-                        <span>Auto-detects array item identity by common fields (<code className="bg-blue-100 px-1 rounded text-xs">id</code>, <code className="bg-blue-100 px-1 rounded text-xs">name</code>, <code className="bg-blue-100 px-1 rounded text-xs">key</code>)</span>
+                        <span className="text-[var(--brand-accent)] mt-0.5">•</span>
+                        <span>Auto-detects array item identity by common fields (<code className="bg-[var(--brand-accent)]/10 px-1 rounded text-xs">id</code>, <code className="bg-[var(--brand-accent)]/10 px-1 rounded text-xs">name</code>, <code className="bg-[var(--brand-accent)]/10 px-1 rounded text-xs">key</code>)</span>
                       </li>
                       <li className="flex items-start gap-2">
-                        <span className="text-blue-600 mt-0.5">•</span>
+                        <span className="text-[var(--brand-accent)] mt-0.5">•</span>
                         <span>Perfect for config files, Kubernetes manifests, CI/CD pipelines, and more</span>
                       </li>
                     </ul>
@@ -403,76 +403,76 @@ export default function DemoSection({
                 ) : (
                   // Show only Legal Document mode with schema reference
                   <div className="mt-3">
-                    <h4 className="font-semibold text-blue-900 mb-2 text-sm">Legal Document Mode - Schema Requirements</h4>
+                    <h4 className="font-semibold text-[var(--foreground)] mb-2 text-sm">Legal Document Mode - Schema Requirements</h4>
 
                     <div className="space-y-3">
                       <div>
-                        <h5 className="text-xs font-semibold text-blue-800 mb-1.5">Document (recommended fields):</h5>
-                        <p className="text-xs text-blue-700 mb-2 italic">Note: Only <code className="bg-blue-100 px-1 rounded text-xs">sections</code> is required. All metadata fields are optional but recommended.</p>
-                        <ul className="text-sm text-blue-800 space-y-1">
+                        <h5 className="text-xs font-semibold text-[var(--foreground)] mb-1.5">Document (recommended fields):</h5>
+                        <p className="text-xs text-[var(--brand-secondary)] mb-2 italic">Note: Only <code className="bg-[var(--brand-accent)]/10 px-1 rounded text-xs">sections</code> is required. All metadata fields are optional but recommended.</p>
+                        <ul className="text-sm text-[var(--foreground)] space-y-1">
                           <li className="flex items-start gap-2">
-                            <span className="text-blue-600 mt-0.5">•</span>
+                            <span className="text-[var(--brand-accent)] mt-0.5">•</span>
                             <span>
-                              <code className="bg-blue-100 px-1 rounded text-xs">id</code>: <span className="text-blue-600">(Optional)</span> String identifier for tracking (UUID or custom)
+                              <code className="bg-[var(--brand-accent)]/10 px-1 rounded text-xs">id</code>: <span className="text-[var(--brand-accent)]">(Optional)</span> String identifier for tracking (UUID or custom)
                             </span>
                           </li>
                           <li className="flex items-start gap-2">
-                            <span className="text-blue-600 mt-0.5">•</span>
+                            <span className="text-[var(--brand-accent)] mt-0.5">•</span>
                             <span>
-                              <code className="bg-blue-100 px-1 rounded text-xs">title</code>: <span className="text-blue-600">(Optional)</span> Document title for human readability
+                              <code className="bg-[var(--brand-accent)]/10 px-1 rounded text-xs">title</code>: <span className="text-[var(--brand-accent)]">(Optional)</span> Document title for human readability
                             </span>
                           </li>
                           <li className="flex items-start gap-2">
-                            <span className="text-blue-600 mt-0.5">•</span>
+                            <span className="text-[var(--brand-accent)] mt-0.5">•</span>
                             <span>
-                              <code className="bg-blue-100 px-1 rounded text-xs">type</code>: <span className="text-blue-600">(Optional)</span> Any string value (recommended for organization and filtering). Common examples: <code className="bg-blue-100 px-0.5 rounded text-xs">'law'</code>, <code className="bg-blue-100 px-0.5 rounded text-xs">'regulation'</code>, <code className="bg-blue-100 px-0.5 rounded text-xs">'directive'</code>, <code className="bg-blue-100 px-0.5 rounded text-xs">'circular'</code>, <code className="bg-blue-100 px-0.5 rounded text-xs">'policy'</code>, <code className="bg-blue-100 px-0.5 rounded text-xs">'other'</code>
+                              <code className="bg-[var(--brand-accent)]/10 px-1 rounded text-xs">type</code>: <span className="text-[var(--brand-accent)]">(Optional)</span> Any string value (recommended for organization and filtering). Common examples: <code className="bg-[var(--brand-accent)]/10 px-0.5 rounded text-xs">'law'</code>, <code className="bg-[var(--brand-accent)]/10 px-0.5 rounded text-xs">'regulation'</code>, <code className="bg-[var(--brand-accent)]/10 px-0.5 rounded text-xs">'directive'</code>, <code className="bg-[var(--brand-accent)]/10 px-0.5 rounded text-xs">'circular'</code>, <code className="bg-[var(--brand-accent)]/10 px-0.5 rounded text-xs">'policy'</code>, <code className="bg-[var(--brand-accent)]/10 px-0.5 rounded text-xs">'other'</code>
                             </span>
                           </li>
                           <li className="flex items-start gap-2">
-                            <span className="text-blue-600 mt-0.5">•</span>
+                            <span className="text-[var(--brand-accent)] mt-0.5">•</span>
                             <span>
-                              <code className="bg-blue-100 px-1 rounded text-xs">language</code>: <span className="text-blue-600">(Optional)</span> Must be <code className="bg-blue-100 px-0.5 rounded text-xs">'hebrew'</code> if provided
+                              <code className="bg-[var(--brand-accent)]/10 px-1 rounded text-xs">language</code>: <span className="text-[var(--brand-accent)]">(Optional)</span> Must be <code className="bg-[var(--brand-accent)]/10 px-0.5 rounded text-xs">'hebrew'</code> if provided
                             </span>
                           </li>
                           <li className="flex items-start gap-2">
-                            <span className="text-blue-600 mt-0.5">•</span>
+                            <span className="text-[var(--brand-accent)] mt-0.5">•</span>
                             <span>
-                              <code className="bg-blue-100 px-1 rounded text-xs">version</code>: <span className="text-blue-600">(Optional)</span> Object with optional <code className="bg-blue-100 px-0.5 rounded text-xs">number</code> field
+                              <code className="bg-[var(--brand-accent)]/10 px-1 rounded text-xs">version</code>: <span className="text-[var(--brand-accent)]">(Optional)</span> Object with optional <code className="bg-[var(--brand-accent)]/10 px-0.5 rounded text-xs">number</code> field
                             </span>
                           </li>
                           <li className="flex items-start gap-2">
-                            <span className="text-blue-600 mt-0.5">•</span>
+                            <span className="text-[var(--brand-accent)] mt-0.5">•</span>
                             <span>
-                              <code className="bg-blue-100 px-1 rounded text-xs">source</code>: <span className="text-blue-600">(Optional)</span> Object with optional <code className="bg-blue-100 px-0.5 rounded text-xs">url</code> and <code className="bg-blue-100 px-0.5 rounded text-xs">fetched_at</code> fields
+                              <code className="bg-[var(--brand-accent)]/10 px-1 rounded text-xs">source</code>: <span className="text-[var(--brand-accent)]">(Optional)</span> Object with optional <code className="bg-[var(--brand-accent)]/10 px-0.5 rounded text-xs">url</code> and <code className="bg-[var(--brand-accent)]/10 px-0.5 rounded text-xs">fetched_at</code> fields
                             </span>
                           </li>
                           <li className="flex items-start gap-2">
-                            <span className="text-blue-600 mt-0.5">•</span>
+                            <span className="text-[var(--brand-accent)] mt-0.5">•</span>
                             <span>
-                              <code className="bg-blue-100 px-1 rounded text-xs font-semibold">sections</code>: <span className="text-blue-700 font-semibold">(Required)</span> Array of section objects
+                              <code className="bg-[var(--brand-accent)]/10 px-1 rounded text-xs font-semibold">sections</code>: <span className="text-[var(--brand-secondary)] font-semibold">(Required)</span> Array of section objects
                             </span>
                           </li>
                         </ul>
                       </div>
 
                       <div>
-                        <h5 className="text-xs font-semibold text-blue-800 mb-1.5">Section (required fields):</h5>
-                        <ul className="text-sm text-blue-800 space-y-1">
+                        <h5 className="text-xs font-semibold text-[var(--foreground)] mb-1.5">Section (required fields):</h5>
+                        <ul className="text-sm text-[var(--foreground)] space-y-1">
                           <li className="flex items-start gap-2">
-                            <span className="text-blue-600 mt-0.5">•</span>
+                            <span className="text-[var(--brand-accent)] mt-0.5">•</span>
                             <span>
-                              <code className="bg-blue-100 px-1 rounded text-xs">marker</code>: Unique structural marker (e.g., "1", "1.א", "(b)") - must be unique at same nesting level
+                              <code className="bg-[var(--brand-accent)]/10 px-1 rounded text-xs">marker</code>: Unique structural marker (e.g., "1", "1.א", "(b)") - must be unique at same nesting level
                             </span>
                           </li>
                           <li className="flex items-start gap-2">
-                            <span className="text-blue-600 mt-0.5">•</span>
+                            <span className="text-[var(--brand-accent)] mt-0.5">•</span>
                             <span>
-                              <code className="bg-blue-100 px-1 rounded text-xs">sections</code>: Array of nested sections (can be empty)
+                              <code className="bg-[var(--brand-accent)]/10 px-1 rounded text-xs">sections</code>: Array of nested sections (can be empty)
                             </span>
                           </li>
                         </ul>
-                        <p className="text-xs text-blue-700 mt-1.5 italic">
-                          Optional: <code className="bg-blue-100 px-0.5 rounded text-xs">id</code> (auto-generated if not provided), <code className="bg-blue-100 px-0.5 rounded text-xs">title</code>, <code className="bg-blue-100 px-0.5 rounded text-xs">content</code>
+                        <p className="text-xs text-[var(--brand-secondary)] mt-1.5 italic">
+                          Optional: <code className="bg-[var(--brand-accent)]/10 px-0.5 rounded text-xs">id</code> (auto-generated if not provided), <code className="bg-[var(--brand-accent)]/10 px-0.5 rounded text-xs">title</code>, <code className="bg-[var(--brand-accent)]/10 px-0.5 rounded text-xs">content</code>
                         </p>
                       </div>
                     </div>
@@ -480,7 +480,7 @@ export default function DemoSection({
                     {/* Schema Reference Box */}
                     <div className="mt-4 p-4 bg-[var(--brand-background)] border border-[var(--brand-accent)]/50 rounded-lg shadow-[0_4px_12px_rgba(0,0,0,0.08)]">
                       <div className="flex items-center justify-between mb-2">
-                        <h5 className="font-semibold text-blue-900 text-sm flex items-center gap-2">
+                        <h5 className="font-semibold text-[var(--foreground)] text-sm flex items-center gap-2">
                           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                           </svg>
@@ -493,8 +493,8 @@ export default function DemoSection({
                           View Full Schema →
                         </button>
                       </div>
-                      <p className="text-xs text-blue-800">
-                        Legal documents must follow the OpenSpec schema with recursive sections. Each section contains a <code className="bg-blue-100 px-1 rounded">marker</code> (required), optional <code className="bg-blue-100 px-1 rounded">title</code>, <code className="bg-blue-100 px-1 rounded">content</code>, and nested <code className="bg-blue-100 px-1 rounded">sections</code>.
+                      <p className="text-xs text-[var(--foreground)]">
+                        Legal documents must follow the OpenSpec schema with recursive sections. Each section contains a <code className="bg-[var(--brand-accent)]/10 px-1 rounded">marker</code> (required), optional <code className="bg-[var(--brand-accent)]/10 px-1 rounded">title</code>, <code className="bg-[var(--brand-accent)]/10 px-1 rounded">content</code>, and nested <code className="bg-[var(--brand-accent)]/10 px-1 rounded">sections</code>.
                       </p>
                     </div>
                   </div>

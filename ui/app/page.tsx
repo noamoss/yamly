@@ -174,7 +174,7 @@ export default function Home() {
                 <span>the pitz studio</span>
               </a>
               <span className="text-[var(--brand-secondary)]/50 hidden sm:inline">|</span>
-              <h1 className="text-xl font-serif font-normal text-[var(--foreground)]" style={{ fontFamily: "var(--font-serif), serif" }}>
+              <h1 className="text-xl font-serif font-normal text-[var(--foreground)]">
                 YAML Diff Viewer
               </h1>
             </div>

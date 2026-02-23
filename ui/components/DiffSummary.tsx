@@ -84,7 +84,7 @@ export default function DiffSummary({ diff }: DiffSummaryProps) {
           )}
           {diff.key_renamed_count > 0 && (
             <div className="flex items-center gap-2">
-              <span className="text-blue-600 font-medium">
+              <span className="text-[var(--brand-accent)] font-medium">
                 ↻{diff.key_renamed_count} keys renamed
               </span>
             </div>

@@ -19,7 +19,7 @@ When making visual changes, keep these fixed:
 - **Credit footer:** The floating “The Pitz Studio” link in the bottom-right ([ui/components/BrandingBubble.tsx](../../ui/components/BrandingBubble.tsx)) is required; do not remove or move it. See the Pitz skill “Credit Footer” spec for styling.
 - **Shadows and cards:** Subtle shadow `0 4px 12px rgba(0,0,0,0.08)` is the standard card shadow; you may introduce a second, stronger shadow only for primary content (see improvement 3).
 
-Reference: [The Pitz Studio brand skill](file:///Users/noam/.cursor/skills/thepitz-branding/SKILL.md) and [ui/app/globals.css](../../ui/app/globals.css).
+Reference: The Pitz Studio brand guidelines (local Cursor skill: thepitz-branding). See [ui/app/globals.css](../../ui/app/globals.css) for variables.
 
 ---
 
@@ -106,7 +106,7 @@ Use this checklist when implementing the improvements (e.g. one item per PR or b
 
 ## References
 
-- [The Pitz Studio brand guidelines](file:///Users/noam/.cursor/skills/thepitz-branding/SKILL.md) (skill)
+- The Pitz Studio brand guidelines (local Cursor skill: thepitz-branding); see [ui/app/globals.css](../../ui/app/globals.css) for variables
 - [ui/app/globals.css](../../ui/app/globals.css) — CSS variables and base styles
 - [ui/app/layout.tsx](../../ui/app/layout.tsx) — Fonts and root layout
 - [ui/app/page.tsx](../../ui/app/page.tsx) — Main page structure and header
